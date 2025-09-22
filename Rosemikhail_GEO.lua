@@ -412,12 +412,12 @@ function midcast(spell)
         equip(sets.midcast.curing)
     elseif spell.name:match("Aspir") then
         equip(sets.midcast.aspir)
-    elseif spell.name:match("Dispelga") then
-        equip(sets.midcast.dispelga)
     elseif spell.name:match("^Geo") then
         equip(sets.midcast.geocolure)
     elseif spell.name:match("^Indi") then
         equip(sets.midcast.indicolure)
+    elseif spell.name == "Dispelga" then
+        equip(sets.midcast.dispelga)
     elseif spell.skill == "Enhancing Magic" then
         equip(sets.midcast.enhancing)
     elseif spell.skill == "Enfeebling Magic" then

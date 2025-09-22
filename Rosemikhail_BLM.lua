@@ -548,7 +548,7 @@ function midcast(spell)
         equip(sets.midcast.curing)
     elseif spell.name:match("Aspir") then
         equip(sets.midcast.aspir)
-    elseif spell.name:match("Dispelga") then
+    elseif spell.name == "Dispelga" then
         equip(sets.midcast.dispelga)
     elseif spell.name == "Impact" then
         equip(sets.midcast.impact)
