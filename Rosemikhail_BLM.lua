@@ -148,7 +148,7 @@ function get_sets()
     ----------------------------------------------------------------
     -- NUKE MODES
     ----------------------------------------------------------------
-    -- I at the very least want good Merlinic bursting feet. Good luck lmao!
+    
     sets.midcast["Burst"] = {                                                                                           -- NEW: 43% MB (Capped), 16% MB II (NOW 36% MB, 16% MB II)
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",                                                                                               -- Khonsu is an alternative for accuracy
