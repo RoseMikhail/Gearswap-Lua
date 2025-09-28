@@ -1,25 +1,27 @@
 ---@diagnostic disable: lowercase-global, undefined-global
 include("Modes.lua")
 
+-- Modes
 nuking_mode = M{"Free Nuke", "Burst"}
-idle_mode = M{"PDT", "MDT"} -- Maybe MDT can just be a toggle that puts on the specific bits
+idle_mode = M{"PDT", "MDT"}
 
+-- Global Variables
 toggle_af_feet = "Off"
 
+-- Bindings
 send_command("bind f1 gs c nukemode freenuke")
 send_command("bind f2 gs c nukemode burst")
-
 send_command("bind f5 gs c idlemode pdt")
 send_command("bind f6 gs c idlemode mdt")
-
 send_command("bind f9 gs c toggleaffeet")
 send_command("bind f12 gs c toggletextbox")
 
+-- Help Text
 add_to_chat(123, "F1-F2: Nuking modes, F5-F6: Idle modes")
 add_to_chat(123, "F9: Toggle AF feet")
 add_to_chat(123, "F12: Hide information text box")
 
--- Info Box
+-- Information Box
 default_settings = {
   bg = { alpha = 100 },
   pos = { x = -210, y = 21 },
@@ -45,6 +47,7 @@ update_macro_book()
 -- TODO: Someday I may want a Bagua Galero override for the HP+ 600 buff. Similar in style to my Mana Wall overrides. This would need to apply in all scenarios where gear changes. (pre/mid/after/pet_change/commands)
 -- Potentially make an override to force the PDT idle set regardless of whether I have a bubble out.
 
+-- Individual spells should be added in the following way: sets.precast["Impact"]. This goes for precast and midcast.
 function get_sets()
     ----------------------------------------------------------------
     -- GEAR PLACEHOLDERS
@@ -105,13 +108,13 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 87% FC, 9% Elem FC, 3% Occ
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 87% FC, 14% Elem FC, 3% Occ
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- 5% FC
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- 3% FC
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
-        hands="Mallquis Cuffs +2",                                                                                                      -- 6% Elem FC
+        hands=gear.relic.hands,                                                                                                         -- 11% Elem FC
         legs=gear.AF.legs,                                                                                                              -- 11% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
         neck="Baetyl Pendant",                                                                                                          -- 4% FC
@@ -123,16 +126,40 @@ function get_sets()
         back=gear.capes.enfeebling_healing_fc,                                                                                          -- 10% FC
     }
 
+    sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
+        main={ name="Marin Staff +1", augments={'Path: A',}},
+        sub="Enki Strap",
+        head="",
+        body="Crepuscular Cloak",
+    })
+
     sets.precast["Dispelga"] = set_combine(sets.precast.fast_cast, {
         main="Daybreak",
         sub="Genmei Shield",
     })
 
-    -- Maybe I can include Impact, but that seems silly.
 
     ----------------------------------------------------------------
     -- NUKE MIDCAST MODES
     ----------------------------------------------------------------
+
+    sets.midcast["Free Nuke"] = {
+        main={ name="Marin Staff +1", augments={'Path: A',}},                                           -- Daybreak + Ammurapi will beat this in MACC and MAB
+        sub="Enki Strap",
+        ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
+        head=gear.empyrean.head,
+        body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        legs=gear.empyrean.legs,
+        feet=gear.empyrean.feet,
+        neck="Saevus Pendant +1",
+        waist={ name="Acuity Belt +1", augments={'Path: A',}},
+        left_ear="Malignance Earring",
+        right_ear="Barkaro. Earring",
+        left_ring="Freke Ring",
+        right_ring="Jhakri Ring", -- Metamorph Ring +1
+        back=gear.capes.nuking,
+    }
 
     -- Picking up more of the Ea set might make this better, but it isn't a priority.
     sets.midcast["Burst"] = {                                                                           -- 35% MB, 24% MB II
@@ -153,26 +180,8 @@ function get_sets()
         back=gear.capes.nuking
     }
 
-    sets.midcast["Free Nuke"] = {
-        main={ name="Marin Staff +1", augments={'Path: A',}},                                           -- Daybreak + Ammurapi will beat this in MACC and MAB
-        sub="Enki Strap",
-        ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
-        head=gear.empyrean.head,
-        body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
-        legs=gear.empyrean.legs,
-        feet=gear.empyrean.feet,
-        neck="Saevus Pendant +1",
-        waist={ name="Acuity Belt +1", augments={'Path: A',}},
-        left_ear="Malignance Earring",
-        right_ear="Barkaro. Earring",
-        left_ring="Freke Ring",
-        right_ring="Jhakri Ring", -- Metamorph Ring +1
-        back=gear.capes.nuking,
-    }
-
     ----------------------------------------------------------------
-    -- OTHER MIDCAST
+    -- COLURE MIDCAST
     ----------------------------------------------------------------
     
     -- Can probably pull some of the skill gear out and replace with idle or conserve mp gear
@@ -215,8 +224,12 @@ function get_sets()
         back={ name="Lifestream Cape", augments={'Geomancy Skill +9','Indi. eff. dur. +20','Pet: Damage taken -2%',}},          -- Skill
     })
 
+    ----------------------------------------------------------------
+    -- ENFEEBLING MIDCAST
+    ----------------------------------------------------------------
+
     -- Geomancy Attire will be really good for this at +2 and +3
-    sets.midcast.enfeebling = {
+    sets.midcast["Enfeebling Magic"] = {
         main={ name="Marin Staff +1", augments={'Path: A',}},                                           -- Daybreak + Ammurapi will beat this in MACC
         sub="Enki Strap",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},
@@ -234,12 +247,33 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     }
 
-    sets.midcast.dispelga = set_combine(sets.midcast.enfeebling, {
+    sets.midcast["Dispelga"] = set_combine(sets.midcast.enfeebling, {
         main="Daybreak",
         sub="Genmei Shield",
     })
 
-    sets.midcast.aspir = set_combine(sets.midcast["Free Nuke"], {
+    sets.midcast["Impact"] = {
+        main={ name="Marin Staff +1", augments={'Path: A',}},
+        sub="Enki Strap",
+        ammo="Kalboron Stone",
+        body="Crepuscular Cloak",
+        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        legs="Azimuth Tights +2",
+        feet="Azimuth Gaiters +2",
+        neck="Incanter's Torque",
+        waist={ name="Acuity Belt +1", augments={'Path: A',}},
+        left_ear="Malignance Earring",
+        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        left_ring="Stikini Ring",
+        right_ring="Stikini Ring",
+        back={ name="Aurist's Cape +1", augments={'Path: A',}},
+    }
+
+    ----------------------------------------------------------------
+    -- OTHER MIDCAST
+    ----------------------------------------------------------------
+
+    sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
         main={ name="Rubicundity", augments={'Mag. Acc.+9','"Mag.Atk.Bns."+8','Dark magic skill +9','"Conserve MP"+5',}},
         sub="Genmei Shield",
         --ammo="",
@@ -257,7 +291,27 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
-    sets.midcast.enhancing = set_combine(sets.midcast["Free Nuke"], {                                                               -- +54% duration
+    sets.midcast["Drain"] = sets.midcast["Aspir"]
+
+    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                  -- Overall +50%
+        main="Daybreak",                                                                                                            -- 30%
+        sub="Genmei Shield",
+        ammo="Kalboron Stone",
+        head={ name="Vanya Hood", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},      -- +10%
+        body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +5%
+        neck="Incanter's Torque",
+        waist="Rumination Sash",
+        left_ear="Mendi. Earring",                                                                                                  -- +5%
+        right_ear="Meili Earring",
+        left_ring="Stikini Ring",
+        right_ring="Stikini Ring",
+        back=gear.capes.enfeebling_healing_fc,
+    })
+
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                               -- +54% duration
         main={ name="Gada", augments={'Indi. eff. dur. +10','Mag. Acc.+13','"Mag.Atk.Bns."+13','DMG:+10',}},
         sub="Genmei Shield",
         ammo="Staunch Tathlum",
@@ -275,37 +329,17 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
-    sets.midcast.curing = set_combine(sets.midcast["Free Nuke"], {                                                                  -- Overall +50%
-        main="Daybreak",                                                                                                            -- 30%
-        sub="Genmei Shield",
-        ammo="Kalboron Stone",
-        head={ name="Vanya Hood", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},      -- +10%
-        body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- Vanya +5%
-        neck="Incanter's Torque",
-        waist="Rumination Sash",
-        left_ear="Mendi. Earring",
-        right_ear="Lifestorm Earring",                                                                                              -- Mendicant's Earring +5%
-        left_ring="Stikini Ring",
-        right_ring="Stikini Ring",
-        back=gear.capes.enfeebling_healing_fc,
-    })
-
-    -- Maybe I can include Impact, but that seems silly.
-
     ----------------------------------------------------------------
     -- IDLE SETS
     ----------------------------------------------------------------
 
-    sets.idle["PDT"] = {                                                                                                                -- -32% DT, -39% PDT, -16% MDT (-71% DT+PDT, -48% DT+MDT)
+    sets.idle["PDT"] = {                                                                                                                -- -35% DT, -39% PDT, -16% MDT (-74% DT+PDT, -51% DT+MDT)
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
         sub="Genmei Shield",                                                                                                            -- -10% PDT
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=gear.empyrean.head,                                                                                                        -- -11% DT
         --body="Mallquis Saio +2",                                                                                                        -- -8% DT
-        body=gear.AF.body,                                                                                                              -- +3 Refresh, I think it's worth the uncapped MDT :p
+        body=gear.AF.body,                                                                                                              -- +3 Refresh
         hands={ name="Hagondes Cuffs +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -3%','"Fast Cast"+4',}},                   -- -4% PDT, -3% MDT
         legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -3%','"Avatar perpetuation cost" -4',}},    -- -4% PDT, -3% MDT
         feet={ name="Hag. Sabots +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -4%','"Mag.Atk.Bns."+27',}},                   -- -4% PDT, -4% MDT
@@ -313,15 +347,15 @@ function get_sets()
         waist="Slipor Sash",                                                                                                            -- -3% MDT
         left_ear="Etiolation Earring",                                                                                                  -- -3% MDT I don't need more PDT here so I use Etiolation instead of Genmei
         right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
-        left_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},                                                                  -- -7% PDT
-        right_ring="Defending Ring",                                                                                                    -- -10% DT
+        left_ring="Defending Ring",                                                                                                     -- -10% DT
+        right_ring="Murky Ring",                                                                                                        -- -10% DT
         back=gear.capes.idle,                                                                                                           -- -10% PDT
     }
 
     -- Potentially make this a toggle
-    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- -23% DT, -33% PDT, -19% MDT (-66% DT+PDT, -42% DT+MDT)
+    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- -29% DT, -29% PDT, -16% MDT (-58% DT+PDT, -45% DT+MDT)
         neck="Warder's Charm +1",
-        --back="Tuilha Cape",
+        back="Tuilha Cape",
     }) 
 
     -- Upgrade hands, then replace body with AF body for the refresh - upgrade AF body for more refresh. I will then be sitting at -37% Pet DT and +25 regen
@@ -332,7 +366,7 @@ function get_sets()
     -- Not enough regen. I replace the Solstice (-4 Pet DT: -34% Pet DT and +22 regen.) with Sucellus (+3 Pet DT, +3 Regen: -37% Pet DT and +25 regen.)
 
     -- Consider Niburu Cudgel Path D or Sucellus
-    sets.idle.luopan = set_combine(sets.idle[idle_mode.current], {                                                                      -- -37% Pet DT (Capped at -37.5%), +25 Regen (need 24+), -21% DT, -20% PDT, -0% MDT (-41% DT+PDT, -18% DT+MDT)
+    sets.idle.luopan = set_combine(sets.idle[idle_mode.current], {                                                                      -- -37% Pet DT (Capped at -37.5%), +25 Regen (need 24+), -22% DT, -19% PDT, -0% MDT (-41% DT+PDT, -19% DT+MDT)
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -4% Pet DT
         sub="Genmei Shield",                                                                                                            -- -10% PDT
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- -5% Pet DT
@@ -346,7 +380,7 @@ function get_sets()
         left_ear="Genmei Earring",                                                                                                      -- -2% PDT -- Likely replace with Etiolation or Ran earring when PDT/DT are maxed.
         right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
         left_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},                                                                  -- -7% PDT
-        right_ring="Defending Ring",                                                                                                    -- -10% DT
+        right_ring="Murky Ring",                                                                                                        -- -10% DT
         waist="Isa Belt",                                                                                                               -- -3% Pet DT, +1 Regen
         back=gear.capes.luopan,                                                                                                         -- +15 regen
     })
@@ -408,31 +442,51 @@ function precast(spell)
 end
 
 function midcast(spell)
-    if spell.name:match("Cure") then
-        equip(sets.midcast.curing)
-    elseif spell.name:match("Aspir") then
-        equip(sets.midcast.aspir)
-    elseif spell.name:match("^Geo") then
-        equip(sets.midcast.geocolure)
-    elseif spell.name:match("^Indi") then
-        equip(sets.midcast.indicolure)
-    elseif spell.name == "Dispelga" then
-        equip(sets.midcast.dispelga)
-    elseif spell.skill == "Enhancing Magic" then
-        equip(sets.midcast.enhancing)
-    elseif spell.skill == "Enfeebling Magic" then
-        equip(sets.midcast.enfeebling)
-    elseif spell.skill == "Elemental Magic" then
-        local current_mode = sets.midcast[nuking_mode.current]
-        if current_mode then
-            equip(current_mode)
-        else
-            add_to_chat(123, "Invalid nuking mode: " .. nuking_mode.current)
+    local match_list  = S{"Cure", "Aspir", "Drain"}
+    local matched = false
+
+    -- If the spell matches one of the match_list spells.
+    for match in match_list:it() do
+        if spell.name:match(match) then
+            equip(sets.midcast[match])
+            matched = true
+            break
         end
-    elseif spell.action_type == "Magic" then
-        -- Non-Cure Healing/unhandled Dark Magic/Divine Magic/Trusts would make their way here.
-        --equip(sets.midcast["Free Nuke"])
+    end
+
+    -- If the spell is a Geocolure or Indicolure spell
+    if not matched then
+        if spell.name:match("^Geo") then
+            equip(sets.midcast.geocolure)
+            matched = true
+        elseif spell.name:match("^Indi") then
+            equip(sets.midcast.indicolure)
+            matched = true
+        end
+    end
+
+    -- If the spell name EXACTLY matches.
+    if not matched and sets.midcast[spell.name] then
+        equip(sets.midcast[spell.name])
+        matched = true
+    end
+
+    -- If the spell skill is Elemental Magic
+    if not matched and spell.skill == "Elemental Magic" then
+        equip(sets.midcast[nuking_mode.current])
+        matched = true
+    end
+
+    -- If the spell skill has a relevant set
+    if not matched and sets.midcast[spell.skill] then
+        equip(sets.midcast[spell.skill])
+        matched = true
+    end
+
+    -- If the magic is literally anything else
+    if not matched and spell.action_type == "Magic" then
         idle()
+        --matched = true
     end
 
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) then
@@ -451,12 +505,7 @@ function idle()
         return
     end
 
-    -- Sanity check
-    if sets.idle[idle_mode.current] then
-        equip(sets.idle[idle_mode.current])
-    else
-        add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-    end
+    equip(sets.idle[idle_mode.current])
 
     if toggle_af_feet == "On" then
         equip({feet=gear.AF.feet})
@@ -472,11 +521,7 @@ function aftercast(spell)
     -- Gearswap will not immediately register the geocolure's unsummoning, so we switch directly to our current idle mode.
     -- TODO: This is maybe unnecessary, as pet_change DOES handle switching back, just a little delayed.
     if S{"Full Circle", "Mending Halation", "Radial Arcana", "Concentric Pulse"}:contains(spell.name) then
-        if sets.idle[idle_mode.current] then
-            equip(sets.idle[idle_mode.current])
-        else
-            add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-        end
+        equip(sets.idle[idle_mode.current])
 
         if toggle_af_feet == "On" then
             equip({feet=gear.AF.feet})
@@ -496,12 +541,7 @@ function pet_change(pet,gain)
             equip(sets.idle.luopan)
         elseif gain == false then
             if not midaction() then
-                -- Sanity check
-                if sets.idle[idle_mode.current] then
-                    equip(sets.idle[idle_mode.current])
-                else
-                    add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-                end
+                equip(sets.idle[idle_mode.current])
             end
         end
 
@@ -563,12 +603,7 @@ function self_command(command)
             if pet.isvalid and pet.name == "Luopan" then
                 add_to_chat(123, "Idle gear will not switch due to your luopan currently being summoned.")
             else
-                -- Sanity check
-                if sets.idle[idle_mode.current] then
-                    equip(sets.idle[idle_mode.current])
-                else
-                    add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-                end
+                equip(sets.idle[idle_mode.current])
 
                 if toggle_af_feet == "On" then
                     equip({feet=gear.AF.feet})

@@ -1,28 +1,31 @@
 ---@diagnostic disable: lowercase-global, undefined-global
 include("Modes.lua")
 
+-- Modes
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
 
+-- Global Variables
 toggle_death = "Off"
 toggle_af_body = "Off"
 
+-- Bindings
 send_command("bind f1 gs c nukemode freenuke")
 send_command("bind f2 gs c nukemode burst")
 send_command("bind f3 gs c nukemode occultacumen")
-
 send_command("bind f5 gs c idlemode pdt")
 send_command("bind f6 gs c idlemode mdt")
 send_command("bind f7 gs c idlemode refresh")
-
 send_command("bind f9 gs c toggleafbody")
 send_command("bind f10 gs c toggledeath")
 send_command("bind f12 gs c toggletextbox")
 
+-- Help Text
 add_to_chat(123, "F1-F3: Nuking modes, F5-F7: Idle modes")
 add_to_chat(123, "F9: Toggle AF body, F10: Toggle Death")
 add_to_chat(123, "F12: Hide information text box")
 
+-- Information Box
 default_settings = {
   bg = { alpha = 100 },
   pos = { x = -210, y = 21 },
@@ -44,6 +47,7 @@ end
 
 update_macro_book()
 
+-- Individual spells should be added in the following way: sets.precast["Impact"]. This goes for precast and midcast.
 function get_sets()
 
     -- Potentially have placeholders for grips/weapons
@@ -105,24 +109,23 @@ function get_sets()
     ----------------------------------------------------------------
     -- PRECAST
     ----------------------------------------------------------------
-    
-    -- Note that a lot of this is elemental cast time
-    sets.precast.fast_cast = {                                                                                                                      -- OVERALL 73% FC, 9% Elem FC, 5% Occ (Technically capped via Elemental Celerity, but 80% is better.)
+
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 73% FC, 9% Elem FC, 5% Occ (Technically capped via Elemental Celerity, but 80% is better.)
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
-        ammo="Impatiens",                                                                                                                           -- 2% Occ
-        head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                               -- 14% FC
-        body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                                       -- 13% FC
-        hands="Mallquis Cuffs +2",                                                                                                                  -- 6% Elem FC
-        legs="Orvail Pants +1",                                                                                                                     -- 5% FC
-        feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                                    -- 11% FC
-        neck="Baetyl Pendant",                                                                                                                      -- 4% FC
-        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                                 -- 5% FC
-        left_ear="Malignance Earring",                                                                                                              -- 4% FC
-        right_ear="Loquacious Earring",                                                                                                             -- 2% FC
-        left_ring="Weather. Ring",                                                                                                                  -- 3% Elem FC
-        right_ring="Mallquis Ring",                                                                                                                 -- 5% FC 3% Occ
-        back=gear.capes.idle_fc,                                                                                                                    -- 10% FC
+        ammo="Impatiens",                                                                                                               -- 2% Occ
+        head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
+        body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
+        hands="Mallquis Cuffs +2",                                                                                                      -- 6% Elem FC
+        legs="Orvail Pants +1",                                                                                                         -- 5% FC
+        feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
+        neck="Baetyl Pendant",                                                                                                          -- 4% FC
+        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
+        left_ear="Malignance Earring",                                                                                                  -- 4% FC
+        right_ear="Loquacious Earring",                                                                                                 -- 2% FC
+        left_ring="Weather. Ring",                                                                                                      -- 3% Elem FC
+        right_ring="Mallquis Ring",                                                                                                     -- 5% FC 3% Occ
+        back=gear.capes.idle_fc,                                                                                                        -- 10% FC
     }
 
     sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
@@ -132,7 +135,6 @@ function get_sets()
         body="Crepuscular Cloak",
     })
 
-    -- Erm, TODO
     sets.precast["Death"] = set_combine(sets.precast.fast_cast, {
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
@@ -146,26 +148,8 @@ function get_sets()
     })
 
     ----------------------------------------------------------------
-    -- NUKE MODES
+    -- NUKE MIDCAST MODES
     ----------------------------------------------------------------
-    
-    sets.midcast["Burst"] = {                                                                                           -- NEW: 43% MB (Capped), 16% MB II (NOW 36% MB, 16% MB II)
-        main={ name="Marin Staff +1", augments={'Path: A',}},
-        sub="Enki Strap",                                                                                               -- Khonsu is an alternative for accuracy
-        ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
-        head="Ea Hat",                                                                                                  -- 6% MB 6% MB II
-        body=gear.empyrean.body,                                                                                        -- 4% MB II
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},                      -- 6% MB II
-        legs=gear.empyrean.legs,                                                                                        -- 15% MB
-        feet=gear.empyrean.feet,                                                                                        -- No Longer 7% MB    According to sim, it's actually better to ditch the Jhakri Pigaches +2 (and their 7% MB) in favour of Wicce
-        neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB   This has no acc, maybe sacrifice a little mb and use Sorcerer's Stole +1/+2 (augmented)
-        waist={ name="Acuity Belt +1", augments={'Path: A',}},
-        left_ear="Malignance Earring",
-        right_ear="Barkaro. Earring",
-        left_ring="Freke Ring",
-        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},                                                   -- I won't pretend to understand why this is better, but the sim says it is
-        back=gear.capes.nuking                                                                                          -- 5% MB
-    }
 
     sets.midcast["Free Nuke"] = {
         main={ name="Marin Staff +1", augments={'Path: A',}},
@@ -185,6 +169,24 @@ function get_sets()
         back=gear.capes.nuking
     }
 
+    sets.midcast["Burst"] = {                                                                                           -- NEW: 43% MB (Capped), 16% MB II (NOW 36% MB, 16% MB II)
+        main={ name="Marin Staff +1", augments={'Path: A',}},
+        sub="Enki Strap",                                                                                               -- Khonsu is an alternative for accuracy
+        ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
+        head="Ea Hat",                                                                                                  -- 6% MB 6% MB II
+        body=gear.empyrean.body,                                                                                        -- 4% MB II
+        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},                      -- 6% MB II
+        legs=gear.empyrean.legs,                                                                                        -- 15% MB
+        feet=gear.empyrean.feet,                                                                                        -- No Longer 7% MB    According to sim, it's actually better to ditch the Jhakri Pigaches +2 (and their 7% MB) in favour of Wicce
+        neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB   This has no acc, maybe sacrifice a little mb and use Sorcerer's Stole +1/+2 (augmented)
+        waist={ name="Acuity Belt +1", augments={'Path: A',}},
+        left_ear="Malignance Earring",
+        right_ear="Barkaro. Earring",
+        left_ring="Freke Ring",
+        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},                                                   -- I won't pretend to understand why this is better, but the sim says it is
+        back=gear.capes.nuking                                                                                          -- 5% MB
+    }
+
     sets.midcast["Occult Acumen"] = set_combine(sets.midcast["Free Nuke"], { -- I have no idea when it comes to Occult Acumen. Panic TP?
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
@@ -202,28 +204,38 @@ function get_sets()
         --right_ring=
         back=gear.capes.occult_acumen,
     })
-    
-    ----------------------------------------------------------------
-    -- DEATH MIDCAST
-    ----------------------------------------------------------------
 
     sets.midcast.death_burst = set_combine(sets.midcast["Burst"], {
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
+        head="Pixie Hairpin +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
         left_ring="Mephitas's Ring +1",
         right_ring="Mephitas's Ring",
         back=gear.capes.idle_fc, -- This wants to be a Death cape
     })
+
     sets.midcast.death_free_nuke = set_combine(sets.midcast["Free Nuke"], {
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
+        head="Pixie Hairpin +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
         left_ring="Mephitas's Ring +1",
         right_ring="Mephitas's Ring",
         back=gear.capes.idle_fc, -- This wants to be a Death cape
+    })
+    
+    ----------------------------------------------------------------
+    -- DAMAGE MIDCAST
+    ----------------------------------------------------------------
+
+    -- TODO: sets.midcast.meteor
+
+    -- TODO: Add Archon Ring when I get it
+    sets.midcast["Comet"] = set_combine(sets.midcast["Free Nuke"], {
+        head="Pixie Hairpin +1",
     })
 
     ----------------------------------------------------------------
@@ -233,19 +245,20 @@ function get_sets()
     --- Spaekona is great for the accuracy bonuses, though it will be beaten out later
     --- Put in the amounts of magic accuracy and elemental magic skill later
     --- Impact likes more elemental magic skill
-    
-    sets.midcast.impact = {
+
+    -- Eventually when I have more Wicce upgraded, they may end up beating out the Spaekona macc bonuses.
+    sets.midcast["Enfeebling Magic"] = {
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
         ammo="Kalboron Stone",
         head="",
-        body="Crepuscular Cloak",
+        body={ name="Cohort Cloak +1", augments={'Path: A',}},
         hands=gear.AF.hands,
         legs=gear.AF.legs,
         feet=gear.AF.feet,
         neck="Incanter's Torque",
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
-        left_ear="Barkaro. Earring",
+        left_ear="Malignance Earring",
         right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
@@ -271,13 +284,17 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     }
 
-    -- Eventually when I have more Wicce upgraded, they may end up beating out the Spaekona macc bonuses.
-    sets.midcast.enfeebling = {
+    sets.midcast["Dispelga"] = set_combine(sets.midcast.enfeebling, {
+        main="Daybreak",
+        sub="Genmei Shield",
+    })
+    
+    sets.midcast["Impact"] = {
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
         ammo="Kalboron Stone",
         head="",
-        body={ name="Cohort Cloak +1", augments={'Path: A',}},
+        body="Crepuscular Cloak",
         hands=gear.AF.hands,
         legs=gear.AF.legs,
         feet=gear.AF.feet,
@@ -290,35 +307,18 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     }
 
-    sets.midcast.dispelga = set_combine(sets.midcast.enfeebling, {
-        main="Daybreak",
-        sub="Genmei Shield",
-    })
-
     ----------------------------------------------------------------
     -- OTHER MIDCAST
     ----------------------------------------------------------------
-    
-    -- sets.midcast.comet
-    -- sets.midcast.meteor
-    -- sets.midcast.stun (dark magic skill?)
-
-    -- Need to add a Taranus cape that has enmity on it
-    sets.midcast.stun_enmity = set_combine(sets.ja["Mana Wall"], {
-        left_ring="Vengeful Ring",                                  -- +3 enmity
-        neck="Unmoving Collar +1",                                  -- +10 enmity
-        left_ear="Darkness Earring",                                -- +1 enmity 
-        right_ear="Friomisi Earring",                               -- +2 enmity
-    })
 
     -- TODO: Apply this to Drain as well perhaps...
-    sets.midcast.aspir = set_combine(sets.midcast["Free Nuke"], {
+    sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
         --main={ name="Rubicundity", augments={'Mag. Acc.+9','"Mag.Atk.Bns."+8','Dark magic skill +9','"Conserve MP"+5',}}, -- I'll be real, this cucks Myrkr way too much
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
         --sub=
         --ammo=
-        --head=
+        head="Pixie Hairpin +1",
         --body=
         --hands=
         legs=gear.AF.legs,
@@ -332,7 +332,9 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
-    sets.midcast.curing = set_combine(sets.midcast["Free Nuke"], {                                                                  -- Overall +50%
+    sets.midcast["Drain"] = sets.midcast["Aspir"]
+
+    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                  -- Overall +50%
         main="Daybreak",                                                                                                            -- 30%
         sub="Genmei Shield",
         ammo="Kalboron Stone",
@@ -340,17 +342,17 @@ function get_sets()
         body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
         hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
         legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- Vanya +5%
+        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +5%
         neck="Incanter's Torque",
         waist="Rumination Sash",
-        left_ear="Mendi. Earring",
-        right_ear="Lifestorm Earring",                                                                                              -- Mendicant's Earring +5%
+        left_ear="Mendi. Earring",                                                                                                  -- +5%
+        right_ear="Meili Earring",
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
-    sets.midcast.enhancing = set_combine(sets.midcast["Free Nuke"], {                                                               -- +54% duration
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +54% duration
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
         ammo="Staunch Tathlum",
@@ -368,33 +370,46 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
+    -- TODO: Need to add a Taranus cape that has enmity on it
+    sets.midcast.stun_enmity = set_combine(sets.ja["Mana Wall"], {
+        left_ring="Vengeful Ring",                                  -- +3 enmity
+        neck="Unmoving Collar +1",                                  -- +10 enmity
+        left_ear="Darkness Earring",                                -- +1 enmity 
+        right_ear="Friomisi Earring",                               -- +2 enmity
+    })
+
     ----------------------------------------------------------------
     -- IDLE MODES
     ----------------------------------------------------------------
 
     -- Capped on damage taken
-    sets.idle["PDT"] = {                                                                                                                -- OVERALL -50% DT, -17% PDT, -6% MDT (-67% DT+PDT, -56% DT+MDT)
+    sets.idle["PDT"] = {                                                                                                                -- OVERALL -50% DT, -10% PDT, -3% MDT (-60% DT+PDT, -53% DT+MDT), +6-7 Refresh
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Enki Strap",
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
-        head=gear.empyrean.head,                                                                                                        -- -10% DT
-        body=gear.empyrean.body,                                                                                                        -- -0% Replaced Mallquis Saio (Lost -8% DT, but we're capped)
+        head="Befouled Crown",                                                                                                          -- +1 Refresh
+        body=gear.empyrean.body,                                                                                                        -- +3 Refresh
         hands=gear.empyrean.hands,                                                                                                      -- -12% DT
-        legs=gear.empyrean.legs,                                                                                                        -- -0%
+        legs="Assid. Pants +1",                                                                                                         -- +1-2 Refresh
         feet=gear.empyrean.feet,                                                                                                        -- -10% DT
         neck="Loricate Torque +1",                                                                                                      -- -6% DT
-        waist="Slipor Sash",                                                                                                            -- -3% MDT
+        waist="Fucho-no-Obi",                                                                                                           -- +1 Refresh
         left_ear="Etiolation Earring",                                                                                                  -- -3% MDT
-        right_ear="Darkness Earring",                                                                                                   -- -0%
-        left_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},                                                                  -- -7% PDT
+        right_ear="Nehalennia Earring",
+        left_ring="Murky Ring",                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                    -- -10% DT
         back=gear.capes.idle_fc,                                                                                                        -- -10% PDT
     }
+    --head=gear.empyrean.head, -- -10% DT
+    --left_ring={ name="Gelatinous Ring +1", augments={'Path: A',}}, -- -7% PDT
+    --waist="Slipor Sash", -- -3% MDT
+    --legs=gear.empyrean.legs,
 
     -- TODO: Make this an override to PDT and Refresh maybe - will probably have to change how I do this throughout... Or just leave as is :3
-    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- OVERALL -44% DT, -7% PDT, -6% MDT (-51% DT+PDT, -50% DT+MDT)
-        neck="Warder's Charm +1",
-        back="Tuilha Cape",
+    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- OVERALL -54% DT, -0% PDT, -3% MDT (-54% DT+PDT, -57% DT+MDT) +5-6 Refresh
+        head=gear.empyrean.head,                                                                                                        -- -10% DT    
+        neck="Warder's Charm +1",                                                                                                       -- Reduction of 6% DT from base set
+        back="Tuilha Cape",                                                                                                             -- Reduction of 10% PDT from base set
     })
 
     sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                              -- OVERALL +8-9 refresh
@@ -442,18 +457,18 @@ function get_sets()
         body=gear.relic.body,
     }
 
-    sets.ja["Mana Wall"] = {                                                                                                            -- OVERALL -50% DT, -10% PDT, -3% MDT
+    sets.ja["Mana Wall"] = {                                                                                                            -- OVERALL -54% DT, -10% PDT, -3% MDT
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=gear.empyrean.head,                                                                                                        -- -10% DT
         body=gear.AF.body,      -- Wicce +3 would probably be better if I wasn't casting. But I like casting and AF3 seems very convenient. Could maybe exception logic AFbody mode this later.
         hands=gear.empyrean.hands,                                                                                                      -- -12% DT
         legs=gear.empyrean.legs,                                                                                                        -- 
         feet=gear.empyrean.feet,                                                                                                        -- -10% DT
-        neck="Loricate Torque +1",                                                                                                      -- -6% DT
+        neck="Unmoving Collar +1",
         waist="Slipor Sash",                                                                                                            -- -3% MDT
         left_ear="Ethereal Earring",                                                                                                    -- Damage to MP
         right_ear="Friomisi Earring",                                                                                                   -- Soon replaced but I won't say no to more damage during mana wall
-        left_ring="Dark Ring",                                                                                                          -- -0%
+        left_ring="Murky Ring",                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                    -- -10% DT
         back=gear.capes.idle_fc,                                                                                                        -- -10% PDT
     }
@@ -543,35 +558,45 @@ function midcast(spell)
 
     local elemental_debuffs = S{'Burn','Frost','Choke','Rasp','Shock','Drown'}
     local cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja', 'Comet'}
+    local match_list = S{"Cure", "Aspir", "Drain"}
+    local matched = false
 
-    if spell.name:match("Cure") then
-        equip(sets.midcast.curing)
-    elseif spell.name:match("Aspir") then
-        equip(sets.midcast.aspir)
-    elseif spell.name == "Dispelga" then
-        equip(sets.midcast.dispelga)
-    elseif spell.name == "Impact" then
-        equip(sets.midcast.impact)
-    elseif spell.name == "Death" then 
+    -- If the spell matches one of the match_list spells.
+    for match in match_list:it() do
+        if spell.name:match(match) then
+            equip(sets.midcast[match])
+            matched = true
+            break
+        end
+    end
+
+    -- If the spell is Death
+    if not matched and spell.name == "Death" then
         if nuking_mode.current == "Burst" then
             equip(sets.midcast.death_burst)
         else
             equip(sets.midcast.death_free_nuke)
         end
-    elseif elemental_debuffs:contains(spell.name) then
-        equip(sets.midcast.elemental_debuff)
-    elseif spell.skill == "Enhancing Magic" then
-        equip(sets.midcast.enhancing)
-    elseif spell.skill == "Enfeebling Magic" then
-        equip(sets.midcast.enfeebling)
-    elseif spell.skill == "Elemental Magic" then
-        local current_mode = sets.midcast[nuking_mode.current]
-        if current_mode then
-            equip(current_mode)
-        else
-            add_to_chat(123, "Invalid nuking mode: " .. nuking_mode.current)
-        end
 
+        matched = true
+    end
+
+    -- If the spell name EXACTLY matches.
+    if not matched and sets.midcast[spell.name] then
+        equip(sets.midcast[spell.name])
+        matched = true
+    end
+
+    -- If the spell name is contained within elemental debuffs
+    if not matched and elemental_debuffs:contains(spell.name) then
+        equip(sets.midcast.elemental_debuff)
+        matched = true
+    end
+
+    -- If the spell skill is Elemental Magic
+    if not matched and spell.skill == "Elemental Magic" then
+        equip(sets.midcast[nuking_mode.current])
+        
         if cumulative_spells:contains(spell.name) then
             equip({legs=gear.empyrean.legs})
         end
@@ -579,12 +604,23 @@ function midcast(spell)
         if toggle_af_body == "On" then
             equip({body=gear.AF.body})
         end
-    elseif spell.action_type == "Magic" then
-        -- Non-Cure Healing/unhandled Dark Magic/Divine Magic/Trusts would make their way here.
-        --equip(sets.midcast["Free Nuke"])
-        idle()
+
+        matched = true
     end
 
+    -- If the spell skill has a relevant set
+    if not matched and sets.midcast[spell.skill] then
+        equip(sets.midcast[spell.skill])
+        matched = true
+    end
+
+    -- If the magic is literally anything else
+    if not matched and spell.action_type == "Magic" then
+        idle()
+        --matched = true
+    end
+
+    -- Equip the Hachirin-no-Obi on top of whatever was selected.
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) then
         -- This will still trigger on stuff like Klimaform but eeh
         equip({waist="Hachirin-no-Obi"})
@@ -604,12 +640,7 @@ function idle()
         return
     end
 
-    -- Sanity check
-    if sets.idle[idle_mode.current] then
-        equip(sets.idle[idle_mode.current])
-    else
-        add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-    end
+    equip(sets.idle[idle_mode.current])
 end
 
 function aftercast(spell)
@@ -635,12 +666,7 @@ function buff_change(name, gain, buff_details)
                     return
                 end
 
-                -- Sanity check
-                if sets.idle[idle_mode.current] then
-                    equip(sets.idle[idle_mode.current])
-                else
-                    add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-                end
+                equip(sets.idle[idle_mode.current])
             end
         end
     end
@@ -702,12 +728,7 @@ function self_command(command)
                     add_to_chat(123, "Idle gear will not switch due to Death toggle mode.")
                 end
             else
-                -- Sanity check
-                if sets.idle[idle_mode.current] then
-                    equip(sets.idle[idle_mode.current])
-                else
-                    add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-                end
+                equip(sets.idle[idle_mode.current])
             end
         else
             add_to_chat(123, "Missing argument.")
@@ -727,12 +748,7 @@ function self_command(command)
             if buffactive["Mana Wall"] then
                 add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
             else
-                -- Sanity check
-                if sets.idle[idle_mode.current] then
-                    equip(sets.idle[idle_mode.current])
-                else
-                    add_to_chat(123, "Invalid idle set: " .. idle_mode.current)
-                end
+                equip(sets.idle[idle_mode.current])
             end
         elseif toggle_death == "Off" then
             toggle_death = "On"
