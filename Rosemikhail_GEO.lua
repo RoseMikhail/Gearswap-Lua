@@ -5,7 +5,18 @@ include("Modes.lua")
 nuking_mode = M{"Free Nuke", "Burst"}
 idle_mode = M{"PDT", "MDT"}
 
--- Global Variables
+-- Command Helpers
+nuking_mode_pairs = {
+    freenuke = "Free Nuke",
+    burst = "Burst",
+}
+
+idle_mode_pairs = {
+    mdt = "MDT",
+    pdt = "PDT",
+    --refresh = "Refresh",
+}
+
 toggle_af_feet = "Off"
 
 -- Bindings
@@ -44,7 +55,6 @@ end
 update_macro_book()
 
 -- Someday TODO: When I have Idris, I need a buff check for Entrust as Geomancy+ doesn't affect it. I will need to use my Gada +10% indocolore duration.
--- TODO: Someday I may want a Bagua Galero override for the HP+ 600 buff. Similar in style to my Mana Wall overrides. This would need to apply in all scenarios where gear changes. (pre/mid/after/pet_change/commands)
 -- Potentially make an override to force the PDT idle set regardless of whether I have a bubble out.
 
 -- Individual spells should be added in the following way: sets.precast["Impact"]. This goes for precast and midcast.
@@ -112,6 +122,7 @@ function get_sets()
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- 5% FC
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- 3% FC
+        ammo=empty,
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
         hands=gear.relic.hands,                                                                                                         -- 11% Elem FC
@@ -127,7 +138,7 @@ function get_sets()
     }
 
     sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
-        head="",
+        head=empty,
         body="Crepuscular Cloak",
     })
 
@@ -144,6 +155,7 @@ function get_sets()
     sets.midcast["Free Nuke"] = {
         main="Daybreak",
         sub="Ammurapi Shield",
+        range=empty,
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=gear.empyrean.head,
         body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
@@ -163,6 +175,7 @@ function get_sets()
     sets.midcast["Burst"] = {                                                                           -- 35% MB, 24% MB II
         main="Daybreak",
         sub="Ammurapi Shield",
+        range=empty,
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Ea Hat",                                                                                  -- 6% MB 6% MB II
         body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},      -- Someday Ea +1 apparently
@@ -190,6 +203,7 @@ function get_sets()
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                            -- Skill
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                              -- Skill
+        ammo=empty,
         head=gear.empyrean.head,                                                                                                -- Skill, Set: MP occasionally not depleted when using geomancy spells.
         body=gear.relic.body,                                                                                                   -- Skill    Consider replacing with Amalric Double +1 for +7 Consere MP
         hands=gear.AF.hands,                                                                                                    -- Skill
@@ -208,6 +222,7 @@ function get_sets()
         main={ name="Gada", augments={'Indi. eff. dur. +10','Mag. Acc.+13','"Mag.Atk.Bns."+13','DMG:+10',}},                    -- Indi duration +10%
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                              -- Skill
+        ammo=empty,
         head=gear.empyrean.head,                                                                                                -- Skill, Set: MP occasionally not depleted when using geomancy spells.
         body=gear.relic.body,                                                                                                   -- Skill    Consider replacing with Amalric Double +1 for +7 Consere MP
         hands=gear.AF.hands,                                                                                                    -- Skill
@@ -233,7 +248,8 @@ function get_sets()
         main="Daybreak",
         sub="Ammurapi Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},
-        head="",
+        ammo=empty,
+        head=empty,
         body={ name="Cohort Cloak +1", augments={'Path: A',}},
         hands="Jhakri Cuffs +2",
         legs="Jhakri Slops +2",
@@ -255,6 +271,7 @@ function get_sets()
     sets.midcast["Impact"] = {
         main="Daybreak",
         sub="Ammurapi Shield",
+        range=empty,
         ammo="Kalboron Stone",
         body="Crepuscular Cloak",
         hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
@@ -276,6 +293,7 @@ function get_sets()
     sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50%
         main="Daybreak",                                                                                                            -- 30%
         sub="Genmei Shield",
+        range=empty,
         ammo="Kalboron Stone",
         head={ name="Vanya Hood", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},      -- +10%
         body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
@@ -294,6 +312,7 @@ function get_sets()
     sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +64% duration
         main={ name="Gada", augments={'Indi. eff. dur. +10','Mag. Acc.+13','"Mag.Atk.Bns."+13','DMG:+10',}},
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
+        range=empty,
         ammo="Staunch Tathlum",
         head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +8',}},                                                          -- +8% duration
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
@@ -340,6 +359,7 @@ function get_sets()
     sets.idle["PDT"] = {                                                                                                                -- -40% DT, -39% PDT, -16% MDT (-75% DT+PDT, -51% DT+MDT)
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
         sub="Genmei Shield",                                                                                                            -- -10% PDT
+        range=empty,
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=gear.empyrean.head,                                                                                                        -- -11% DT
         body=gear.AF.body,                                                                                                              -- +3 Refresh
@@ -375,7 +395,7 @@ function get_sets()
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -4% Pet DT
         sub="Genmei Shield",                                                                                                            -- -10% PDT
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- -5% Pet DT
-        ammo="",
+        ammo=empty,
         head={ name="Telchine Cap", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                              -- -4% Pet DT, +3 Regen -- When I have Idris, replace with Azimuth head for DT
         body=gear.AF.body,                                                                                                              -- +3 Refresh -- Replace with Shamash when possible for DT
         hands=gear.AF.hands,                                                                                                            -- -3% DT, -13% Pet DT
@@ -502,17 +522,13 @@ function midcast(spell)
     end
 end
 
-function idle()
-    if pet.isvalid and pet.name == "Luopan" then
+-- Change checks to be "movement speed" stuff
+function idle(force_idle_mode)
+    if pet.isvalid and not force_idle_mode then
         equip(sets.idle.luopan)
-
-        if toggle_af_feet == "On" then
-            equip({feet=gear.AF.feet})
-        end
-        return
+    else
+        equip(sets.idle[idle_mode.current])
     end
-
-    equip(sets.idle[idle_mode.current])
 
     if toggle_af_feet == "On" then
         equip({feet=gear.AF.feet})
@@ -525,36 +541,13 @@ function aftercast(spell)
         return
     end
 
-    -- Gearswap will not immediately register the geocolure's unsummoning, so we switch directly to our current idle mode.
-    -- TODO: This is maybe unnecessary, as pet_change DOES handle switching back, just a little delayed.
-    if S{"Full Circle", "Mending Halation", "Radial Arcana", "Concentric Pulse"}:contains(spell.name) then
-        equip(sets.idle[idle_mode.current])
-
-        if toggle_af_feet == "On" then
-            equip({feet=gear.AF.feet})
-        end
-
-        return
-    end
-
     idle()
 end
 
 function pet_change(pet,gain)
-    -- We switch to the luopan idle set here on the initial summon instead of via the aftercast, as gearswap does not immediately register the summoning.
-    -- Upon losing our luopan in a way that is out of our control (i.e. damage or timeout), we will switch to a normal idle set.
-    if pet.name == "Luopan" then
-        if gain == true then
-            equip(sets.idle.luopan)
-        elseif gain == false then
-            if not midaction() then
-                equip(sets.idle[idle_mode.current])
-            end
-        end
-
-        if toggle_af_feet == "On" then
-            equip({feet=gear.AF.feet})
-        end
+    -- We wait until here to select gear, as Gearswap doesn't immediately register the summoning in aftercast.
+    if not midaction() then
+        idle()
     end
 end
 
@@ -562,79 +555,47 @@ function status_change(new, old)
     idle()
 end
 
-function buff_change(name, gain, buff_details)
-    -- Maybe add the currently active colures to the bar.
-end
-
 function sub_job_change(new,old)
     update_macro_book()
 end
 
--- This needs cleaning up - I could definitely break this into small functions.
 function self_command(command)
-    local commandArgs = command
+    local commandArgs = T(command:lower():split(" ")) -- lowercase and split
+    local main_command = commandArgs[1]
+    local sub_command = commandArgs[2]
 
-    if #commandArgs:split(" ") >= 1 then
-        commandArgs = T(commandArgs:split(" "))
+    local function handle_mode(mode_table, mode_var, label)
+        if not sub_command then
+            add_to_chat(123, "Missing argument.")
+            return
+        end
+
+        local mode = mode_table[sub_command]
+        if mode then
+            add_to_chat(123, string.format("%s mode set to %s", label, mode))
+            mode_var:set(mode)
+        else
+            add_to_chat(123, string.format("Invalid %s mode.", label))
+        end
     end
 
-    if commandArgs[1]:lower() == "nukemode" then
-        if commandArgs[2] then
-            if commandArgs[2]:lower() == "freenuke" then
-                nuking_mode:set("Free Nuke")
-            elseif commandArgs[2]:lower() == "burst" then
-                nuking_mode:set("Burst")
-            else
-                add_to_chat(123, "Argument not recognized.")
-                return
-            end
+    if main_command == "nukemode" then
+        handle_mode(nuking_mode_pairs, nuking_mode, "Nuking")
+    elseif main_command == "idlemode" then
+        handle_mode(idle_mode_pairs, idle_mode, "Idle")
 
-            add_to_chat(123, "Switching Nuking mode to " .. nuking_mode.current)
+        if pet.isvalid then
+            add_to_chat(123, "Idle gear will not switch due to your pet currently being summoned.")
         else
-            add_to_chat(123, "Missing argument.")
+            idle(true) -- Force idle set switch
         end
-    elseif commandArgs[1]:lower() == "idlemode" then
-        if commandArgs[2] then
-            if commandArgs[2]:lower() == "pdt" then
-                idle_mode:set("PDT")
-            elseif commandArgs[2]:lower() == "mdt" then
-                idle_mode:set("MDT")
-            else
-                add_to_chat(123, "Argument not recognized.")
-                return
-            end
-
-            add_to_chat(123, "Switching Idle mode to " .. idle_mode.current)
-
-            -- Luopan
-            if pet.isvalid and pet.name == "Luopan" then
-                add_to_chat(123, "Idle gear will not switch due to your luopan currently being summoned.")
-            else
-                equip(sets.idle[idle_mode.current])
-
-                if toggle_af_feet == "On" then
-                    equip({feet=gear.AF.feet})
-                end
-            end
-        else
-            add_to_chat(123, "Missing argument.")
-        end
-    elseif commandArgs[1]:lower() == "toggleaffeet" then
-        if toggle_af_feet == "On" then
-            toggle_af_feet = "Off"
-            idle()
-        elseif toggle_af_feet == "Off" then
-            toggle_af_feet = "On"
-            equip({feet=gear.AF.feet})
-        end
+    elseif main_command == "toggleaffeet" then
+        toggle_af_feet = (toggle_af_feet == "On") and "Off" or "On"
+        idle()
 
         add_to_chat(123, "AF Feet toggle: " .. tostring(toggle_af_feet))
-    elseif commandArgs[1]:lower() == "toggletextbox" then
-        if text_box:visible() == true then
-            text_box:visible(false)
-        else
-            text_box:visible(true)
-        end
+    elseif main_command == "toggletextbox" then
+        text_box:visible(not text_box:visible())
     else
         add_to_chat(123, "Command not recognised.")
     end
