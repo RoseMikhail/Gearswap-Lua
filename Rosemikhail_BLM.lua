@@ -5,7 +5,20 @@ include("Modes.lua")
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
 
--- Global Variables
+-- Command Helpers
+nuking_mode_pairs = {
+    freenuke = "Free Nuke",
+    burst = "Burst",
+    occultacumen = "Occult Acumen",
+}
+
+idle_mode_pairs = {
+    mdt = "MDT",
+    pdt = "PDT",
+    refresh = "Refresh",
+}
+
+toggle_speed = "Off" -- TODO: Sort this bwo
 toggle_death = "Off"
 toggle_af_body = "Off"
 
@@ -16,8 +29,9 @@ send_command("bind f3 gs c nukemode occultacumen")
 send_command("bind f5 gs c idlemode pdt")
 send_command("bind f6 gs c idlemode mdt")
 send_command("bind f7 gs c idlemode refresh")
-send_command("bind f9 gs c toggleafbody")
-send_command("bind f10 gs c toggledeath")
+send_command("bind f9 gs c togglespeed")
+send_command("bind f10 gs c toggleafbody")
+send_command("bind f11 gs c toggledeath")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
@@ -34,7 +48,7 @@ default_settings = {
 }
 
 text_box = texts.new(default_settings)
-text_box:text("Nuke: " .. nuking_mode.current .. " | Idle: " .. idle_mode.current .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
+text_box:text("Nuke: " .. nuking_mode.current .. " | Idle: " .. idle_mode.current .. " | Speed: " .. toggle_speed .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
 text_box:visible(true)
 
 -- Lockstyle
@@ -92,7 +106,7 @@ function get_sets()
         nuking ={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},
         idle_fc ={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10','Phys. dmg. taken-10%',}},
         occult_acumen ={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Store TP"+10',}},
-        death ="",
+        --death ="",
     }
 
     -- Add Merlinic / Telchine etc.
@@ -133,7 +147,7 @@ function get_sets()
     sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Khonsu",
-        head="",
+        head=empty,
         body="Crepuscular Cloak",
     })
 
@@ -261,7 +275,7 @@ function get_sets()
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Khonsu",
         ammo="Kalboron Stone",
-        head="",
+        head=empty,
         body={ name="Cohort Cloak +1", augments={'Path: A',}},
         hands=gear.AF.hands,
         legs=gear.AF.legs,
@@ -280,7 +294,7 @@ function get_sets()
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Khonsu",
         ammo="Kalboron Stone",
-        head="",
+        head=empty,
         body={ name="Cohort Cloak +1", augments={'Path: A',}},
         hands=gear.AF.hands,
         legs=gear.relic.legs,
@@ -303,7 +317,7 @@ function get_sets()
         main={ name="Marin Staff +1", augments={'Path: A',}},
         sub="Khonsu",
         ammo="Kalboron Stone",
-        head="",
+        head=empty,
         body="Crepuscular Cloak",
         hands=gear.AF.hands,
         legs=gear.AF.legs,
@@ -513,6 +527,10 @@ end
 -- TODO: Maybe make an exception for impact/elemental magic in my Death logic somehow... later.
 
 function precast(spell)
+    if toggle_speed == "On" then
+        add_to_chat(123, "Consider disabling the speed toggle!")
+    end
+
     -- Mana Wall
     if buffactive["Mana Wall"] then
         equip(sets.ja["Mana Wall"])
@@ -634,7 +652,6 @@ function midcast(spell)
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) then
         -- This will still trigger on stuff like Klimaform but eeh
         equip({waist="Hachirin-no-Obi"})
-
         -- Chatoyant staff check?
     end
 end
@@ -643,16 +660,16 @@ function idle()
     -- Mana Wall
     if buffactive["Mana Wall"] then
         equip(sets.ja["Mana Wall"])
-        return
-    end
-
     -- Death
-    if toggle_death == "On" then
+    elseif toggle_death == "On" then
         equip(sets.idle["Death"])
-        return
+    else
+        equip(sets.idle[idle_mode.current])
     end
 
-    equip(sets.idle[idle_mode.current])
+    if toggle_speed == "On" then
+        equip({legs="Track Pants +1", feet=empty})
+    end
 end
 
 function aftercast(spell)
@@ -665,22 +682,9 @@ function aftercast(spell)
 end
 
 function buff_change(name, gain, buff_details)
-    -- We switch to the Mana Wall gear here, as Gearswap will not immediately register the buff's activation.
-    -- Upon losing Mana Wall, we will switch to either a normal idle or Death set.
-    if name == "Mana Wall" then
-        if gain == true then
-            equip(sets.ja["Mana Wall"])
-        elseif gain == false then
-            if not midaction() then
-                -- Death
-                if toggle_death == "On" then
-                    equip(sets.idle["Death"])
-                    return
-                end
-
-                equip(sets.idle[idle_mode.current])
-            end
-        end
+    -- We wait until here to select gear, as Gearswap doesn't immediately register Mana Wall in aftercast.
+    if not midaction() then
+        idle()
     end
 end
 
@@ -692,197 +696,64 @@ function sub_job_change(new,old)
     update_macro_book()
 end
 
--- This needs cleaning up - I could definitely break this into small functions.
 function self_command(command)
-    local commandArgs = command
+    -- Lowercase and split
+    local commandArgs = T(command:lower():split(" "))
+    local main_command = commandArgs[1]
+    local sub_command = commandArgs[2]
 
-    if #commandArgs:split(" ") >= 1 then
-        commandArgs = T(commandArgs:split(" "))
-    end
-
-    if commandArgs[1]:lower() == "nukemode" then
-        if commandArgs[2] then
-            if commandArgs[2]:lower() == "freenuke" then
-                nuking_mode:set("Free Nuke")
-            elseif commandArgs[2]:lower() == "burst" then
-                nuking_mode:set("Burst")
-            elseif commandArgs[2]:lower() == "occultacumen" then
-                nuking_mode:set("Occult Acumen")
-            else
-                add_to_chat(123, "Argument not recognized.")
-                return
-            end
-
-            add_to_chat(123, "Switching Nuking mode to " .. nuking_mode.current)
-        else
+    local function handle_mode(mode_table, mode_var, label)
+        if not sub_command then
             add_to_chat(123, "Missing argument.")
-        end
-    elseif commandArgs[1]:lower() == "idlemode" then
-        if commandArgs[2] then
-            if commandArgs[2]:lower() == "pdt" then
-                idle_mode:set("PDT")
-            elseif commandArgs[2]:lower() == "mdt" then
-                idle_mode:set("MDT")
-            elseif commandArgs[2]:lower() == "refresh" then
-                idle_mode:set("Refresh")
-            else
-                add_to_chat(123, "Argument not recognized.")
-                return
-            end
-
-            add_to_chat(123, "Switching Idle mode to " .. idle_mode.current)
-
-            -- Mana Wall / Death
-            if buffactive["Mana Wall"] or toggle_death == "On" then
-                if buffactive["Mana Wall"] then
-                    add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
-                elseif toggle_death == "On" then
-                    add_to_chat(123, "Idle gear will not switch due to Death toggle mode.")
-                end
-            else
-                equip(sets.idle[idle_mode.current])
-            end
-        else
-            add_to_chat(123, "Missing argument.")
-        end
-    elseif commandArgs[1]:lower() == "toggleafbody" then
-        if toggle_af_body == "On" then
-            toggle_af_body = "Off"
-        elseif toggle_af_body == "Off" then
-            toggle_af_body = "On"
-        end
-        add_to_chat(123, "AF Body toggle: " .. tostring(toggle_af_body))
-    elseif commandArgs[1]:lower() == "toggledeath" then
-        if toggle_death == "On" then
-            toggle_death = "Off"
-
-            -- Mana Wall
-            if buffactive["Mana Wall"] then
-                add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
-            else
-                equip(sets.idle[idle_mode.current])
-            end
-        elseif toggle_death == "Off" then
-            toggle_death = "On"
-
-            -- Mana Wall
-            if buffactive["Mana Wall"] then
-                add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
-            else
-                equip(sets.idle["Death"])
-            end
-        end
-
-        add_to_chat(123, "Death toggle: " .. toggle_death)
-    elseif commandArgs[1]:lower() == "toggletextbox" then
-        if text_box:visible() == true then
-            text_box:visible(false)
-        else
-            text_box:visible(true)
-        end
-    else
-        add_to_chat(123, "Command not recognised.")
-    end
-
-    text_box:text("Nuke: " .. nuking_mode.current .. " | Idle: " .. idle_mode.current .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
-
-    --[[ mine
-    local nuke_mode_list = {
-        [0] = {command = "freenuke", mode="Free Nuke"},
-        [1] = {command = "burst", mode="Burst"},
-        [2] = {command = "occultacumen", mode="Occult Acumen"},
-    }
-
-    local main_argument = commandArgs[1]:lower()
-    local sub_argument = commandArgs[2]:lower()
-
-    if main_argument == "nukemode" then
-        local sub_match = nil
-
-        for id, mode in pairs(nuke_mode_list) do
-            if mode.command == sub_argument then
-                add_to_chat(123, string.format("%s is the command. %s is the mode name", mode.command, mode.mode))
-                sub_match = id
-                break
-            end
-        end
-
-        if sub_match then
-            nuking_mode:set(nuke_mode_list[sub_match].mode)
-            text_box:text("Nuke: " .. nuking_mode.current .. " | Idle: " .. idle_mode.current .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
-            return
-        else
-            add_to_chat(123, "Argument not recognized.")
             return
         end
+
+        local mode = mode_table[sub_command]
+        if mode then
+            add_to_chat(123, string.format("%s mode set to %s", label, mode))
+            mode_var:set(mode)
+        else
+            add_to_chat(123, string.format("Invalid %s mode.", label))
+        end
     end
-    ]]
 
-    --[[ garbage
-    local args = T(command:split(" "))
-    local cmd = args[1] and args[1]:lower()
-    local arg = args[2] and args[2]:lower()
+    if main_command == "nukemode" then
+        handle_mode(nuking_mode_pairs, nuking_mode, "Nuking")
+    elseif main_command == "idlemode" then
+        handle_mode(idle_mode_pairs, idle_mode, "Idle")
 
-    local nuking_modes = {
-        freenuke = "Free Nuke",
-        burst = "Burst",
-        occultacumen = "Occult Acumen"
-    }
-
-    local idle_modes = {
-        pdt = "PDT",
-        mdt = "MDT",
-        refresh = "Refresh"
-    }
-
-    if cmd == "nukemode" then
-        if arg and nuking_modes[arg] then
-            nuking_mode:set(nuking_modes[arg])
-            add_to_chat(123, "Switching Nuking mode to " .. nuking_mode.current)
+        if buffactive["Mana Wall"] then
+            add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
+        elseif toggle_death == "On" then
+            add_to_chat(123, "Idle gear will not switch due to Death toggle mode.")
         else
-            add_to_chat(123, arg and "Argument not recognized." or "Missing argument.")
+            idle()
         end
 
-    elseif cmd == "idlemode" then
-        if arg and idle_modes[arg] then
-            idle_mode:set(idle_modes[arg])
-            add_to_chat(123, "Switching Idle mode to " .. idle_mode.current)
-
-            if buffactive["Mana Wall"] or toggle_death == "On" then
-                local reason = buffactive["Mana Wall"] and "Mana Wall" or "Death toggle mode"
-                add_to_chat(123, "Idle gear will not switch due to " .. reason .. ".")
-            else
-                equip(sets.idle[idle_mode.current])
-            end
-        else
-            add_to_chat(123, arg and "Argument not recognized." or "Missing argument.")
-        end
-
-    elseif cmd == "toggleafbody" then
+    elseif main_command == "toggleafbody" then
         toggle_af_body = (toggle_af_body == "On") and "Off" or "On"
-        add_to_chat(123, "AF Body toggle: " .. toggle_af_body)
-
-    elseif cmd == "toggledeath" then
+        add_to_chat(123, "AF Body toggle: " .. tostring(toggle_af_body))
+    elseif main_command == "toggledeath" then
         toggle_death = (toggle_death == "On") and "Off" or "On"
-        local mode = (toggle_death == "On") and "Death" or idle_mode.current
+        add_to_chat(123, "Death toggle: " .. toggle_death)
 
         if buffactive["Mana Wall"] then
             add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
         else
-            equip(sets.idle[mode])
+            idle()
         end
+    elseif main_command == "togglespeed" then
+        toggle_speed = (toggle_speed == "On") and "Off" or "On"
+        idle()
 
-        add_to_chat(123, "Death toggle: " .. toggle_death)
-
-    elseif cmd == "toggletextbox" then
+        add_to_chat(123, "Speed toggle: " .. tostring(toggle_speed))
+    elseif main_command == "toggletextbox" then
         text_box:visible(not text_box:visible())
-
     else
         add_to_chat(123, "Command not recognised.")
     end
 
-    text_box:text("Nuke: " .. nuking_mode.current .. " | Idle: " .. idle_mode.current .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
-]]
+    text_box:text("Nuke: " .. nuking_mode.current .. " | Idle: " .. idle_mode.current .. " | Speed: " .. toggle_speed .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
 end
 
 function file_unload(file_name)
@@ -896,5 +767,6 @@ function file_unload(file_name)
     
     send_command("unbind f9")
     send_command("unbind f10")
+    send_command("unbind f11")
     send_command("unbind f12")
 end

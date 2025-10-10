@@ -24,7 +24,7 @@ send_command("bind f1 gs c nukemode freenuke")
 send_command("bind f2 gs c nukemode burst")
 send_command("bind f5 gs c idlemode pdt")
 send_command("bind f6 gs c idlemode mdt")
-send_command("bind f9 gs c toggleaffeet")
+send_command("bind f11 gs c toggleaffeet")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
@@ -450,6 +450,10 @@ end
 ----------------------------------------------------------------
 
 function precast(spell)
+    if toggle_af_feet == "On" then
+        add_to_chat(123, "Consider disabling the AF Feet toggle!")
+    end
+
     if sets.ja[spell.name] then                 -- Job Abilities
         equip(sets.ja[spell.name])
     elseif sets.ws[spell.name] then             -- Weapon Skills
@@ -523,7 +527,7 @@ function midcast(spell)
 end
 
 -- Change checks to be "movement speed" stuff
-function idle(force_idle_mode)
+function idle()
     if pet.isvalid and not force_idle_mode then
         equip(sets.idle.luopan)
     else
@@ -560,7 +564,8 @@ function sub_job_change(new,old)
 end
 
 function self_command(command)
-    local commandArgs = T(command:lower():split(" ")) -- lowercase and split
+    -- Lowercase and split
+    local commandArgs = T(command:lower():split(" "))
     local main_command = commandArgs[1]
     local sub_command = commandArgs[2]
 
@@ -587,7 +592,7 @@ function self_command(command)
         if pet.isvalid then
             add_to_chat(123, "Idle gear will not switch due to your pet currently being summoned.")
         else
-            idle(true) -- Force idle set switch
+            idle()
         end
     elseif main_command == "toggleaffeet" then
         toggle_af_feet = (toggle_af_feet == "On") and "Off" or "On"
@@ -610,6 +615,6 @@ function file_unload(file_name)
     send_command("unbind F5")
     send_command("unbind f6")
 
-    send_command("unbind f9")
+    send_command("unbind f11")
     send_command("unbind f12")
 end
