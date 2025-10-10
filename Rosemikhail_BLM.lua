@@ -18,7 +18,7 @@ idle_mode_pairs = {
     refresh = "Refresh",
 }
 
-toggle_speed = "Off" -- TODO: Sort this bwo
+toggle_speed = "Off"
 toggle_death = "Off"
 toggle_af_body = "Off"
 
@@ -722,11 +722,8 @@ function self_command(command)
     elseif main_command == "idlemode" then
         handle_mode(idle_mode_pairs, idle_mode, "Idle")
 
-        if buffactive["Mana Wall"] then
-            add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
-        elseif toggle_death == "On" then
-            add_to_chat(123, "Idle gear will not switch due to Death toggle mode.")
-        else
+        -- Only change if Mana Wall is not up and Death is off.
+        if not buffactive["Mana Wall"] and toggle_death == "Off" then
             idle()
         end
 
@@ -737,9 +734,8 @@ function self_command(command)
         toggle_death = (toggle_death == "On") and "Off" or "On"
         add_to_chat(123, "Death toggle: " .. toggle_death)
 
-        if buffactive["Mana Wall"] then
-            add_to_chat(123, "Idle gear will not switch due to Mana Wall.")
-        else
+        -- Only change if Mana Wall is not up.
+        if not buffactive["Mana Wall"] then
             idle()
         end
     elseif main_command == "togglespeed" then

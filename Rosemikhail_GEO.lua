@@ -24,7 +24,7 @@ send_command("bind f1 gs c nukemode freenuke")
 send_command("bind f2 gs c nukemode burst")
 send_command("bind f5 gs c idlemode pdt")
 send_command("bind f6 gs c idlemode mdt")
-send_command("bind f11 gs c toggleaffeet")
+send_command("bind f9 gs c toggleaffeet")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
@@ -589,9 +589,7 @@ function self_command(command)
     elseif main_command == "idlemode" then
         handle_mode(idle_mode_pairs, idle_mode, "Idle")
 
-        if pet.isvalid then
-            add_to_chat(123, "Idle gear will not switch due to your pet currently being summoned.")
-        else
+        if not pet.isvalid then
             idle()
         end
     elseif main_command == "toggleaffeet" then
@@ -615,6 +613,6 @@ function file_unload(file_name)
     send_command("unbind F5")
     send_command("unbind f6")
 
-    send_command("unbind f11")
+    send_command("unbind f9")
     send_command("unbind f12")
 end
