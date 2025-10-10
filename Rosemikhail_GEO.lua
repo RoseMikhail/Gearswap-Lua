@@ -63,14 +63,14 @@ function get_sets()
         body = "Geomancy Tunic +3",
         hands = "Geo. Mitaines +3",
         legs = "Geo. Pants +1",
-        feet = "Geo. Sandals +2",
+        feet = "Geo. Sandals +3",
     }
 
     gear.relic = {
         head = "Bagua Galero",
         body = "Bagua Tunic",
         hands = "Bagua Mitaines",
-        legs = { name="Bagua Pants +1", augments={'Enhances "Mending Halation" effect',}},
+        legs = { name="Bagua Pants +2", augments={'Enhances "Mending Halation" effect',}},
         feet = { name="Bagua Sandals +1", augments={'Enhances "Radial Arcana" effect',}},
     }
 
@@ -127,8 +127,6 @@ function get_sets()
     }
 
     sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
-        main={ name="Marin Staff +1", augments={'Path: A',}},
-        sub="Enki Strap",
         head="",
         body="Crepuscular Cloak",
     })
@@ -144,8 +142,8 @@ function get_sets()
     ----------------------------------------------------------------
 
     sets.midcast["Free Nuke"] = {
-        main={ name="Marin Staff +1", augments={'Path: A',}},                                           -- Daybreak + Ammurapi will beat this in MACC and MAB
-        sub="Enki Strap",
+        main="Daybreak",
+        sub="Ammurapi Shield",
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=gear.empyrean.head,
         body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
@@ -163,8 +161,8 @@ function get_sets()
 
     -- Picking up more of the Ea set might make this better, but it isn't a priority.
     sets.midcast["Burst"] = {                                                                           -- 35% MB, 24% MB II
-        main={ name="Marin Staff +1", augments={'Path: A',}},                                           -- Daybreak + Ammurapi will beat this in MACC and MAB
-        sub="Enki Strap",
+        main="Daybreak",
+        sub="Ammurapi Shield",
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Ea Hat",                                                                                  -- 6% MB 6% MB II
         body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},      -- Someday Ea +1 apparently
@@ -229,15 +227,17 @@ function get_sets()
     ----------------------------------------------------------------
 
     -- Geomancy Attire will be really good for this at +2 and +3
+    -- Need the WHOLE set though lol, maybe minus the hands if I get the regal cuffs.
+    -- Technically Cohort beats the Geo set by a tiny amount on skill+acc alone lol, but I guess more survivability via the geo set...? int? mnd? idk bwo
     sets.midcast["Enfeebling Magic"] = {
-        main={ name="Marin Staff +1", augments={'Path: A',}},                                           -- Daybreak + Ammurapi will beat this in MACC
-        sub="Enki Strap",
+        main="Daybreak",
+        sub="Ammurapi Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},
         head="",
         body={ name="Cohort Cloak +1", augments={'Path: A',}},
         hands="Jhakri Cuffs +2",
         legs="Jhakri Slops +2",
-        feet=gear.relic.feet,
+        feet=gear.empyrean.feet,
         neck={ name="Bagua Charm +1", augments={'Path: A',}},
         waist="Rumination Sash",
         left_ear="Malignance Earring",
@@ -253,8 +253,8 @@ function get_sets()
     })
 
     sets.midcast["Impact"] = {
-        main={ name="Marin Staff +1", augments={'Path: A',}},
-        sub="Enki Strap",
+        main="Daybreak",
+        sub="Ammurapi Shield",
         ammo="Kalboron Stone",
         body="Crepuscular Cloak",
         hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
@@ -273,27 +273,7 @@ function get_sets()
     -- OTHER MIDCAST
     ----------------------------------------------------------------
 
-    sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
-        main={ name="Rubicundity", augments={'Mag. Acc.+9','"Mag.Atk.Bns."+8','Dark magic skill +9','"Conserve MP"+5',}},
-        sub="Genmei Shield",
-        --ammo="",
-        head=gear.relic.head,
-        body=gear.AF.body,
-        --hands="",
-        legs=gear.empyrean.legs,
-        --feet="",
-        neck="Dark Torque",
-        waist="Fucho-no-Obi",
-        left_ear="Barkaro. Earring",
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
-        left_ring="Evanescence Ring",
-        right_ring="Stikini Ring",
-        back={ name="Aurist's Cape +1", augments={'Path: A',}},
-    })
-
-    sets.midcast["Drain"] = sets.midcast["Aspir"]
-
-    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                  -- Overall +50%
+    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50%
         main="Daybreak",                                                                                                            -- 30%
         sub="Genmei Shield",
         ammo="Kalboron Stone",
@@ -311,9 +291,9 @@ function get_sets()
         back=gear.capes.enfeebling_healing_fc,
     })
 
-    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                               -- +54% duration
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +64% duration
         main={ name="Gada", augments={'Indi. eff. dur. +10','Mag. Acc.+13','"Mag.Atk.Bns."+13','DMG:+10',}},
-        sub="Genmei Shield",
+        sub="Ammurapi Shield",                                                                                                      -- +10% duration
         ammo="Staunch Tathlum",
         head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +8',}},                                                          -- +8% duration
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
@@ -329,23 +309,48 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
+    sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
+        main={ name="Rubicundity", augments={'Mag. Acc.+9','"Mag.Atk.Bns."+8','Dark magic skill +9','"Conserve MP"+5',}},
+        sub="Ammurapi Shield",
+        --ammo="",
+        head=gear.relic.head,
+        body=gear.AF.body,
+        --hands="",
+        legs=gear.empyrean.legs,
+        --feet="",
+        neck="Dark Torque",
+        waist="Fucho-no-Obi",
+        left_ear="Barkaro. Earring",
+        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        left_ring="Evanescence Ring",
+        right_ring="Stikini Ring",
+        back={ name="Aurist's Cape +1", augments={'Path: A',}},
+    })
+
+    sets.midcast["Drain"] = sets.midcast["Aspir"]
+
+    sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
+        main="Bolelabunga",                                                                                                         -- 10% potency
+    })
+
     ----------------------------------------------------------------
     -- IDLE SETS
     ----------------------------------------------------------------
 
-    sets.idle["PDT"] = {                                                                                                                -- -35% DT, -39% PDT, -16% MDT (-74% DT+PDT, -51% DT+MDT)
+    sets.idle["PDT"] = {                                                                                                                -- -40% DT, -39% PDT, -16% MDT (-75% DT+PDT, -51% DT+MDT)
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
         sub="Genmei Shield",                                                                                                            -- -10% PDT
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=gear.empyrean.head,                                                                                                        -- -11% DT
-        --body="Mallquis Saio +2",                                                                                                        -- -8% DT
         body=gear.AF.body,                                                                                                              -- +3 Refresh
         hands={ name="Hagondes Cuffs +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -3%','"Fast Cast"+4',}},                   -- -4% PDT, -3% MDT
-        legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -3%','"Avatar perpetuation cost" -4',}},    -- -4% PDT, -3% MDT
+        --legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -3%','"Avatar perpetuation cost" -4',}},  -- -4% PDT, -3% MDT
+        legs="Assid. Pants +1",                                                                                                         -- +1-2 Refresh
         feet={ name="Hag. Sabots +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -4%','"Mag.Atk.Bns."+27',}},                   -- -4% PDT, -4% MDT
         neck="Loricate Torque +1",                                                                                                      -- -6% DT
         waist="Slipor Sash",                                                                                                            -- -3% MDT
-        left_ear="Etiolation Earring",                                                                                                  -- -3% MDT I don't need more PDT here so I use Etiolation instead of Genmei
+        --left_ear="Etiolation Earring",                                                                                                -- -3% MDT I don't need more PDT here so I use Etiolation instead of Genmei
+        left_ear="Alabaster Earring",                                                                                                   -- -5% DT
         right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
         left_ring="Defending Ring",                                                                                                     -- -10% DT
         right_ring="Murky Ring",                                                                                                        -- -10% DT
@@ -353,7 +358,7 @@ function get_sets()
     }
 
     -- Potentially make this a toggle
-    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- -29% DT, -29% PDT, -16% MDT (-58% DT+PDT, -45% DT+MDT)
+    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- -34% DT, -29% PDT, -16% MDT (-63% DT+PDT, -50% DT+MDT)
         neck="Warder's Charm +1",
         back="Tuilha Cape",
     }) 
@@ -366,7 +371,7 @@ function get_sets()
     -- Not enough regen. I replace the Solstice (-4 Pet DT: -34% Pet DT and +22 regen.) with Sucellus (+3 Pet DT, +3 Regen: -37% Pet DT and +25 regen.)
 
     -- Consider Niburu Cudgel Path D or Sucellus
-    sets.idle.luopan = set_combine(sets.idle[idle_mode.current], {                                                                      -- -37% Pet DT (Capped at -37.5%), +25 Regen (need 24+), -22% DT, -19% PDT, -0% MDT (-41% DT+PDT, -19% DT+MDT)
+    sets.idle.luopan = {                                                                                                                -- -37% Pet DT (Capped at -37.5%), +25 Regen (need 24+), -27% DT, -17% PDT, -0% MDT (-44% DT+PDT, -27% DT+MDT)
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -4% Pet DT
         sub="Genmei Shield",                                                                                                            -- -10% PDT
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- -5% Pet DT
@@ -377,13 +382,13 @@ function get_sets()
         legs={ name="Telchine Braconi", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                          -- -4% Pet DT, +3 Regen
         feet={ name="Telchine Pigaches", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                         -- -4% Pet DT, +3 Regen
         neck="Loricate Torque +1",                                                                                                      -- -6% DT
-        left_ear="Genmei Earring",                                                                                                      -- -2% PDT -- Likely replace with Etiolation or Ran earring when PDT/DT are maxed.
+        left_ear="Alabaster Earring",                                                                                                   -- -5% DT
         right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
         left_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},                                                                  -- -7% PDT
         right_ring="Murky Ring",                                                                                                        -- -10% DT
         waist="Isa Belt",                                                                                                               -- -3% Pet DT, +1 Regen
         back=gear.capes.luopan,                                                                                                         -- +15 regen
-    })
+    }
 
     ----------------------------------------------------------------
     -- JOB ABILITIES
@@ -442,7 +447,7 @@ function precast(spell)
 end
 
 function midcast(spell)
-    local match_list  = S{"Cure", "Aspir", "Drain"}
+    local match_list  = S{"Cure", "Aspir", "Drain", "Regen"}
     local matched = false
 
     -- If the spell matches one of the match_list spells.
@@ -492,6 +497,8 @@ function midcast(spell)
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) then
         -- This will still trigger on stuff like Klimaform but eeh
         equip({waist="Hachirin-no-Obi"})
+
+        -- Chatoyant staff check?
     end
 end
 
