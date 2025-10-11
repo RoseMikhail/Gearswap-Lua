@@ -45,7 +45,7 @@ text_box:text("Nuke: " .. nuking_mode.current .. " | Idle: " .. idle_mode.curren
 text_box:visible(true)
 
 -- Lockstyle
-send_command("wait 3;input /lockstyleset 22") -- Geomancer Artifact
+send_command("wait 3;input /lockstyleset 22") -- Geomancer Relic
 
 function update_macro_book()
     -- GEO/RDM macro book
@@ -199,39 +199,39 @@ function get_sets()
     -- GEO SET CONSERVE MP: 43(GEO)+6+4+15+2 = 70%
     -- INDI SET CONSERVE MP: 43(GEO)+15+2 = 60%
     
-    sets.midcast.geocolure = set_combine(sets.idle[idle_mode.current], {                                                        -- 920 total at present
-        main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                            -- Skill
+    sets.midcast.geocolure = set_combine(sets.idle[idle_mode.current], {                                                        -- 940 total at present
+        main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                            -- Skill, 6% Conserve MP
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                              -- Skill
         ammo=empty,
         head=gear.empyrean.head,                                                                                                -- Skill, Set: MP occasionally not depleted when using geomancy spells.
-        body=gear.relic.body,                                                                                                   -- Skill    Consider replacing with Amalric Double +1 for +7 Consere MP
-        hands=gear.AF.hands,                                                                                                    -- Skill
+        body=gear.relic.body,                                                                                                   -- Skill (10) Consider replacing with Amalric Doublet +1 for +7 Conserve MP
+        hands=gear.AF.hands,                                                                                                    -- Skill, DT
         legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}}, -- 6% Conserve MP
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                -- 4% Conserve MP
         neck={ name="Bagua Charm +1", augments={'Path: A',}},                                                                   -- Geomancy boost - Replace with Incanter's Torque when I have Idris + sufficient pet DT and regen for the MP effect.
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                             -- 15% Conserve MP
         left_ear="Mendi. Earring",                                                                                              -- 2% Conserve MP
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},                             -- Skill
+        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},                             -- Skill Consider replacing with Gwati Earring for Conserve
         left_ring="Stikini Ring",                                                                                               -- Skill
         right_ring="Stikini Ring",                                                                                              -- Skill
         back={ name="Lifestream Cape", augments={'Geomancy Skill +9','Indi. eff. dur. +20','Pet: Damage taken -2%',}},          -- Skill
     })
 
-    sets.midcast.indicolure = set_combine(sets.idle[idle_mode.current], {                                                       -- 915 total at present
+    sets.midcast.indicolure = set_combine(sets.idle[idle_mode.current], {                                                       -- 935 total at present
         main={ name="Gada", augments={'Indi. eff. dur. +10','Mag. Acc.+13','"Mag.Atk.Bns."+13','DMG:+10',}},                    -- Indi duration +10%
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                              -- Skill
         ammo=empty,
         head=gear.empyrean.head,                                                                                                -- Skill, Set: MP occasionally not depleted when using geomancy spells.
-        body=gear.relic.body,                                                                                                   -- Skill    Consider replacing with Amalric Double +1 for +7 Consere MP
-        hands=gear.AF.hands,                                                                                                    -- Skill
+        body=gear.relic.body,                                                                                                   -- Skill (10) Consider replacing with Amalric Doublet +1 for +7 Conserve MP
+        hands=gear.AF.hands,                                                                                                    -- Skill, DT
         legs=gear.relic.legs,                                                                                                   -- Indi duration +12
         feet=gear.empyrean.feet,                                                                                                -- Indi duration +15, Set: MP occasionally not depleted when using geomancy spells.
         neck={ name="Bagua Charm +1", augments={'Path: A',}},                                                                   -- Geomancy boost - Replace with Incanter's Torque when I have Idris + sufficient pet DT and regen for the MP effect.
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                             -- 15% Conserve MP
         left_ear="Mendi. Earring",                                                                                              -- 2% Conserve MP
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},                             -- Skill
+        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},                             -- Skill Consider replacing with Gwati Earring for Conserve
         left_ring="Stikini Ring",                                                                                               -- Skill
         right_ring="Stikini Ring",                                                                                              -- Skill
         back={ name="Lifestream Cape", augments={'Geomancy Skill +9','Indi. eff. dur. +20','Pet: Damage taken -2%',}},          -- Skill
@@ -528,7 +528,7 @@ end
 
 -- Change checks to be "movement speed" stuff
 function idle()
-    if pet.isvalid and not force_idle_mode then
+    if pet.isvalid then
         equip(sets.idle.luopan)
     else
         equip(sets.idle[idle_mode.current])
