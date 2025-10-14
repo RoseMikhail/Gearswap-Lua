@@ -65,6 +65,7 @@ update_macro_book()
 function get_sets()
 
     -- Potentially have placeholders for grips/weapons
+    -- weapon sets? idk how I'd integrate into my logic though
     -- gear.grips = {damage = "", accuracy = ""}
 
     ----------------------------------------------------------------
@@ -667,6 +668,7 @@ function idle()
         equip(sets.idle[idle_mode.current])
     end
 
+    -- Consider NOT enabling this during Mana Wall. For now, just have eyes.
     if toggle_speed == "On" then
         equip({legs="Track Pants +1", feet=empty})
     end
@@ -683,7 +685,7 @@ end
 
 function buff_change(name, gain, buff_details)
     -- We wait until here to select gear, as Gearswap doesn't immediately register Mana Wall in aftercast.
-    if not midaction() then
+    if name == "Mana Wall" and not midaction() then
         idle()
     end
 end
