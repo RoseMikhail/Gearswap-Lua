@@ -35,8 +35,9 @@ send_command("bind f11 gs c toggledeath")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1-F3: Nuking modes, F5-F7: Idle modes")
-add_to_chat(123, "F9: Toggle AF body, F10: Toggle Death")
+add_to_chat(123, "F1-F2: Nuking modes, F5-F6: Idle modes")
+add_to_chat(123, "F9: Toggle speed gear, F10: Toggle AF body")
+add_to_chat(123, "F11: Toggle Death")
 add_to_chat(123, "F12: Hide information text box")
 
 -- Information Box
