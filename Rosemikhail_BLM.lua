@@ -5,13 +5,14 @@ include("Modes.lua")
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
 weapon_mode = M{"Staff", "StaffAcc", "Daybreak", "Wizard"}
+-- TODO: As long as StaffAcc exists with Khonsu in it, dirty Mana Wall checks to not equip Khonsu will exist lol
 
 -- Midcast helpers
 match_list = S{"Cure", "Aspir", "Drain", "Regen"}
 elemental_debuffs = S{'Burn','Frost','Choke','Rasp','Shock','Drown'}
 cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja', 'Comet'}
 
--- Command Helpers
+-- Command helpers
 nuking_mode_pairs = {
     freenuke = "Free Nuke",
     burst = "Burst",
@@ -78,6 +79,7 @@ function get_sets()
     ----------------------------------------------------------------
     -- GEAR PLACEHOLDERS
     ----------------------------------------------------------------
+    
     jse = {}                       -- Leave this empty
     jse.AF = {}                    -- Leave this empty
     jse.relic = {}                 -- Leave this empty
@@ -142,6 +144,7 @@ function get_sets()
     ----------------------------------------------------------------
     -- GEAR SETS
     ----------------------------------------------------------------
+    
     sets = {}
     sets.idle = {}                  -- Leave this empty
     sets.ws = {}                    -- Leave this empty
@@ -521,6 +524,11 @@ function idle()
     -- Mana Wall
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
+
+        -- Dirty check to avoid enmity decrease
+        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
+            equip({sub="Enki Strap"})
+        end
     -- Death
     elseif toggle_death == "On" then
         equip_set_and_weapon(sets.idle["Death"])
@@ -537,8 +545,8 @@ end
 ----------------------------------------------------------------
 -- GEARSWAP FUNCTIONS 
 ----------------------------------------------------------------
--- Quick note for future me's sanity: I only apply the weapon set in precast and aftercast/self_command (via idle).
--- If a midcast set has a weapon attached to it, it will use that instead.
+-- If a set has a main or a sub attached to it, it will use those instead.
+-- To work with the weapon set cycling, a gear set must have neither.
 
 function precast(spell)
     if toggle_speed == "On" then
@@ -548,6 +556,11 @@ function precast(spell)
     -- Mana Wall
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
+
+        -- Dirty check to avoid enmity decrease
+        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
+            equip({sub="Enki Strap"})
+        end
         return
     end
 
@@ -559,13 +572,13 @@ function precast(spell)
 
     local matched_set
 
-    if sets.ja[spell.name] then                                                 -- Job Abilities
+    if sets.ja[spell.name] then                 -- Job Abilities
         matched_set = sets.ja[spell.name]
-    elseif sets.ws[spell.name] then                                             -- Weapon Skills
+    elseif sets.ws[spell.name] then             -- Weapon Skills
         matched_set = sets.ws[spell.name]
-    elseif spell.type ~= "JobAbility" then                                      -- Avoid unhandled Job Abilities
-        if spell.action_type == "Magic" then                                    -- Avoid unhandled Weapon Skills
-            if sets.precast[spell.name] then                                    -- Specific spells
+    elseif spell.type ~= "JobAbility" then      -- Avoid unhandled Job Abilities
+        if spell.action_type == "Magic" then    -- Avoid unhandled Weapon Skills
+            if sets.precast[spell.name] then    -- Specific spells
                 matched_set = sets.precast[spell.name]
             else
                 -- General purpose
@@ -578,7 +591,6 @@ function precast(spell)
 
     if matched_set then
         equip_set_and_weapon(matched_set)
-        return
     else
         -- Eh, just in case you somehow don't have a weapon equipped and you for some reason need one, this'll solve that
         -- This is the "unhandled" scenario, so I'm okay with sitting in idle.
@@ -590,9 +602,16 @@ function midcast(spell)
     -- Mana Wall
     if buffactive["Mana Wall"] then
         if spell.name == "Stun" then
-            equip(sets.midcast.stun_enmity)
+            --equip(sets.midcast.stun_enmity)
+            equip_set_and_weapon(sets.midcast.stun_enmity)
         else
-            equip(sets.ja["Mana Wall"])
+            --equip(sets.ja["Mana Wall"])
+            equip_set_and_weapon(sets.ja["Mana Wall"])
+        end
+
+        -- Dirty check to avoid enmity decrease
+        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
+            equip({sub="Enki Strap"})
         end
         return
     end
@@ -601,77 +620,74 @@ function midcast(spell)
     if toggle_death == "On" then
         if spell.action_type == "Magic" then
             if nuking_mode.current == "Burst" then
-                equip(sets.midcast.death_burst)
+                equip_set_and_weapon(sets.midcast.death_burst)
             else
-                equip(sets.midcast.death_free_nuke)
+                equip_set_and_weapon(sets.midcast.death_free_nuke)
             end
         end
         return
     end
 
-    local matched = false
+    --local matched = false
+    local matched_set
 
     -- If the spell matches one of the match_list spells.
     for match in match_list:it() do
         if spell.name:match(match) then
-            equip(sets.midcast[match])
-            matched = true
+            matched_set = sets.midcast[match]
             break
         end
     end
 
     -- If the spell is Death
-    if not matched and spell.name == "Death" then
+    if not matched_set and spell.name == "Death" then
         if nuking_mode.current == "Burst" then
-            equip(sets.midcast.death_burst)
+            matched_set = sets.midcast.death_burst
         else
-            equip(sets.midcast.death_free_nuke)
+            matched_set = sets.midcast.death_free_nuke
         end
-
-        matched = true
     end
 
     -- If the spell name EXACTLY matches.
-    if not matched and sets.midcast[spell.name] then
-        equip(sets.midcast[spell.name])
-        matched = true
+    if not matched_set and sets.midcast[spell.name] then
+        matched_set = sets.midcast[spell.name]
     end
 
     -- If the spell name is contained within elemental debuffs
-    if not matched and elemental_debuffs:contains(spell.name) then
-        equip(sets.midcast.elemental_debuff)
-        matched = true
+    if not matched_set and elemental_debuffs:contains(spell.name) then
+        matched_set = sets.midcast.elemental_debuff
     end
 
     -- If the spell skill is Elemental Magic
-    if not matched and spell.skill == "Elemental Magic" then
-        equip(sets.midcast[nuking_mode.current])
-        
-        if cumulative_spells:contains(spell.name) then
-            equip({legs=jse.empyrean.legs})
-        end
-
-        if toggle_af_body == "On" then
-            equip({body=jse.AF.body})
-        end
-
-        matched = true
+    if not matched_set and spell.skill == "Elemental Magic" then
+        matched_set = sets.midcast[nuking_mode.current]
     end
 
     -- If the spell skill has a relevant set
-    if not matched and sets.midcast[spell.skill] then
-        equip(sets.midcast[spell.skill])
-        matched = true
+    if not matched_set and sets.midcast[spell.skill] then
+        matched_set = sets.midcast[spell.skill]
     end
 
-    -- If the magic is literally anything else
-    if not matched and spell.action_type == "Magic" then
+    if matched_set then
+        equip_set_and_weapon(matched_set)
+    else
+        -- Eh, just in case you somehow don't have a weapon equipped and you for some reason need one, this'll solve that
+        -- This is the "unhandled" scenario, so I'm okay with sitting in idle.
         idle()
-        --matched = true
     end
 
-    -- Equip the Hachirin-no-Obi on top of whatever was selected.
-    if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) then
+    -- Empyrean leg overlay
+    if cumulative_spells:contains(spell.name) then
+        equip({legs=jse.empyrean.legs})
+    end
+
+    -- AF body overlay
+    if toggle_af_body == "On" and spell.skill == "Elemental Magic" then
+        equip({body=jse.AF.body})
+    end
+
+    -- Hachirin-no-Obi overlay
+    if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" then
         -- This will still trigger on stuff like Klimaform but eeh
         equip({waist="Hachirin-no-Obi"})
         -- Chatoyant staff check?
