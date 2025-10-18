@@ -1,4 +1,13 @@
 ---@diagnostic disable: lowercase-global, undefined-global
+
+-- Potential refinements:
+-- Maybe remove the match set thing and have everything equip per check again. One reason is that any set that doesn't need to equip a weapon (job abilities?) will anyway, which could delete tp for no reason.
+-- I've for the time being combined them with the idle sets via precast to get around this specific issue.
+
+-- When TPing, ensure that we are in an engaged set. This won't have any specific main or sub attached to it.
+-- When casting a spell while TPing, we need to consider whether we're okay with losing that TP for switching to a spell weapon.
+-- We CAN bypass the check that looks for whether the set is missing weapons and just force our weapon set if we want to keep them on, maybe via a toggle - very easy via equip_set_and_weapon
+
 include("Modes.lua")
 
 -- Modes
@@ -418,8 +427,8 @@ function get_sets()
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- -5% Pet DT
         ammo=empty,
         head={ name="Telchine Cap", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                              -- -4% Pet DT, +3 Regen -- When I have Idris, replace with Azimuth head for DT
-        body=jse.AF.body,                                                                                                              -- +3 Refresh -- Replace with Shamash when possible for DT
-        hands=jse.AF.hands,                                                                                                            -- -3% DT, -13% Pet DT
+        body=jse.AF.body,                                                                                                               -- +3 Refresh -- Replace with Shamash when possible for DT
+        hands=jse.AF.hands,                                                                                                             -- -3% DT, -13% Pet DT
         legs={ name="Telchine Braconi", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                          -- -4% Pet DT, +3 Regen
         feet={ name="Telchine Pigaches", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                         -- -4% Pet DT, +3 Regen
         neck="Loricate Torque +1",                                                                                                      -- -6% DT
@@ -428,7 +437,7 @@ function get_sets()
         left_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},                                                                  -- -7% PDT
         right_ring="Murky Ring",                                                                                                        -- -10% DT
         waist="Isa Belt",                                                                                                               -- -3% Pet DT, +1 Regen
-        back=jse.capes.luopan,                                                                                                         -- +15 regen
+        back=jse.capes.luopan,                                                                                                          -- +15 regen
     }
 
     ----------------------------------------------------------------
@@ -474,6 +483,7 @@ function equip_set_and_weapon(set)
     equip(set)
     -- This will only add a weapon set to sets that have neither a main weapon or a sub (like a shield)
     -- Not perfect, but simply make sure that sets either have both or neither
+
     if not set.main and not set.sub then
         equip(weapon_sets[weapon_mode.current])
         return
@@ -482,10 +492,8 @@ end
 
 function idle()
     if pet.isvalid then
-        --equip(sets.idle.luopan)
         equip_set_and_weapon(sets.idle.luopan)
     else
-        --equip(sets.idle[idle_mode.current])
         equip_set_and_weapon(sets.idle[idle_mode.current])
     end
 
@@ -508,7 +516,11 @@ function precast(spell)
     local matched_set
 
     if sets.ja[spell.name] then                 -- Job Abilities
-        matched_set = sets.ja[spell.name]
+        if pet.isvalid then
+            matched_set = set_combine(sets.idle.luopan, sets.ja[spell.name])
+        else
+            matched_set = set_combine(sets.idle[idle_mode.current], sets.ja[spell.name])
+        end
     elseif sets.ws[spell.name] then             -- Weapon Skills
         matched_set = sets.ws[spell.name]
     elseif spell.type ~= "JobAbility" then      -- Avoid unhandled Job Abilities
@@ -573,8 +585,7 @@ function midcast(spell)
     if matched_set then
         equip_set_and_weapon(matched_set)
     else
-        -- Eh, just in case you somehow don't have a weapon equipped and you for some reason need one, this'll solve that
-        -- This is the "unhandled" scenario, so I'm okay with sitting in idle.
+        -- This is the "unhandled" scenario.
         idle()
     end
 

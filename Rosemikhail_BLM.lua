@@ -1,4 +1,13 @@
 ---@diagnostic disable: lowercase-global, undefined-global
+
+-- Potential refinements:
+-- Maybe remove the match set thing and have everything equip per check again. One reason is that any set that doesn't need to equip a weapon (job abilities?) will anyway, which could delete tp for no reason.
+-- I've for the time being combined them with the idle sets via precast to get around this specific issue.
+
+-- When TPing, ensure that we are in an engaged set. This won't have any specific main or sub attached to it.
+-- When casting a spell while TPing, we need to consider whether we're okay with losing that TP for switching to a spell weapon.
+-- We CAN bypass the check that looks for whether the set is missing weapons and just force our weapon set if we want to keep them on, maybe via a toggle - very easy via equip_set_and_weapon
+
 include("Modes.lua")
 
 -- Modes
@@ -403,21 +412,21 @@ function get_sets()
     sets.idle["PDT"] = {                                                                                                                                -- OVERALL -50% DT, -10% PDT, -3% MDT (-60% DT+PDT, -53% DT+MDT), +7-8 Refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body=jse.empyrean.body,                                                                                                                        -- +3 Refresh
-        hands=jse.empyrean.hands,                                                                                                                      -- -12% DT
+        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh
+        hands=jse.empyrean.hands,                                                                                                                       -- -12% DT
         legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
-        feet=jse.empyrean.feet,                                                                                                                        -- -10% DT
+        feet=jse.empyrean.feet,                                                                                                                         -- -10% DT
         neck="Loricate Torque +1",                                                                                                                      -- -6% DT
         waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
         left_ear="Etiolation Earring",                                                                                                                  -- -3% MDT
         right_ear="Nehalennia Earring",
         left_ring="Murky Ring",                                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                                    -- -10% DT
-        back=jse.capes.idle_fc,                                                                                                                        -- -10% PDT
+        back=jse.capes.idle_fc,                                                                                                                         -- -10% PDT
     }
 
     sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                                  -- OVERALL -54% DT, -0% PDT, -3% MDT (-54% DT+PDT, -57% DT+MDT) +5-6 Refresh
-        head=jse.empyrean.head,                                                                                                                        -- -10% DT    
+        head=jse.empyrean.head,                                                                                                                         -- -10% DT    
         neck="Warder's Charm +1",                                                                                                                       -- Reduction of 6% DT from base set
         back="Tuilha Cape",                                                                                                                             -- Reduction of 10% PDT from base set
     })
@@ -435,7 +444,7 @@ function get_sets()
         right_ear="Nehalennia Earring",
         left_ring="Murky Ring",                                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                                    -- -10% DT
-        back=jse.capes.idle_fc,                                                                                                                        -- -10% PDT
+        back=jse.capes.idle_fc,                                                                                                                         -- -10% PDT
     })
 
     sets.idle["Death"] = {
@@ -514,6 +523,7 @@ function equip_set_and_weapon(set)
     equip(set)
     -- This will only add a weapon set to sets that have neither a main weapon or a sub (like a shield)
     -- Not perfect, but simply make sure that sets either have both or neither
+
     if not set.main and not set.sub then
         equip(weapon_sets[weapon_mode.current])
         return
@@ -573,7 +583,7 @@ function precast(spell)
     local matched_set
 
     if sets.ja[spell.name] then                 -- Job Abilities
-        matched_set = sets.ja[spell.name]
+        matched_set = set_combine(sets.idle[idle_mode.current], sets.ja[spell.name])
     elseif sets.ws[spell.name] then             -- Weapon Skills
         matched_set = sets.ws[spell.name]
     elseif spell.type ~= "JobAbility" then      -- Avoid unhandled Job Abilities
@@ -671,8 +681,7 @@ function midcast(spell)
     if matched_set then
         equip_set_and_weapon(matched_set)
     else
-        -- Eh, just in case you somehow don't have a weapon equipped and you for some reason need one, this'll solve that
-        -- This is the "unhandled" scenario, so I'm okay with sitting in idle.
+        -- This is the "unhandled" scenario.
         idle()
     end
 
