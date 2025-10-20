@@ -1,14 +1,22 @@
 ---@diagnostic disable: lowercase-global, undefined-global
-
--- Potential refinements:
--- Maybe remove the match set thing and have everything equip per check again. One reason is that any set that doesn't need to equip a weapon (job abilities?) will anyway, which could delete tp for no reason.
--- I've for the time being combined them with the idle sets via precast to get around this specific issue.
-
--- When TPing, ensure that we are in an engaged set. This won't have any specific main or sub attached to it.
--- When casting a spell while TPing, we need to consider whether we're okay with losing that TP for switching to a spell weapon.
--- We CAN bypass the check that looks for whether the set is missing weapons and just force our weapon set if we want to keep them on, maybe via a toggle - very easy via equip_set_and_weapon
-
 include("Modes.lua")
+
+----------------------------------------------------------------
+-- NOTES
+----------------------------------------------------------------
+
+--[[
+Problems and planned
+- TP toggle for switching to an engaged set that contains store TP stats and doesn't have any main or sub
+	- Potential additional mode could be just force weapon + the same idle as current minus any weapons
+- Cannot switch gear while in mana wall or death set for stuff like dispelga or impact
+	- Solution: have specific handlers for that in precast and midcast similar to how stun is handled
+- Save last weapon set mode?
+]]
+
+----------------------------------------------------------------
+-- VARIABLES
+----------------------------------------------------------------
 
 -- Modes
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
@@ -61,7 +69,10 @@ add_to_chat(123, "F10: Toggle AF body")
 add_to_chat(123, "F11: Toggle Death")
 add_to_chat(123, "F12: Hide information text box")
 
--- Information Box
+----------------------------------------------------------------
+-- INFORMATION BOX
+----------------------------------------------------------------
+
 default_settings = {
   bg = { alpha = 100 },
   pos = { x = -210, y = 21 },
@@ -72,6 +83,10 @@ default_settings = {
 text_box = texts.new(default_settings)
 text_box:text("Mode: " .. nuking_mode.current .. " | Set: " .. weapon_mode.current .. " | Idle: " .. idle_mode.current .. " | Speed: " .. toggle_speed .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
 text_box:visible(true)
+
+----------------------------------------------------------------
+-- MISC INIT/COMMANDS
+----------------------------------------------------------------
 
 -- Lockstyle
 send_command("wait 3;input /lockstyleset 5") -- Furia
@@ -138,7 +153,7 @@ function get_sets()
         },
         ["StaffAcc"] = {
             main={ name="Marin Staff +1", augments={'Path: A',}},
-            sub="Khonsu",
+            sub="Khonsu", -- Mana Wall checks will try to replace "Khonsu" with the sub from the regular Staff set to avoid enmity decrease
         },
         ["Daybreak"] = {
             main="Daybreak",
@@ -155,12 +170,12 @@ function get_sets()
     ----------------------------------------------------------------
     
     sets = {}
-    sets.idle = {}                  -- Leave this empty
-    sets.ws = {}                    -- Leave this empty
-    sets.ja = {}                    -- Leave this empty
     sets.precast = {}               -- Leave this empty
     sets.midcast = {}               -- Leave this empty
-    sets.aftercast = {}             -- Leave this empty
+    sets.idle = {}                  -- Leave this empty
+    sets.ja = {}                    -- Leave this empty
+    sets.ws = {}                    -- Leave this empty
+    sets.melee = {}                 -- Leave this empty
 
     ----------------------------------------------------------------
     -- PRECAST
@@ -324,7 +339,7 @@ function get_sets()
 
     sets.midcast["Dispelga"] = set_combine(sets.midcast["Enfeebling Magic"], {
         main="Daybreak",
-        sub="Genmei Shield",
+        sub="Ammurapi Shield",
     })
     
     -- Impact likes more elemental magic skill
@@ -471,6 +486,10 @@ function get_sets()
         body=jse.relic.body,
     }
 
+    sets.ja["Cascade"] = {
+        body=jse.relic.body,
+    }
+
     sets.ja["Mana Wall"] = {                                                                                                            -- OVERALL -54% DT, -10% PDT, -3% MDT
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=jse.empyrean.head,                                                                                                         -- -10% DT
@@ -497,6 +516,12 @@ function get_sets()
     ----------------------------------------------------------------
     -- WEAPONSKILLS 
     ----------------------------------------------------------------
+    
+    -- TODO: I guess just populate with generic WSD shit
+    -- Shrug ? Can just base this on my idle set for now
+    -- If I need a magic defense version then I can make one later
+    sets.ws.default = {
+    }
 
     sets.ws["Myrkr"] = {
         ammo="Strobilus",
@@ -513,6 +538,27 @@ function get_sets()
         right_ring="Mephitas's Ring",
         back=jse.capes.idle_fc,
     }
+
+    ----------------------------------------------------------------
+    -- MELEE
+    ----------------------------------------------------------------
+    
+    -- TODO: We can get back to this later. Add a bunch of TP stuff.
+    sets.melee.TP = set_combine(sets.idle["PDT"], {                                                                                                -- OVERALL -50% DT, -10% PDT, -3% MDT (-60% DT+PDT, -53% DT+MDT), +7-8 Refresh
+        ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
+        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
+        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh
+        hands=jse.empyrean.hands,                                                                                                                       -- -12% DT
+        legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
+        feet=jse.empyrean.feet,                                                                                                                         -- -10% DT
+        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
+        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
+        left_ear="Etiolation Earring",                                                                                                                  -- -3% MDT
+        right_ear="Nehalennia Earring",
+        left_ring="Murky Ring",                                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                                    -- -10% DT
+        back=jse.capes.idle_fc,                                                                                                                         -- -10% PDT
+    })
 end
 
 ----------------------------------------------------------------
@@ -521,9 +567,7 @@ end
 
 function equip_set_and_weapon(set)
     equip(set)
-    -- This will only add a weapon set to sets that have neither a main weapon or a sub (like a shield)
-    -- Not perfect, but simply make sure that sets either have both or neither
-
+    -- This will only add the current weapon set to sets that have neither a main weapon or a sub (like a shield)
     if not set.main and not set.sub then
         equip(weapon_sets[weapon_mode.current])
         return
@@ -531,22 +575,25 @@ function equip_set_and_weapon(set)
 end
 
 function idle()
-    -- Mana Wall
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
 
         -- Dirty check to avoid enmity decrease
         if weapon_sets[weapon_mode.current].sub == "Khonsu" then
-            equip({sub="Enki Strap"})
+            equip({sub=weapon_sets["Staff"].sub})
         end
-    -- Death
-    elseif toggle_death == "On" then
-        equip_set_and_weapon(sets.idle["Death"])
-    else
-        equip_set_and_weapon(sets.idle[idle_mode.current])
+        return
     end
 
-    -- Consider NOT enabling this during Mana Wall. For now, just have eyes.
+    if toggle_death == "On" then
+        equip_set_and_weapon(sets.idle["Death"])
+        return
+    end
+
+    -- Normal idle equip
+    equip_set_and_weapon(sets.idle[idle_mode.current])
+
+    -- Speed overlay
     if toggle_speed == "On" then
         equip({legs="Track Pants +1", feet=empty})
     end
@@ -555,144 +602,181 @@ end
 ----------------------------------------------------------------
 -- GEARSWAP FUNCTIONS 
 ----------------------------------------------------------------
--- If a set has a main or a sub attached to it, it will use those instead.
--- To work with the weapon set cycling, a gear set must have neither.
+
+-- Precast does not overlay weapons
+-- Midcast does to compensate for any precast weapons (for example, FC)
+-- Aftercast does to compensate for any midcast weapons (for example, dispelga or cure - this lets us TP normally for say, a staff, even outside of a TP set)
 
 function precast(spell)
     if toggle_speed == "On" then
         add_to_chat(123, "Consider disabling the speed toggle!")
     end
 
+    local function equip_if_ja_match(spell_name)
+        if sets.ja[spell_name] then
+            -- No need to use equip_set_and_weapon as JAs are single-piece swaps
+            equip(sets.ja[spell_name])
+            return true
+        end
+        return false
+    end
+
     -- Mana Wall
     if buffactive["Mana Wall"] then
-        equip_set_and_weapon(sets.ja["Mana Wall"])
+        equip(sets.ja["Mana Wall"])
+        equip_if_ja_match(spell.name)
 
         -- Dirty check to avoid enmity decrease
         if weapon_sets[weapon_mode.current].sub == "Khonsu" then
-            equip({sub="Enki Strap"})
-        end
-        return
-    end
-
-    -- Death
-    if toggle_death == "On" and spell.action_type == "Magic" then
-        equip_set_and_weapon(sets.precast["Death"])
-        return
-    end
-
-    local matched_set
-
-    if sets.ja[spell.name] then                 -- Job Abilities
-        matched_set = set_combine(sets.idle[idle_mode.current], sets.ja[spell.name])
-    elseif sets.ws[spell.name] then             -- Weapon Skills
-        matched_set = sets.ws[spell.name]
-    elseif spell.type ~= "JobAbility" then      -- Avoid unhandled Job Abilities
-        if spell.action_type == "Magic" then    -- Avoid unhandled Weapon Skills
-            if sets.precast[spell.name] then    -- Specific spells
-                matched_set = sets.precast[spell.name]
-            else
-                -- General purpose
-                matched_set = sets.precast.fast_cast
-            end
-        --else
-            -- Only Weapon Skill will go here. Any default Weapon Skill set would be here.
-        end
-    end
-
-    if matched_set then
-        equip_set_and_weapon(matched_set)
-    else
-        -- Eh, just in case you somehow don't have a weapon equipped and you for some reason need one, this'll solve that
-        -- This is the "unhandled" scenario, so I'm okay with sitting in idle.
-        idle()
-    end
-end
-
-function midcast(spell)
-    -- Mana Wall
-    if buffactive["Mana Wall"] then
-        if spell.name == "Stun" then
-            --equip(sets.midcast.stun_enmity)
-            equip_set_and_weapon(sets.midcast.stun_enmity)
-        else
-            --equip(sets.ja["Mana Wall"])
-            equip_set_and_weapon(sets.ja["Mana Wall"])
-        end
-
-        -- Dirty check to avoid enmity decrease
-        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
-            equip({sub="Enki Strap"})
+            equip({sub=weapon_sets["Staff"].sub})
         end
         return
     end
 
     -- Death
     if toggle_death == "On" then
-        if spell.action_type == "Magic" then
-            if nuking_mode.current == "Burst" then
-                equip_set_and_weapon(sets.midcast.death_burst)
-            else
-                equip_set_and_weapon(sets.midcast.death_free_nuke)
+        if spell.type == "JobAbility" then
+            if equip_if_ja_match(spell.name) then
+                -- Stay in Death idle
+                return
             end
+        end
+
+        if spell.action_type == "Magic" then
+            equip(sets.precast["Death"])
+        end
+
+        -- Do nothing with weapon skills
+        return
+    end
+
+    -- If the job ability name matches.
+    if equip_if_ja_match(spell.name) then
+        return
+    end
+
+    -- If the weapon skill name matches.
+    if sets.ws[spell.name] then
+        equip(sets.ws[spell.name])
+        return
+    end
+
+    -- Handling for both matched and unmatched magic spells
+    if spell.action_type == "Magic" then
+        if sets.precast[spell.name] then
+            -- If the spell name matches.
+            equip(sets.precast[spell.name])
+        else
+            -- General purpose
+            equip(sets.precast.fast_cast)
         end
         return
     end
 
-    --local matched = false
-    local matched_set
+    -- Unhandled Job Abilities
+    if spell.type == "JobAbility" then
+        -- Stay in idle.
+        return
+    end
+
+    -- Unhandled Weapon Skills
+    if spell.action_type == "Ability" then
+        equip(sets.ws.default)
+        return
+    end
+
+    -- Literally anything else
+    add_to_chat(123, "How did you get here? Precast action: " .. spell.name)
+end
+
+-- spell.action_type == "Magic" ensures that job ability gear survives into midcast, as otherwise they won't work.
+function midcast(spell)
+    -- Mana Wall
+    if buffactive["Mana Wall"] and spell.action_type == "Magic"  then
+        if spell.name == "Stun" then
+            equip_set_and_weapon(sets.midcast.stun_enmity)
+        else
+            equip_set_and_weapon(sets.ja["Mana Wall"])
+        end
+
+        -- Dirty check to avoid enmity decrease
+        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
+            equip({sub=weapon_sets["Staff"].sub})
+        end
+        return
+    end
+
+    -- Death
+    if toggle_death == "On" and spell.action_type == "Magic" then
+        if nuking_mode.current == "Burst" then
+            equip_set_and_weapon(sets.midcast.death_burst)
+        else
+            equip_set_and_weapon(sets.midcast.death_free_nuke)
+        end
+        return
+    end
+
+    local matched = false
 
     -- If the spell matches one of the match_list spells.
     for match in match_list:it() do
         if spell.name:match(match) then
             matched_set = sets.midcast[match]
+
+            equip_set_and_weapon(sets.midcast[match])
+            matched = true
             break
         end
     end
 
     -- If the spell is Death
-    if not matched_set and spell.name == "Death" then
+    if not matched and spell.name == "Death" then
         if nuking_mode.current == "Burst" then
-            matched_set = sets.midcast.death_burst
+            equip_set_and_weapon(sets.midcast.death_burst)
         else
-            matched_set = sets.midcast.death_free_nuke
+            equip_set_and_weapon(sets.midcast.death_burst)
         end
+
+        matched = true
     end
 
     -- If the spell name EXACTLY matches.
-    if not matched_set and sets.midcast[spell.name] then
-        matched_set = sets.midcast[spell.name]
+    if not matched and sets.midcast[spell.name] then
+        equip_set_and_weapon(sets.midcast[spell.name])
+        matched = true
     end
 
     -- If the spell name is contained within elemental debuffs
-    if not matched_set and elemental_debuffs:contains(spell.name) then
-        matched_set = sets.midcast.elemental_debuff
+    if not matched and elemental_debuffs:contains(spell.name) then
+        equip_set_and_weapon(sets.midcast.elemental_debuff)
+        matched = true
     end
 
     -- If the spell skill is Elemental Magic
-    if not matched_set and spell.skill == "Elemental Magic" then
-        matched_set = sets.midcast[nuking_mode.current]
+    if not matched and spell.skill == "Elemental Magic" then
+        equip_set_and_weapon(sets.midcast[nuking_mode.current])
+        matched = true
+
+        -- Empyrean leg overlay
+        if cumulative_spells:contains(spell.name) then
+            equip({legs=jse.empyrean.legs})
+        end
+
+        -- AF body overlay
+        if toggle_af_body == "On" and spell.skill == "Elemental Magic" then
+            equip({body=jse.AF.body})
+        end
     end
 
     -- If the spell skill has a relevant set
-    if not matched_set and sets.midcast[spell.skill] then
-        matched_set = sets.midcast[spell.skill]
+    if not matched and sets.midcast[spell.skill] then
+        equip_set_and_weapon(sets.midcast[spell.skill])
+        matched = true
     end
 
-    if matched_set then
-        equip_set_and_weapon(matched_set)
-    else
-        -- This is the "unhandled" scenario.
+    -- Any other spell (trusts?)
+    if not matched and spell.action_type == "Magic" then
         idle()
-    end
-
-    -- Empyrean leg overlay
-    if cumulative_spells:contains(spell.name) then
-        equip({legs=jse.empyrean.legs})
-    end
-
-    -- AF body overlay
-    if toggle_af_body == "On" and spell.skill == "Elemental Magic" then
-        equip({body=jse.AF.body})
     end
 
     -- Hachirin-no-Obi overlay
