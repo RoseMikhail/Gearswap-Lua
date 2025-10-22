@@ -6,24 +6,14 @@ include("Modes.lua")
 ----------------------------------------------------------------
 
 --[[
-Problems and planned
-- TP toggle for switching to an engaged set that contains store TP stats and doesn't have any main or sub.
-	- Potential additional mode could be just force weapon + the same idle as current minus any weapons.
-    - Alternatively, I could just rely on status_change and accept that any job that uses weapons in a precast/midcast/idle set will lose tp
-        - In this scenario, I could instead have a "force tp" set
-    - I think the way to implement this is:
-        - firstly, if engaged, idle set should become the engaged set
-        - if force tp is enabled, override whatever weapons are in any of the sets - easily achievable via editing the equip_set_and_weapon function to take a bool
-- Cannot switch gear while in mana wall or death set for stuff like dispelga or impact.
-	- Solution: have specific handlers for that in precast and midcast similar to how stun is handled.
-- Save last weapon set mode?
-- Early return for "spells" that aren't Magic in midcast could be cleaner.
-- I have a higher accuracy weapon set, but what if I need an entire higher accuracy gearset+weapon set?
-    - Nukemode "Free Nuke Acc" and "Burst Acc", I guess
-    - Will I have to set them both individually? Or should there be a separate toggle?
-- Make Idle Mode a cycler
-
-- Embla sash / sublimation idle overlay set
+Potential enhancements:
+- Force TP mode (Do not allow precast or midcast to equip set-specific weapons)
+- Allow dispelga and impact during mana wall and death
+- Save certain toggles and sets between reloads
+- Accuracy mode/toggle
+    - Would be checked in midcast based on whatever the mode/toggle is set to
+- Embla Sash/Sublimation idle overlay set
+    - Will this apply to the engaged set or just the regular idle?
 ]]
 
 ----------------------------------------------------------------
