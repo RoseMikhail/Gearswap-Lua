@@ -7,27 +7,39 @@ include("Modes.lua")
 
 --[[
 Problems and planned
-- TP toggle for switching to an engaged set that contains store TP stats and doesn't have any main or sub
-	- Potential additional mode could be just force weapon + the same idle as current minus any weapons
-- Cannot switch gear while in mana wall or death set for stuff like dispelga or impact
-	- Solution: have specific handlers for that in precast and midcast similar to how stun is handled
+- TP toggle for switching to an engaged set that contains store TP stats and doesn't have any main or sub.
+	- Potential additional mode could be just force weapon + the same idle as current minus any weapons.
+    - Alternatively, I could just rely on status_change and accept that any job that uses weapons in a precast/midcast/idle set will lose tp
+        - In this scenario, I could instead have a "force tp" set
+    - I think the way to implement this is:
+        - firstly, if engaged, idle set should become the engaged set
+        - if force tp is enabled, override whatever weapons are in any of the sets - easily achievable via editing the equip_set_and_weapon function to take a bool
+- Cannot switch gear while in mana wall or death set for stuff like dispelga or impact.
+	- Solution: have specific handlers for that in precast and midcast similar to how stun is handled.
 - Save last weapon set mode?
+- Early return for "spells" that aren't Magic in midcast could be cleaner.
+- I have a higher accuracy weapon set, but what if I need an entire higher accuracy gearset+weapon set?
+    - Nukemode "Free Nuke Acc" and "Burst Acc", I guess
+    - Will I have to set them both individually? Or should there be a separate toggle?
+- Make Idle Mode a cycler
+
+- Embla sash / sublimation idle overlay set
 ]]
 
 ----------------------------------------------------------------
 -- VARIABLES
 ----------------------------------------------------------------
 
--- Modes
+-- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
 weapon_mode = M{"Staff", "StaffAcc", "Daybreak", "Wizard"}
 -- TODO: As long as StaffAcc exists with Khonsu in it, dirty Mana Wall checks to not equip Khonsu will exist lol
 
--- Midcast helpers
-match_list = S{"Cure", "Aspir", "Drain", "Regen"}
-elemental_debuffs = S{'Burn','Frost','Choke','Rasp','Shock','Drown'}
-cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja', 'Comet'}
+toggle_speed = "Off"
+toggle_af_body = "Off"
+toggle_death = "Off"
+toggle_tp = "Off" -- Default off for a caster because you might only engage for trusts
 
 -- Command helpers
 nuking_mode_pairs = {
@@ -36,24 +48,20 @@ nuking_mode_pairs = {
     occultacumen = "Occult Acumen",
 }
 
-idle_mode_pairs = {
-    mdt = "MDT",
-    pdt = "PDT",
-    refresh = "Refresh",
-}
-
-toggle_speed = "Off"
-toggle_death = "Off"
-toggle_af_body = "Off"
+-- Midcast helpers
+match_list = S{"Cure", "Aspir", "Drain", "Regen", "Refresh"}
+elemental_debuffs = S{'Burn','Frost','Choke','Rasp','Shock','Drown'}
+cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja', 'Comet'}
 
 -- Bindings
 send_command("bind f1 gs c nukemode freenuke")
 send_command("bind f2 gs c nukemode burst")
 send_command("bind f3 gs c nukemode occultacumen")
-send_command("bind f4 gs c weaponmode")
-send_command("bind f5 gs c idlemode pdt")
-send_command("bind f6 gs c idlemode mdt")
-send_command("bind f7 gs c idlemode refresh")
+
+send_command("bind f5 gs c weaponmode")
+send_command("bind f6 gs c idlemode")
+send_command("bind f7 gs c toggletp")
+
 send_command("bind f9 gs c togglespeed")
 send_command("bind f10 gs c toggleafbody")
 send_command("bind f11 gs c toggledeath")
@@ -81,7 +89,7 @@ default_settings = {
 }
 
 text_box = texts.new(default_settings)
-text_box:text("Mode: " .. nuking_mode.current .. " | Set: " .. weapon_mode.current .. " | Idle: " .. idle_mode.current .. " | Speed: " .. toggle_speed .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
+text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s | AF Body: %s | Death: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed, toggle_af_body, toggle_death))
 text_box:visible(true)
 
 ----------------------------------------------------------------
@@ -417,7 +425,10 @@ function get_sets()
 
     sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
         main="Bolelabunga",                                                                                                         -- 10% potency
-        sub="Genmei Shield",
+    })
+
+    sets.midcast["Refresh"] = set_combine(sets.midcast["Enhancing Magic"], {
+        main="Bolelabunga",
     })
 
     ----------------------------------------------------------------
@@ -479,6 +490,15 @@ function get_sets()
     }
 
     ----------------------------------------------------------------
+    -- MELEE "IDLE"
+    ----------------------------------------------------------------
+    
+    -- TODO: We can get back to this later. Add a bunch of TP stuff.
+    -- Until this is filled, TP mode will effectively do nothing
+    sets.melee.TP = set_combine(sets.idle["PDT"], {
+    })
+
+    ----------------------------------------------------------------
     -- JOB ACTIONS 
     ----------------------------------------------------------------
 
@@ -518,8 +538,7 @@ function get_sets()
     ----------------------------------------------------------------
     
     -- TODO: I guess just populate with generic WSD shit
-    -- Shrug ? Can just base this on my idle set for now
-    -- If I need a magic defense version then I can make one later
+    -- Until this is filled, this will effectively do nothing
     sets.ws.default = {
     }
 
@@ -538,27 +557,6 @@ function get_sets()
         right_ring="Mephitas's Ring",
         back=jse.capes.idle_fc,
     }
-
-    ----------------------------------------------------------------
-    -- MELEE
-    ----------------------------------------------------------------
-    
-    -- TODO: We can get back to this later. Add a bunch of TP stuff.
-    sets.melee.TP = set_combine(sets.idle["PDT"], {                                                                                                -- OVERALL -50% DT, -10% PDT, -3% MDT (-60% DT+PDT, -53% DT+MDT), +7-8 Refresh
-        ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
-        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh
-        hands=jse.empyrean.hands,                                                                                                                       -- -12% DT
-        legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
-        feet=jse.empyrean.feet,                                                                                                                         -- -10% DT
-        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
-        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
-        left_ear="Etiolation Earring",                                                                                                                  -- -3% MDT
-        right_ear="Nehalennia Earring",
-        left_ring="Murky Ring",                                                                                                                         -- -10% DT
-        right_ring="Defending Ring",                                                                                                                    -- -10% DT
-        back=jse.capes.idle_fc,                                                                                                                         -- -10% PDT
-    })
 end
 
 ----------------------------------------------------------------
@@ -590,13 +588,40 @@ function idle()
         return
     end
 
-    -- Normal idle equip
-    equip_set_and_weapon(sets.idle[idle_mode.current])
+    if toggle_tp == "On" and player.status == "Engaged" then
+        equip_set_and_weapon(sets.melee.TP)
+    else
+        -- Normal idle equip
+        equip_set_and_weapon(sets.idle[idle_mode.current])
+    end
 
     -- Speed overlay
     if toggle_speed == "On" then
         equip({legs="Track Pants +1", feet=empty})
     end
+end
+
+-- This is for modes that are bound separately via subcommand.
+-- It requires a mode pair table (so freenuke = "Free Nuke") that corresponds to the mode variable that you also pass in and a label for the output.
+function handle_submode_switch(sub_command, mode_table, mode_var, label)
+    if not sub_command then
+        add_to_chat(123, "Missing argument.")
+        return
+    end
+
+    local mode = mode_table[sub_command]
+    if mode then
+        add_to_chat(123, string.format("%s mode set to %s", label, mode))
+        mode_var:set(mode)
+    else
+        add_to_chat(123, string.format("Invalid %s mode.", label))
+    end
+end
+
+function handle_toggle(toggle, label)
+    local result = (toggle == "On") and "Off" or "On"
+    add_to_chat(123, string.format("%s toggle: %s", label, result))
+    return result
 end
 
 ----------------------------------------------------------------
@@ -817,65 +842,49 @@ function self_command(command)
     local main_command = commandArgs[1]
     local sub_command = commandArgs[2]
 
-    local function handle_mode(mode_table, mode_var, label)
-        if not sub_command then
-            add_to_chat(123, "Missing argument.")
-            return
-        end
-
-        local mode = mode_table[sub_command]
-        if mode then
-            add_to_chat(123, string.format("%s mode set to %s", label, mode))
-            mode_var:set(mode)
-        else
-            add_to_chat(123, string.format("Invalid %s mode.", label))
-        end
-    end
-
     if main_command == "nukemode" then
-        handle_mode(nuking_mode_pairs, nuking_mode, "Nuking")
+        handle_submode_switch(sub_command, nuking_mode_pairs, nuking_mode, "Nuking")
+
     elseif main_command == "weaponmode" then
         weapon_mode:cycle()
-        idle()
         add_to_chat(123, string.format("Weapon mode set to %s", weapon_mode.current))
-    elseif main_command == "idlemode" then
-        handle_mode(idle_mode_pairs, idle_mode, "Idle")
+        idle()
 
-        -- Only change if Mana Wall is not up and Death is off.
-        if not buffactive["Mana Wall"] and toggle_death == "Off" then
-            idle()
-        end
+    elseif main_command == "idlemode" then
+        idle_mode:cycle()
+        add_to_chat(123, string.format("Idle mode set to %s", idle_mode.current))
+        idle()
+
+    elseif main_command == "toggletp" then
+        toggle_tp = handle_toggle(toggle_tp, "TP")
+        idle()
 
     elseif main_command == "toggleafbody" then
-        toggle_af_body = (toggle_af_body == "On") and "Off" or "On"
-        add_to_chat(123, "AF Body toggle: " .. tostring(toggle_af_body))
-    elseif main_command == "toggledeath" then
-        toggle_death = (toggle_death == "On") and "Off" or "On"
-        add_to_chat(123, "Death toggle: " .. toggle_death)
+        toggle_af_body = handle_toggle(toggle_af_body, "AF Body")
+        -- Midcast so no need to idle()
 
-        -- Only change if Mana Wall is not up.
-        if not buffactive["Mana Wall"] then
-            idle()
-        end
-    elseif main_command == "togglespeed" then
-        toggle_speed = (toggle_speed == "On") and "Off" or "On"
+    elseif main_command == "toggledeath" then
+        toggle_death = handle_toggle(toggle_death, "Death")
         idle()
 
-        add_to_chat(123, "Speed toggle: " .. tostring(toggle_speed))
+    elseif main_command == "togglespeed" then
+        toggle_speed = handle_toggle(toggle_speed, "Speed")
+        idle()
+
     elseif main_command == "toggletextbox" then
         text_box:visible(not text_box:visible())
+
     else
         add_to_chat(123, "Command not recognised.")
     end
 
-    text_box:text("Nuke: " .. nuking_mode.current .. " | Set: " .. weapon_mode.current .. " | Idle: " .. idle_mode.current .. " | Speed: " .. toggle_speed .. " | AF Body: " .. toggle_af_body .. " | Death: " .. toggle_death)
+    text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s | AF Body: %s | Death: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed, toggle_af_body, toggle_death))
 end
 
 function file_unload(file_name)
     send_command("unbind f1")
     send_command("unbind f2")
     send_command("unbind f3")
-    send_command("unbind f4")
     
     send_command("unbind f5")
     send_command("unbind f6")
