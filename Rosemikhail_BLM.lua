@@ -59,12 +59,9 @@ send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
 add_to_chat(123, "BLM Lua")
-add_to_chat(123, "F1-F3: Nuking modes")
-add_to_chat(123, "F4: Weapon sets")
-add_to_chat(123, "F5-F6: Idle modes")
-add_to_chat(123, "F9: Toggle speed gear")
-add_to_chat(123, "F10: Toggle AF body")
-add_to_chat(123, "F11: Toggle Death")
+add_to_chat(123, "F1-F3: Switch nuking mode")
+add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
+add_to_chat(123, "F9: Toggle speed gear, F10: Toggle AF body, F11: Toggle Death")
 add_to_chat(123, "F12: Hide information text box")
 
 ----------------------------------------------------------------
