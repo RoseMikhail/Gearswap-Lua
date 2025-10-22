@@ -1,5 +1,5 @@
-I have no idea if the SMN one works correctly; I made that one for a friend.
+BLM one is my pride and joy.
 
-Actually please don't look at the SMN one it has lots of my previous ewwies in it
+GEO one is probably outdated.
 
-Begs
+SMN one is woefully outdated and hasn't been tested.
