@@ -256,7 +256,7 @@ function get_sets()
         --neck=,
         waist="Oneiros Rope",
         left_ear="Steelflash Earring",
-        --right_ear=
+        right_ear="Bladeborn Earring",
         left_ring="Rajas Ring",
         --right_ring=
         back=jse.capes.occult_acumen,
@@ -483,10 +483,22 @@ function get_sets()
     -- MELEE "IDLE"
     ----------------------------------------------------------------
     
-    -- TODO: We can get back to this later. Add a bunch of TP stuff.
-    -- Until this is filled, TP mode will effectively do nothing
-    sets.melee.TP = set_combine(sets.idle["PDT"], {
-    })
+    -- TODO: This has barely any DT so be careful using this lol
+    sets.melee.TP = {
+        ammo="Staunch Tathlum",
+        head="Wicce Petasos +2",
+        body="Spae. Coat +4",
+        hands="Spae. Gloves +4",
+        legs="Wicce Chausses +3",
+        feet="Wicce Sabots +2",
+        neck="Loricate Torque +1", -- Could using Unmoving Collar but it has +10 enmity lol
+        waist="Eschan Stone",
+        left_ear="Steelflash Earring",
+        right_ear="Bladeborn Earring",
+        left_ring="Rajas Ring",
+        right_ring="Jhakri Ring",
+        back="Aurist's Cape +1",
+    }
 
     ----------------------------------------------------------------
     -- JOB ACTIONS 
@@ -528,8 +540,9 @@ function get_sets()
     ----------------------------------------------------------------
     
     -- TODO: I guess just populate with generic WSD shit
-    -- Until this is filled, this will effectively do nothing
+    -- Until this is filled, this will do very little
     sets.ws.default = {
+        left_ring="Mujin Band" -- Skillchain Bonus + 5
     }
 
     sets.ws["Myrkr"] = {
