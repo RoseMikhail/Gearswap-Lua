@@ -1,22 +1,30 @@
 ---@diagnostic disable: lowercase-global, undefined-global
-
--- Potential refinements:
--- Maybe remove the match set thing and have everything equip per check again. One reason is that any set that doesn't need to equip a weapon (job abilities?) will anyway, which could delete tp for no reason.
--- I've for the time being combined them with the idle sets via precast to get around this specific issue.
-
--- When TPing, ensure that we are in an engaged set. This won't have any specific main or sub attached to it.
--- When casting a spell while TPing, we need to consider whether we're okay with losing that TP for switching to a spell weapon.
--- We CAN bypass the check that looks for whether the set is missing weapons and just force our weapon set if we want to keep them on, maybe via a toggle - very easy via equip_set_and_weapon
-
 include("Modes.lua")
+
+----------------------------------------------------------------
+-- NOTES
+----------------------------------------------------------------
+
+--[[
+Potential enhancements:
+- Force TP mode (Do not allow precast or midcast to equip set-specific weapons)
+    - This would also be useful to prevent swaps when returning to a regular idle on disengage
+- Save certain toggles and sets between reloads
+- Accuracy mode/toggle
+    - Would be checked in midcast based on whatever the mode/toggle is set to
+]]
+
+----------------------------------------------------------------
+-- VARIABLES
+----------------------------------------------------------------
 
 -- Modes
 nuking_mode = M{"Free Nuke", "Burst"}
-idle_mode = M{"PDT", "MDT"}
+idle_mode = M{"PDT", "MDT", "Refresh"}
 weapon_mode = M{"Daybreak", "Wizard"}
 
---Midcast helper
-local match_list  = S{"Cure", "Aspir", "Drain", "Regen"}
+toggle_speed = "Off"
+toggle_tp = "Off" -- Default off for a caster because you might only engage for trusts
 
 -- Command helpers
 nuking_mode_pairs = {
@@ -24,32 +32,30 @@ nuking_mode_pairs = {
     burst = "Burst",
 }
 
-idle_mode_pairs = {
-    mdt = "MDT",
-    pdt = "PDT",
-    --refresh = "Refresh",
-}
-
-toggle_af_feet = "Off"
+-- Midcast helpers
+match_list  = S{"Cure", "Aspir", "Drain", "Regen", "Refresh"}
 
 -- Bindings
 send_command("bind f1 gs c nukemode freenuke")
 send_command("bind f2 gs c nukemode burst")
-send_command("bind f4 gs c weaponmode")
-send_command("bind f5 gs c idlemode pdt")
-send_command("bind f6 gs c idlemode mdt")
-send_command("bind f9 gs c toggleaffeet")
+
+send_command("bind f5 gs c weaponmode")
+send_command("bind f6 gs c idlemode")
+send_command("bind f7 gs c toggletp")
+
+send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "GEO Lua")
-add_to_chat(123, "F1-F2: Nuking modes")
-add_to_chat(123, "F4: Weapon sets")
-add_to_chat(123, "F5-F6: Idle modes")
-add_to_chat(123, "F9: Toggle AF feet")
+add_to_chat(123, "F1-F2: Switch nuking mode")
+add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode, F7: Toggle TP mode")
+add_to_chat(123, "F9: Toggle speed gear")
 add_to_chat(123, "F12: Hide information text box")
 
--- Information Box
+----------------------------------------------------------------
+-- INFORMATION BOX
+----------------------------------------------------------------
+
 default_settings = {
   bg = { alpha = 100 },
   pos = { x = -210, y = 21 },
@@ -58,8 +64,12 @@ default_settings = {
 }
 
 text_box = texts.new(default_settings)
-text_box:text("Nuke: " .. nuking_mode.current .. " | Set: " .. weapon_mode.current .. " | Idle: " .. idle_mode.current .. " | AF Feet: " .. toggle_af_feet)
+text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed))
 text_box:visible(true)
+
+----------------------------------------------------------------
+-- MISC INIT/COMMANDS
+----------------------------------------------------------------
 
 -- Lockstyle
 send_command("wait 3;input /lockstyleset 22") -- Geomancer Relic
@@ -79,7 +89,6 @@ function get_sets()
     ----------------------------------------------------------------
     -- GEAR PLACEHOLDERS
     ----------------------------------------------------------------
-    
     jse = {}                       -- Leave this empty
     jse.AF = {}                    -- Leave this empty
     jse.relic = {}                 -- Leave this empty
@@ -87,34 +96,35 @@ function get_sets()
     jse.capes = {}                 -- Leave this empty
 
     jse.AF = {
-        head = "Geo. Galero +1",
-        body = "Geomancy Tunic +3",
-        hands = "Geo. Mitaines +4",
-        legs = "Geo. Pants +1",
-        feet = "Geo. Sandals +3",
+        head= "Geo. Galero +1",
+        body= "Geomancy Tunic +3",
+        hands= "Geo. Mitaines +4",
+        legs= "Geo. Pants +1",
+        feet= "Geo. Sandals +3",
     }
 
     jse.relic = {
-        head = "Bagua Galero",
-        body = "Bagua Tunic",
-        hands = "Bagua Mitaines",
-        legs = { name="Bagua Pants +2", augments={'Enhances "Mending Halation" effect',}},
-        feet = { name="Bagua Sandals +1", augments={'Enhances "Radial Arcana" effect',}},
+        head= "Bagua Galero",
+        body= "Bagua Tunic",
+        hands= "Bagua Mitaines",
+        legs= { name="Bagua Pants +2", augments={'Enhances "Mending Halation" effect',}},
+        feet= { name="Bagua Sandals +1", augments={'Enhances "Radial Arcana" effect',}},
     }
 
     jse.empyrean = {
-        head = "Azimuth Hood +2",
-        body = "Azimuth Coat +2",
-        hands = "Azimuth Gloves +2",
-        legs = "Azimuth Tights +2",
-        feet = "Azimuth Gaiters +2",
+        head= "Azimuth Hood +2",
+        body= "Azimuth Coat +2",
+        hands= "Azimuth Gloves +2",
+        legs= "Azimuth Tights +2",
+        feet= "Azimuth Gaiters +2",
     }
 
-    jse.capes = {
-        luopan = { name="Nantosuelta's Cape", augments={'VIT+20','Eva.+20 /Mag. Eva.+20','Evasion+10','Pet: "Regen"+10','Pet: "Regen"+5',}},
-        idle = { name="Nantosuelta's Cape", augments={'VIT+20','Eva.+20 /Mag. Eva.+20','Evasion+10','Pet: "Regen"+10','Phys. dmg. taken-10%',}},
-        nuking = { name="Nantosuelta's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
-        enfeebling_healing_fc = { name="Nantosuelta's Cape", augments={'MND+20','Mag. Acc+20 /Mag. Dmg.+20','MND+10','"Fast Cast"+10','Phys. dmg. taken-10%',}},
+    jse.capes={
+        luopan={ name="Nantosuelta's Cape", augments={'VIT+20','Eva.+20 /Mag. Eva.+20','Evasion+10','Pet: "Regen"+10','Pet: "Regen"+5',}},
+        idle={ name="Nantosuelta's Cape", augments={'VIT+20','Eva.+20 /Mag. Eva.+20','Evasion+10','Pet: "Regen"+10','Phys. dmg. taken-10%',}},
+        nuking={ name="Nantosuelta's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
+        enfeebling_healing_fc={ name="Nantosuelta's Cape", augments={'MND+20','Mag. Acc+20 /Mag. Dmg.+20','MND+10','"Fast Cast"+10','Phys. dmg. taken-10%',}},
+        --tp="",
     }
 
     ----------------------------------------------------------------
@@ -133,23 +143,22 @@ function get_sets()
     }
 
     ----------------------------------------------------------------
-    -- GEAR SETS
+    -- SETS
     ----------------------------------------------------------------
 
     sets = {}
-    sets.idle = {}                  -- Leave this empty
-    sets.ws = {}                    -- Leave this empty
-    sets.ja = {}                    -- Leave this empty
     sets.precast = {}               -- Leave this empty
     sets.midcast = {}               -- Leave this empty
-    sets.aftercast = {}             -- Leave this empty]
+    sets.idle = {}                  -- Leave this empty
+    sets.ja = {}                    -- Leave this empty
+    sets.ws = {}                    -- Leave this empty
+    sets.melee = {}                 -- Leave this empty
 
     ----------------------------------------------------------------
     -- PRECAST
     ----------------------------------------------------------------
 
-    -- Keep Solstice for fast cast
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 87% FC, 14% Elem FC, 3% Occ
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 89% FC, 11% Elem FC, 3% Occ
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- 5% FC
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- 3% FC
@@ -164,7 +173,7 @@ function get_sets()
         left_ear="Malignance Earring",                                                                                                  -- 4% FC
         right_ear="Loquacious Earring",                                                                                                 -- 2% FC
         left_ring="Weather. Ring",                                                                                                      -- 5% FC 3% Occ
-        right_ring="Mallquis Ring",                                                                                                     -- 3% Elem FC
+        right_ring="Prolix Ring",                                                                                                       -- 2% FC
         back=jse.capes.enfeebling_healing_fc,                                                                                          -- 10% FC
     }
 
@@ -184,8 +193,6 @@ function get_sets()
     ----------------------------------------------------------------
 
     sets.midcast["Free Nuke"] = {
-        --main="Daybreak",
-        --sub="Ammurapi Shield",
         range=empty,
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=jse.empyrean.head,
@@ -204,8 +211,6 @@ function get_sets()
 
     -- Picking up more of the Ea set might make this better, but it isn't a priority.
     sets.midcast["Burst"] = {                                                                           -- 35% MB, 24% MB II
-        --main="Daybreak",
-        --sub="Ammurapi Shield",
         range=empty,
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Ea Hat",                                                                                  -- 6% MB 6% MB II
@@ -226,7 +231,9 @@ function get_sets()
     -- COLURE MIDCAST
     ----------------------------------------------------------------
     
-    -- Keep Solstice and Gada in their respective sets for their buffs
+    -- Can probably pull some of the skill gear out and replace with idle or conserve mp gear
+    -- GEO SET CONSERVE MP: 43(GEO)+6+4+15+2 = 70%
+    -- INDI SET CONSERVE MP: 43(GEO)+15+2 = 60%
     
     sets.midcast.geocolure = set_combine(sets.idle[idle_mode.current], {                                                        -- 940 total at present
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                            -- Skill, 6% Conserve MP
@@ -274,8 +281,6 @@ function get_sets()
     -- Need the WHOLE set though lol, maybe minus the hands if I get the regal cuffs.
     -- Technically Cohort beats the Geo set by a tiny amount on skill+acc alone lol, but I guess more survivability via the geo set...? int? mnd? idk bwo
     sets.midcast["Enfeebling Magic"] = {
-        --main="Daybreak",
-        --sub="Ammurapi Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},
         ammo=empty,
         head=empty,
@@ -298,8 +303,6 @@ function get_sets()
     })
 
     sets.midcast["Impact"] = {
-        --main="Daybreak",
-        --sub="Ammurapi Shield",
         range=empty,
         ammo="Kalboron Stone",
         body="Crepuscular Cloak",
@@ -379,39 +382,58 @@ function get_sets()
 
     sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
         main="Bolelabunga",                                                                                                         -- 10% potency
-        sub="Genmei Shield",
+    })
+
+    sets.midcast["Refresh"] = set_combine(sets.midcast["Enhancing Magic"], {
+        main="Bolelabunga",
     })
 
     ----------------------------------------------------------------
     -- IDLE SETS
     ----------------------------------------------------------------
 
-    sets.idle["PDT"] = {                                                                                                                -- -40% DT, -39% PDT, -16% MDT (-75% DT+PDT, -51% DT+MDT)
+    sets.idle["PDT"] = {                                                                                                                -- -40% DT, -39% PDT, -16% MDT (-75% DT+PDT, -51% DT+MDT), +4-5 Refresh
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
         sub="Genmei Shield",                                                                                                            -- -10% PDT
         range=empty,
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
-        head=jse.empyrean.head,                                                                                                        -- -11% DT
-        body=jse.AF.body,                                                                                                              -- +3 Refresh
+        head=jse.empyrean.head,                                                                                                         -- -11% DT
+        body=jse.AF.body,                                                                                                               -- +3 Refresh
         hands={ name="Hagondes Cuffs +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -3%','"Fast Cast"+4',}},                   -- -4% PDT, -3% MDT
-        --legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -3%','"Avatar perpetuation cost" -4',}},  -- -4% PDT, -3% MDT
         legs="Assid. Pants +1",                                                                                                         -- +1-2 Refresh
         feet={ name="Hag. Sabots +1", augments={'Phys. dmg. taken -4%','Magic dmg. taken -4%','"Mag.Atk.Bns."+27',}},                   -- -4% PDT, -4% MDT
         neck="Loricate Torque +1",                                                                                                      -- -6% DT
         waist="Slipor Sash",                                                                                                            -- -3% MDT
-        --left_ear="Etiolation Earring",                                                                                                -- -3% MDT I don't need more PDT here so I use Etiolation instead of Genmei
         left_ear="Alabaster Earring",                                                                                                   -- -5% DT
         right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
-        left_ring="Defending Ring",                                                                                                     -- -10% DT
-        right_ring="Murky Ring",                                                                                                        -- -10% DT
-        back=jse.capes.idle,                                                                                                           -- -10% PDT
+        left_ring="Murky Ring",                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                    -- -10% DT
+        back=jse.capes.idle,                                                                                                            -- -10% PDT
     }
 
     -- Potentially make this a toggle
     sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- -34% DT, -29% PDT, -16% MDT (-63% DT+PDT, -50% DT+MDT)
         neck="Warder's Charm +1",
         back="Tuilha Cape",
-    }) 
+    })
+
+    sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                                              -- OVERALL -33% DT, -20% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
+        main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                                    -- -0%
+        sub="Genmei Shield",                                                                                                                            -- -10% PDT
+        ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
+        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
+        body="Jhakri Robe +2",                                                                                                                          -- -0%      +4 Refresh
+        hands="Serpentes Cuffs",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Sabots
+        legs="Assid. Pants +1",                                                                                                                         --          1-2 Refresh (realistically 1)
+        feet="Serpentes Sabots",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Cuffs
+        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
+        waist="Fucho-no-Obi",                                                                                                                           -- -0%      +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
+        left_ear="Alabaster Earring",                                                                                                                   -- -5% DT
+        right_ear="Nehalennia Earring",
+        left_ring="Murky Ring",                                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                                    -- -10% DT
+        back=jse.capes.idle,                                                                                                                            -- -10% PDT
+    })
 
     -- Upgrade hands, then replace body with AF body for the refresh - upgrade AF body for more refresh. I will then be sitting at -37% Pet DT and +25 regen
 
@@ -434,10 +456,33 @@ function get_sets()
         neck="Loricate Torque +1",                                                                                                      -- -6% DT
         left_ear="Alabaster Earring",                                                                                                   -- -5% DT
         right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
-        left_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},                                                                  -- -7% PDT
-        right_ring="Murky Ring",                                                                                                        -- -10% DT
+        left_ring="Murky Ring",                                                                                                         -- -10% DT
+        right_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},                                                                 -- -7% PDT
         waist="Isa Belt",                                                                                                               -- -3% Pet DT, +1 Regen
         back=jse.capes.luopan,                                                                                                          -- +15 regen
+    }
+
+    ----------------------------------------------------------------
+    -- MELEE "IDLE"
+    ----------------------------------------------------------------
+    
+    -- TODO: This has barely any DT so be careful using this lol
+    -- TODO: Finish a version of this for GEO lol
+    sets.melee.TP = {
+        range=empty,
+        ammo="Staunch Tathlum",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands=jse.AF.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Loricate Torque +1", -- Could using Unmoving Collar but it has +10 enmity lol
+        waist="Eschan Stone",
+        left_ear="Steelflash Earring",
+        right_ear="Bladeborn Earring",
+        left_ring="Rajas Ring",
+        right_ring="Jhakri Ring",
+        back="Aurist's Cape +1",
     }
 
     ----------------------------------------------------------------
@@ -470,9 +515,11 @@ function get_sets()
     -- WEAPONSKILLS
     ----------------------------------------------------------------
 
-    -- Just examples
-    --sets.ws["Hexa Strike"] = {}
-    --sets.ws["Realmrazer"] = {} -- This is apparently good?
+    sets.ws.default = set_combine(sets.melee.TP, {
+        left_ring="Mujin Band",         -- Skillchain Bonus + 5
+        right_ring="Rufescent Ring",    -- 7% WS accuracy
+        back="Alabaster Mantle",        -- WSD +11%
+    })
 end
 
 ----------------------------------------------------------------
@@ -481,117 +528,165 @@ end
 
 function equip_set_and_weapon(set)
     equip(set)
-    -- This will only add a weapon set to sets that have neither a main weapon or a sub (like a shield)
-    -- Not perfect, but simply make sure that sets either have both or neither
-
+    -- This will only add the current weapon set to sets that have neither a main weapon or a sub (like a shield)
     if not set.main and not set.sub then
         equip(weapon_sets[weapon_mode.current])
         return
     end
 end
 
+-- TODO: If you have a weapon or shield in your normal idle, you will reset TP every time you disengage
+-- Solution? Maybe TP mode = Force
 function idle()
-    if pet.isvalid then
-        equip_set_and_weapon(sets.idle.luopan)
+    if toggle_tp == "On" and player.status == "Engaged" then
+        -- TODO: Expand this maybe to put on a luopan-aware set if necessary.
+        equip_set_and_weapon(sets.melee.TP)
     else
-        equip_set_and_weapon(sets.idle[idle_mode.current])
+        if pet.isvalid then
+            equip_set_and_weapon(sets.idle.luopan)
+        else
+            equip_set_and_weapon(sets.idle[idle_mode.current])
+        end
     end
 
-    if toggle_af_feet == "On" then
+    -- Speed overlay
+    if toggle_speed == "On" then
         equip({feet=jse.AF.feet})
     end
+end
+
+-- This is for modes that are bound separately via subcommand.
+-- It requires a mode pair table (so freenuke = "Free Nuke") that corresponds to the mode variable that you also pass in and a label for the output.
+function handle_submode_switch(sub_command, mode_table, mode_var, label)
+    if not sub_command then
+        add_to_chat(123, "Missing argument.")
+        return
+    end
+
+    local mode = mode_table[sub_command]
+    if mode then
+        add_to_chat(123, string.format("%s mode set to %s", label, mode))
+        mode_var:set(mode)
+    else
+        add_to_chat(123, string.format("Invalid %s mode.", label))
+    end
+end
+
+function handle_toggle(toggle, label)
+    local result = (toggle == "On") and "Off" or "On"
+    add_to_chat(123, string.format("%s toggle: %s", label, result))
+    return result
 end
 
 ----------------------------------------------------------------
 -- GEARSWAP FUNCTIONS 
 ----------------------------------------------------------------
--- If a set has a main or a sub attached to it, it will use those instead.
--- To work with the weapon set cycling, a gear set must have neither.
+
+-- Precast does not overlay weapons
+-- Midcast does to compensate for any precast weapons (for example, FC)
+-- Aftercast does to compensate for any midcast weapons (for example, dispelga or cure - this lets us TP normally for say, a staff, even outside of a TP set)
 
 function precast(spell)
-    if toggle_af_feet == "On" then
-        add_to_chat(123, "Consider disabling the AF Feet toggle!")
+    if toggle_speed == "On" then
+        add_to_chat(123, "Consider disabling the speed toggle!")
     end
 
-    local matched_set
-
-    if sets.ja[spell.name] then                 -- Job Abilities
-        if pet.isvalid then
-            matched_set = set_combine(sets.idle.luopan, sets.ja[spell.name])
-        else
-            matched_set = set_combine(sets.idle[idle_mode.current], sets.ja[spell.name])
+    local function equip_if_ja_match(spell_name)
+        if sets.ja[spell_name] then
+            equip(sets.ja[spell_name])
+            return true
         end
-    elseif sets.ws[spell.name] then             -- Weapon Skills
-        matched_set = sets.ws[spell.name]
-    elseif spell.type ~= "JobAbility" then      -- Avoid unhandled Job Abilities
-        if spell.action_type == "Magic" then    -- Avoid unhandled Weapon Skills
-            if sets.precast[spell.name] then    -- Specific spells
-                matched_set = sets.precast[spell.name]
-            else
-                -- General purpose
-                matched_set = sets.precast.fast_cast
-            end
-        --else
-            -- Only Weapon Skill will go here. Any default Weapon Skill set would be here.
-        end
+        return false
     end
 
-    if matched_set then
-        equip_set_and_weapon(matched_set)
+    -- If the job ability name matches.
+    if equip_if_ja_match(spell.name) then
         return
-    else
-        -- Eh, just in case you somehow don't have a weapon equipped and you for some reason need one, this'll solve that
-        -- This is the "unhandled" scenario, so I'm okay with sitting in idle.
-        idle()
     end
+
+    -- If the weapon skill name matches.
+    if sets.ws[spell.name] then
+        equip(sets.ws[spell.name])
+        return
+    end
+
+    -- Handling for both matched and unmatched magic spells
+    if spell.action_type == "Magic" then
+        if sets.precast[spell.name] then
+            -- If the spell name matches.
+            equip(sets.precast[spell.name])
+        else
+            -- General purpose
+            equip(sets.precast.fast_cast)
+        end
+        return
+    end
+
+    -- Unhandled Job Abilities
+    if spell.type == "JobAbility" then
+        -- Stay in idle.
+        return
+    end
+
+    -- Unhandled Weapon Skills
+    if spell.action_type == "Ability" then
+        equip(sets.ws.default)
+        return
+    end
+
+    -- Literally anything else
+    add_to_chat(123, "How did you get here? Precast action: " .. spell.name)
 end
 
 function midcast(spell)
-    --local matched = false
-    local matched_set
-
-    -- If the spell matches one of the match_list spells.
-    for match in match_list:it() do
-        if spell.name:match(match) then
-            matched_set = sets.midcast[match]
-            break
-        end
-    end
+    local matched = false
 
     -- If the spell is a Geocolure or Indicolure spell
-    if not matched_set then
-        if spell.name:match("^Geo") then
-            matched_set = sets.midcast.geocolure
-        elseif spell.name:match("^Indi") then
-            matched_set = sets.midcast.indicolure
-        end
+    if spell.name:match("^Geo") then
+        equip_set_and_weapon(sets.midcast.geocolure)
+        matched = true
+    elseif spell.name:match("^Indi") then
+        equip_set_and_weapon(sets.midcast.indicolure)
+        matched = true
     end
 
+    -- If the spell matches one of the match_list spells.#
+    -- Note: This HAS to be after the Geo/Indi spells otherwise it'll match those too
+    if not matched then
+        for match in match_list:it() do
+            if spell.name:match(match) then
+                equip_set_and_weapon(sets.midcast[match])
+                matched = true
+                break
+            end
+        end
+    end
+    
     -- If the spell name EXACTLY matches.
-    if not matched_set and sets.midcast[spell.name] then
-        matched_set = sets.midcast[spell.name]
+    if not matched and sets.midcast[spell.name] then
+        equip_set_and_weapon(sets.midcast[spell.name])
+        matched = true
     end
 
     -- If the spell skill is Elemental Magic
-    if not matched_set and spell.skill == "Elemental Magic" then
-        matched_set = sets.midcast[nuking_mode.current]
+    if not matched and spell.skill == "Elemental Magic" then
+        equip_set_and_weapon(sets.midcast[nuking_mode.current])
+        matched = true
     end
 
     -- If the spell skill has a relevant set
-    if not matched_set and sets.midcast[spell.skill] then
-        matched_set = sets.midcast[spell.skill]
+    if not matched and sets.midcast[spell.skill] then
+        equip_set_and_weapon(sets.midcast[spell.skill])
+        matched = true
     end
 
-    if matched_set then
-        equip_set_and_weapon(matched_set)
-    else
-        -- This is the "unhandled" scenario.
+    -- Any other spell (trusts?)
+    if not matched and spell.action_type == "Magic" then
         idle()
     end
 
     -- Hachirin-no-Obi overlay
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" then
-        -- This will still trigger on stuff like Klimaform but eeh
         equip({waist="Hachirin-no-Obi"})
         -- Chatoyant staff check?
     end
@@ -627,54 +722,46 @@ function self_command(command)
     local main_command = commandArgs[1]
     local sub_command = commandArgs[2]
 
-    local function handle_mode(mode_table, mode_var, label)
-        if not sub_command then
-            add_to_chat(123, "Missing argument.")
-            return
-        end
-
-        local mode = mode_table[sub_command]
-        if mode then
-            add_to_chat(123, string.format("%s mode set to %s", label, mode))
-            mode_var:set(mode)
-        else
-            add_to_chat(123, string.format("Invalid %s mode.", label))
-        end
-    end
-
     if main_command == "nukemode" then
-        handle_mode(nuking_mode_pairs, nuking_mode, "Nuking")
+        handle_submode_switch(sub_command, nuking_mode_pairs, nuking_mode, "Nuking")
+
     elseif main_command == "weaponmode" then
         weapon_mode:cycle()
-        idle()
         add_to_chat(123, string.format("Weapon mode set to %s", weapon_mode.current))
-    elseif main_command == "idlemode" then
-        handle_mode(idle_mode_pairs, idle_mode, "Idle")
-
-        if not pet.isvalid then
-            idle()
-        end
-    elseif main_command == "toggleaffeet" then
-        toggle_af_feet = (toggle_af_feet == "On") and "Off" or "On"
         idle()
 
-        add_to_chat(123, "AF Feet toggle: " .. tostring(toggle_af_feet))
+    elseif main_command == "idlemode" then
+        idle_mode:cycle()
+        add_to_chat(123, string.format("Idle mode set to %s", idle_mode.current))
+        idle()
+
+    elseif main_command == "toggletp" then
+        toggle_tp = handle_toggle(toggle_tp, "TP")
+        add_to_chat(123, "Toggled TP.")
+        idle()
+
+    elseif main_command == "togglespeed" then
+        toggle_speed = handle_toggle(toggle_speed, "Speed")
+        add_to_chat(123, "Toggled speed.")
+        idle()
+
     elseif main_command == "toggletextbox" then
         text_box:visible(not text_box:visible())
+
     else
         add_to_chat(123, "Command not recognised.")
     end
 
-    text_box:text("Nuke: " .. nuking_mode.current .. " | Set: " .. weapon_mode.current .. " | Idle: " .. idle_mode.current .. " | AF Feet: " .. toggle_af_feet)
+    text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed))
 end
 
 function file_unload(file_name)
     send_command("unbind f1")
     send_command("unbind f2")
-    send_command("unbind f4")
 
-    send_command("unbind F5")
+    send_command("unbind f5")
     send_command("unbind f6")
+    send_command("unbind f7")
 
     send_command("unbind f9")
     send_command("unbind f12")

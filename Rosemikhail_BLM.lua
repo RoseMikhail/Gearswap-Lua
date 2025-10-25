@@ -8,6 +8,7 @@ include("Modes.lua")
 --[[
 Potential enhancements:
 - Force TP mode (Do not allow precast or midcast to equip set-specific weapons)
+    - This would also be useful to prevent swaps when returning to a regular idle on disengage
 - Allow dispelga and impact during mana wall and death
 - Save certain toggles and sets between reloads
 - Accuracy mode/toggle
@@ -58,9 +59,8 @@ send_command("bind f11 gs c toggledeath")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "BLM Lua")
 add_to_chat(123, "F1-F3: Switch nuking mode")
-add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
+add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode, F7: Toggle TP mode")
 add_to_chat(123, "F9: Toggle speed gear, F10: Toggle AF body, F11: Toggle Death")
 add_to_chat(123, "F12: Hide information text box")
 
@@ -130,11 +130,12 @@ function get_sets()
     }
 
     jse.capes = {
-        nuking ={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},
-        idle_fc ={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10','Phys. dmg. taken-10%',}},
-        occult_acumen ={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Store TP"+10',}},
+        nuking={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},
+        idle_fc={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10','Phys. dmg. taken-10%',}},
+        occult_acumen={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Store TP"+10',}},
         --death ="",
         --enmity ="",
+        --tp="",
     }
 
     ----------------------------------------------------------------
@@ -176,7 +177,7 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 73% FC, 9% Elem FC, 5% Occ (Technically capped via Elemental Celerity, but 80% is better.)
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 75% FC, 6% Elem FC, 5% Occ (Technically capped via Elemental Celerity, but 80% is better.)
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
@@ -187,8 +188,8 @@ function get_sets()
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
         left_ear="Malignance Earring",                                                                                                  -- 4% FC
         right_ear="Loquacious Earring",                                                                                                 -- 2% FC
-        left_ring="Weather. Ring",                                                                                                      -- 3% Elem FC
-        right_ring="Mallquis Ring",                                                                                                     -- 5% FC 3% Occ
+        left_ring="Weather. Ring",                                                                                                      -- 5% FC 3% Occ
+        right_ring="Prolix Ring",                                                                                                       -- 2% FC
         back=jse.capes.idle_fc,                                                                                                         -- 10% FC
     }
 
@@ -227,7 +228,7 @@ function get_sets()
         back=jse.capes.nuking
     }
 
-    sets.midcast["Burst"] = {                                                                                           -- NEW: 43% MB (Capped), 16% MB II (NOW 36% MB, 16% MB II)
+    sets.midcast["Burst"] = {                                                                                           -- 43% MB (Capped), 16% MB II (NOW 36% MB, 16% MB II)
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Ea Hat",                                                                                                  -- 6% MB 6% MB II
         body=jse.empyrean.body,                                                                                         -- 4% MB II
@@ -483,11 +484,11 @@ function get_sets()
     -- TODO: This has barely any DT so be careful using this lol
     sets.melee.TP = {
         ammo="Staunch Tathlum",
-        head="Wicce Petasos +2",
-        body="Spae. Coat +4",
-        hands="Spae. Gloves +4",
-        legs="Wicce Chausses +3",
-        feet="Wicce Sabots +2",
+        head=jse.empyrean.head,
+        body=jse.AF.body,
+        hands=jse.AF.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
         neck="Loricate Torque +1", -- Could using Unmoving Collar but it has +10 enmity lol
         waist="Eschan Stone",
         left_ear="Steelflash Earring",
@@ -498,7 +499,7 @@ function get_sets()
     }
 
     ----------------------------------------------------------------
-    -- JOB ACTIONS 
+    -- JOB ABILITIES 
     ----------------------------------------------------------------
 
     sets.ja["Manafont"] = {
@@ -536,11 +537,11 @@ function get_sets()
     -- WEAPONSKILLS 
     ----------------------------------------------------------------
     
-    -- TODO: I guess just populate with generic WSD shit
-    -- Until this is filled, this will do very little
-    sets.ws.default = {
-        left_ring="Mujin Band" -- Skillchain Bonus + 5
-    }
+    sets.ws.default = set_combine(sets.melee.TP, {
+        left_ring="Mujin Band",         -- Skillchain Bonus + 5
+        right_ring="Rufescent Ring",    -- 7% WS accuracy
+        back="Alabaster Mantle",        -- WSD +11%
+    })
 
     sets.ws["Myrkr"] = {
         ammo="Strobilus",
@@ -572,6 +573,8 @@ function equip_set_and_weapon(set)
     end
 end
 
+-- TODO: If you have a weapon or shield in your normal idle, you will reset TP every time you disengage
+-- Solution? Maybe TP mode = Force
 function idle()
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
@@ -625,7 +628,7 @@ function handle_toggle(toggle, label)
 end
 
 ----------------------------------------------------------------
--- GEARSWAP FUNCTIONS 
+-- GEARSWAP FUNCTIONS
 ----------------------------------------------------------------
 
 -- Precast does not overlay weapons
@@ -639,7 +642,6 @@ function precast(spell)
 
     local function equip_if_ja_match(spell_name)
         if sets.ja[spell_name] then
-            -- No need to use equip_set_and_weapon as JAs are single-piece swaps
             equip(sets.ja[spell_name])
             return true
         end
@@ -746,8 +748,6 @@ function midcast(spell)
     -- If the spell matches one of the match_list spells.
     for match in match_list:it() do
         if spell.name:match(match) then
-            matched_set = sets.midcast[match]
-
             equip_set_and_weapon(sets.midcast[match])
             matched = true
             break
