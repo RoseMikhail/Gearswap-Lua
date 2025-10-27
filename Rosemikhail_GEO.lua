@@ -26,6 +26,9 @@ weapon_mode = M{"Daybreak", "Wizard"}
 toggle_speed = "Off"
 toggle_tp = "Off" -- Default off for a caster because you might only engage for trusts
 
+-- Default modes
+weapon_mode:set("Daybreak")
+
 -- Command helpers
 nuking_mode_pairs = {
     freenuke = "Free Nuke",
@@ -56,16 +59,43 @@ add_to_chat(123, "F12: Hide information text box")
 -- INFORMATION BOX
 ----------------------------------------------------------------
 
+--[[
 default_settings = {
   bg = { alpha = 100 },
   pos = { x = -210, y = 21 },
   flags = { draggable = false, right = true },
   text = { font = "Arial", size = 13 },
 }
+]]
+
+default_settings = {
+  bg = { alpha = 0 },
+  pos = { x = -32, y = -2 },
+  flags = { draggable = false, right = true },
+  text = { font = "Arial", size = 11, stroke = { width = 1}},
+}
 
 text_box = texts.new(default_settings)
-text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed))
 text_box:visible(true)
+
+function build_info_box()
+    local function format_toggle(toggle)
+        return toggle == "On" and "\\cs(0,255,0)On\\cr" or "\\cs(255,0,0)Off\\cr"
+    end
+
+    local output = string.format(
+        "Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s",
+        nuking_mode.current,
+        weapon_mode.current,
+        idle_mode.current,
+        format_toggle(toggle_tp),
+        format_toggle(toggle_speed)
+    )
+
+    text_box:text(output)
+end
+
+build_info_box()
 
 ----------------------------------------------------------------
 -- MISC INIT/COMMANDS
@@ -752,7 +782,7 @@ function self_command(command)
         add_to_chat(123, "Command not recognised.")
     end
 
-    text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed))
+    build_info_box()
 end
 
 function file_unload(file_name)

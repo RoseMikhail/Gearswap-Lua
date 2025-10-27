@@ -32,6 +32,9 @@ toggle_af_body = "Off"
 toggle_death = "Off"
 toggle_tp = "Off" -- Default off for a caster because you might only engage for trusts
 
+-- Default modes
+weapon_mode:set("StaffAcc")
+
 -- Command helpers
 nuking_mode_pairs = {
     freenuke = "Free Nuke",
@@ -68,16 +71,45 @@ add_to_chat(123, "F12: Hide information text box")
 -- INFORMATION BOX
 ----------------------------------------------------------------
 
+--[[
 default_settings = {
   bg = { alpha = 100 },
   pos = { x = -210, y = 21 },
   flags = { draggable = false, right = true },
   text = { font = "Arial", size = 13 },
 }
+]]
+
+default_settings = {
+  bg = { alpha = 0 },
+  pos = { x = -35, y = -2 },
+  flags = { draggable = false, right = true },
+  text = { font = "Arial", size = 11, stroke = { width = 1}},
+}
 
 text_box = texts.new(default_settings)
-text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s | AF Body: %s | Death: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed, toggle_af_body, toggle_death))
 text_box:visible(true)
+
+function build_info_box()
+    local function format_toggle(toggle)
+        return toggle == "On" and "\\cs(0,255,0)On\\cr" or "\\cs(255,0,0)Off\\cr"
+    end
+
+    local output = string.format(
+        "Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s | AF Body: %s | Death: %s",
+        nuking_mode.current,
+        weapon_mode.current,
+        idle_mode.current,
+        format_toggle(toggle_tp),
+        format_toggle(toggle_speed),
+        format_toggle(toggle_af_body),
+        format_toggle(toggle_death)
+    )
+
+    text_box:text(output)
+end
+
+build_info_box()
 
 ----------------------------------------------------------------
 -- MISC INIT/COMMANDS
@@ -123,7 +155,7 @@ function get_sets()
 
     jse.empyrean = {
         head="Wicce Petasos +2",
-        body="Wicce Coat +2",
+        body="Wicce Coat +3",
         hands="Wicce Gloves +2",
         legs="Wicce Chausses +3",
         feet="Wicce Sabots +2",
@@ -219,7 +251,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Saevus Pendant +1", -- Sorcerer's Stole +1/+2 (augmented)
+        neck="Saevus Pendant +1", -- Sorcerer's Stole +1/+2 (augmented) Hmmmm wouldn't this be better if I had the accuracy?
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring", -- Regal Earring
@@ -228,13 +260,13 @@ function get_sets()
         back=jse.capes.nuking
     }
 
-    sets.midcast["Burst"] = {                                                                                           -- 43% MB (Capped), 16% MB II (NOW 36% MB, 16% MB II)
+    sets.midcast["Burst"] = {                                                                                           -- 36% MB, 17% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Ea Hat",                                                                                                  -- 6% MB 6% MB II
-        body=jse.empyrean.body,                                                                                         -- 4% MB II
+        body=jse.empyrean.body,                                                                                         -- 5% MB II
         hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},                      -- 6% MB II
         legs=jse.empyrean.legs,                                                                                         -- 15% MB
-        feet=jse.empyrean.feet,                                                                                         -- No Longer 7% MB    According to sim, it's actually better to ditch the Jhakri Pigaches +2 (and their 7% MB) in favour of Wicce
+        feet=jse.empyrean.feet,
         neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB   This has no acc, maybe sacrifice a little mb and use Sorcerer's Stole +1/+2 (augmented)
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
@@ -423,10 +455,10 @@ function get_sets()
     -- IDLE MODES
     ----------------------------------------------------------------
 
-    sets.idle["PDT"] = {                                                                                                                                -- OVERALL -50% DT, -10% PDT, -3% MDT (-60% DT+PDT, -53% DT+MDT), +7-8 Refresh
+    sets.idle["PDT"] = {                                                                                                                                -- OVERALL -50% DT, -10% PDT, -3% MDT (-60% DT+PDT, -53% DT+MDT), +8-9 Refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh
+        body=jse.empyrean.body,                                                                                                                         -- +4 Refresh
         hands=jse.empyrean.hands,                                                                                                                       -- -12% DT
         legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
         feet=jse.empyrean.feet,                                                                                                                         -- -10% DT
@@ -448,7 +480,7 @@ function get_sets()
     sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                                              -- OVERALL -33% DT, -10% PDT, -0% MDT (-43% DT+PDT, -33% DT+MDT), +9-10 refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body="Jhakri Robe +2",                                                                                                                          -- -0%      +4 Refresh
+        body=jse.empyrean.body,                                                                                                                         -- -0%      +4 Refresh
         hands="Serpentes Cuffs",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Sabots
         legs="Assid. Pants +1",                                                                                                                         --          1-2 Refresh (realistically 1)
         feet="Serpentes Sabots",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Cuffs
@@ -878,7 +910,7 @@ function self_command(command)
         add_to_chat(123, "Command not recognised.")
     end
 
-    text_box:text(string.format("Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s | AF Body: %s | Death: %s", nuking_mode.current, weapon_mode.current, idle_mode.current, toggle_tp, toggle_speed, toggle_af_body, toggle_death))
+    build_info_box()
 end
 
 function file_unload(file_name)
