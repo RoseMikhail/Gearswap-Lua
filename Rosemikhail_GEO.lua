@@ -12,6 +12,9 @@ Potential enhancements:
 - Save certain toggles and sets between reloads
 - Accuracy mode/toggle
     - Would be checked in midcast based on whatever the mode/toggle is set to
+
+- Consider removing Daybreak weaponset? It looks like Wizard is just a better rod for bursting and free nuking overall?
+- Sim Marin Staff +1 vs the club weapon sets and see which is better for nuking in general; I've always assumed clubs were better in general for damage and staff for myrkr but I'm not sure!
 ]]
 
 ----------------------------------------------------------------
@@ -21,13 +24,11 @@ Potential enhancements:
 -- Modes
 nuking_mode = M{"Free Nuke", "Burst"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
-weapon_mode = M{"Daybreak", "Wizard"}
+weapon_mode = M{"Wizard", "Daybreak"}
 
 toggle_speed = "Off"
 toggle_tp = "Off" -- Default off for a caster because you might only engage for trusts
-
--- Default modes
-weapon_mode:set("Daybreak")
+toggle_weapon_lock = "Off" -- This is mostly to avoid losing TP in cases of your idle having something that resets your TP
 
 -- Command helpers
 nuking_mode_pairs = {
@@ -45,6 +46,7 @@ send_command("bind f2 gs c nukemode burst")
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
 send_command("bind f7 gs c toggletp")
+send_command("bind f8 gs c toggleweaponlock")
 
 send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
@@ -84,11 +86,12 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Mode: %s | Wep: %s | Idle: %s | TP: %s | Speed: %s",
+        "Mode: %s | Wep: %s | Idle: %s | TP: %s | Wep. Lock: %s | Speed: %s",
         nuking_mode.current,
         weapon_mode.current,
         idle_mode.current,
         format_toggle(toggle_tp),
+        format_toggle(toggle_weapon_lock),
         format_toggle(toggle_speed)
     )
 
@@ -162,12 +165,12 @@ function get_sets()
     ----------------------------------------------------------------
     
     weapon_sets = {
-        ["Daybreak"] = {
-            main="Daybreak",
-            sub="Ammurapi Shield",
-        },
         ["Wizard"] = {
             main="Wizard's Rod",
+            sub="Ammurapi Shield",
+        },
+        ["Daybreak"] = {
+            main="Daybreak",
             sub="Ammurapi Shield",
         },
     }
@@ -195,7 +198,7 @@ function get_sets()
         ammo=empty,
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
-        hands=jse.relic.hands,                                                                                                         -- 11% Elem FC
+        hands=jse.relic.hands,                                                                                                         -- 11% Elem FC -- Can replace with +7 Merlinic if I want to
         legs=jse.AF.legs,                                                                                                              -- 11% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
         neck="Baetyl Pendant",                                                                                                          -- 4% FC
@@ -278,7 +281,7 @@ function get_sets()
         neck={ name="Bagua Charm +1", augments={'Path: A',}},                                                                   -- Geomancy boost - Replace with Incanter's Torque when I have Idris + sufficient pet DT and regen for the MP effect.
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                             -- 15% Conserve MP
         left_ear="Mendi. Earring",                                                                                              -- 2% Conserve MP
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},                             -- Skill Consider replacing with Gwati Earring for Conserve
+        right_ear={ name="Azimuth Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Damage taken-3%',}},       -- Skill Consider replacing with Gwati Earring for Conserve
         left_ring="Stikini Ring",                                                                                               -- Skill
         right_ring="Stikini Ring",                                                                                              -- Skill
         back={ name="Lifestream Cape", augments={'Geomancy Skill +9','Indi. eff. dur. +20','Pet: Damage taken -2%',}},          -- Skill
@@ -297,7 +300,7 @@ function get_sets()
         neck={ name="Bagua Charm +1", augments={'Path: A',}},                                                                   -- Geomancy boost - Replace with Incanter's Torque when I have Idris + sufficient pet DT and regen for the MP effect.
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                             -- 15% Conserve MP
         left_ear="Mendi. Earring",                                                                                              -- 2% Conserve MP
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},                             -- Skill Consider replacing with Gwati Earring for Conserve
+        right_ear={ name="Azimuth Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Damage taken-3%',}},       -- Skill Consider replacing with Gwati Earring for Conserve
         left_ring="Stikini Ring",                                                                                               -- Skill
         right_ring="Stikini Ring",                                                                                              -- Skill
         back={ name="Lifestream Cape", augments={'Geomancy Skill +9','Indi. eff. dur. +20','Pet: Damage taken -2%',}},          -- Skill
@@ -321,7 +324,7 @@ function get_sets()
         neck={ name="Bagua Charm +1", augments={'Path: A',}},
         waist="Rumination Sash",
         left_ear="Malignance Earring",
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        right_ear={ name="Azimuth Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Damage taken-3%',}},
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -342,7 +345,7 @@ function get_sets()
         neck="Incanter's Torque",
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        right_ear={ name="Azimuth Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Damage taken-3%',}},
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -399,10 +402,10 @@ function get_sets()
         --hands="",
         legs=jse.empyrean.legs,
         --feet="",
-        neck="Dark Torque",
+        neck="Erra Pendant",
         waist="Fucho-no-Obi",
         left_ear="Barkaro. Earring",
-        right_ear={ name="Azimuth Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        right_ear={ name="Azimuth Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Damage taken-3%',}},
         left_ring="Evanescence Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -496,23 +499,23 @@ function get_sets()
     -- MELEE "IDLE"
     ----------------------------------------------------------------
     
-    -- TODO: This has barely any DT so be careful using this lol
-    -- TODO: Finish a version of this for GEO lol
+    -- This set is trying its best for accuracy but is suffering; it is a work in progress
+    -- Nyame RP will help a lot, as will stuff like Chirich
     sets.melee.TP = {
         range=empty,
-        ammo="Staunch Tathlum",
-        head=jse.empyrean.head,
-        body=jse.empyrean.body,
-        hands=jse.AF.hands,
-        legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet,
-        neck="Loricate Torque +1", -- Could using Unmoving Collar but it has +10 enmity lol
-        waist="Eschan Stone",
-        left_ear="Steelflash Earring",
-        right_ear="Bladeborn Earring",
-        left_ring="Rajas Ring",
-        right_ring="Jhakri Ring",
-        back="Aurist's Cape +1",
+        ammo="Amar Cluster",
+        head="Null Masque",
+        body="Jhakri Robe +2",
+        hands="Mallquis Cuffs +2",
+        legs="Jhakri Slops +2",
+        feet="Battlecast Gaiters",
+        neck="Loricate Torque +1",
+        waist="Grunfeld Rope",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Murky Ring",
+        right_ring="Defending Ring",
+        back="Null Shawl",
     }
 
     ----------------------------------------------------------------
@@ -545,11 +548,43 @@ function get_sets()
     -- WEAPONSKILLS
     ----------------------------------------------------------------
 
-    sets.ws.default = set_combine(sets.melee.TP, {
-        left_ring="Mujin Band",         -- Skillchain Bonus + 5
-        right_ring="Rufescent Ring",    -- 7% WS accuracy
-        back="Alabaster Mantle",        -- WSD +11%
-    })
+    -- Would it just be better to use Nyame anyway for much of these sets for the sake of the higher magic evasion? I do have decent DT in all of them anyway.
+
+    sets.ws.default = { -- Hybrid DT, generic for physical weaponskills (idk what else to put here)
+        ranged=Empty,
+        ammo="Amar Cluster",
+        head="Null Masque",
+        body="Jhakri Robe +2",
+        hands=jse.empyrean.hands,
+        legs="Jhakri Slops +2",
+        feet="Jhakri Pigaches +2",
+        neck="Loricate Torque +1",
+        waist="Null Belt",
+        left_ear="Odnowa Earring +1",
+        right_ear="Moonshade Earring",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
+        back="Null Shawl",
+    }
+
+    sets.ws["Realmrazer"] = { -- Hybrid DT, requires club
+        ranged=Empty,
+        ammo="Amar Cluster",
+        head="Null Masque",
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet="Jhakri Pigaches +2",
+        neck="Loricate Torque +1",
+        waist="Null Belt",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
+        back="Null Shawl",
+    }
+
+    --TODO: Black Halo when I unlock it
 end
 
 ----------------------------------------------------------------
@@ -558,6 +593,13 @@ end
 
 function equip_set_and_weapon(set)
     equip(set)
+
+    -- Force the weapon set on, regardless of what the main set would usually wear, preventing any potential TP loss
+    if toggle_weapon_lock == "On" then
+        equip(weapon_sets[weapon_mode.current])
+        return
+    end
+
     -- This will only add the current weapon set to sets that have neither a main weapon or a sub (like a shield)
     if not set.main and not set.sub then
         equip(weapon_sets[weapon_mode.current])
@@ -623,7 +665,8 @@ function precast(spell)
 
     local function equip_if_ja_match(spell_name)
         if sets.ja[spell_name] then
-            equip(sets.ja[spell_name])
+            --equip(sets.ja[spell_name])
+            equip_set_and_weapon(sets.ja[spell_name])
             return true
         end
         return false
@@ -636,7 +679,14 @@ function precast(spell)
 
     -- If the weapon skill name matches.
     if sets.ws[spell.name] then
-        equip(sets.ws[spell.name])
+        --equip(sets.ws[spell.name])
+        equip_set_and_weapon(sets.ws[spell.name])
+
+        -- Hachirin-no-Obi overlay. Do not apply this to Myrkr.
+        if S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" and spell.name ~= "Myrkr" then
+            equip({waist="Hachirin-no-Obi"})
+        end
+
         return
     end
 
@@ -644,10 +694,12 @@ function precast(spell)
     if spell.action_type == "Magic" then
         if sets.precast[spell.name] then
             -- If the spell name matches.
-            equip(sets.precast[spell.name])
+            --equip(sets.precast[spell.name])
+            equip_set_and_weapon(sets.precast[spell.name])
         else
             -- General purpose
-            equip(sets.precast.fast_cast)
+            --equip(sets.precast.fast_cast)
+            equip_set_and_weapon(sets.precast.fast_cast)
         end
         return
     end
@@ -660,7 +712,8 @@ function precast(spell)
 
     -- Unhandled Weapon Skills
     if spell.action_type == "Ability" then
-        equip(sets.ws.default)
+        --equip(sets.ws.default)
+        equip_set_and_weapon(sets.ws.default)
         return
     end
 
@@ -767,12 +820,14 @@ function self_command(command)
 
     elseif main_command == "toggletp" then
         toggle_tp = handle_toggle(toggle_tp, "TP")
-        add_to_chat(123, "Toggled TP.")
         idle()
+
+    elseif main_command == "toggleweaponlock" then
+        toggle_weapon_lock = handle_toggle(toggle_weapon_lock, "Weapon Lock")
+        -- No need to idle as this only really affects when we next change weapon set
 
     elseif main_command == "togglespeed" then
         toggle_speed = handle_toggle(toggle_speed, "Speed")
-        add_to_chat(123, "Toggled speed.")
         idle()
 
     elseif main_command == "toggletextbox" then
@@ -792,6 +847,7 @@ function file_unload(file_name)
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
+    send_command("unbind f8")
 
     send_command("unbind f9")
     send_command("unbind f12")
