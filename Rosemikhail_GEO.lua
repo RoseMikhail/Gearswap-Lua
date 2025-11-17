@@ -7,14 +7,9 @@ include("Modes.lua")
 
 --[[
 Potential enhancements:
-- Force TP mode (Do not allow precast or midcast to equip set-specific weapons)
-    - This would also be useful to prevent swaps when returning to a regular idle on disengage
 - Save certain toggles and sets between reloads
 - Accuracy mode/toggle
     - Would be checked in midcast based on whatever the mode/toggle is set to
-
-- Consider removing Daybreak weaponset? It looks like Wizard is just a better rod for bursting and free nuking overall?
-- Sim Marin Staff +1 vs the club weapon sets and see which is better for nuking in general; I've always assumed clubs were better in general for damage and staff for myrkr but I'm not sure!
 ]]
 
 ----------------------------------------------------------------
@@ -53,7 +48,8 @@ send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
 add_to_chat(123, "F1-F2: Switch nuking mode")
-add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode, F7: Toggle TP mode")
+add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
+add_to_chat(123, "F7: Toggle TP mode, F8: Toggle weapon lock")
 add_to_chat(123, "F9: Toggle speed gear")
 add_to_chat(123, "F12: Hide information text box")
 
@@ -191,23 +187,43 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 89% FC, 11% Elem FC, 3% Occ
+    --[[
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 88% FC, 11% Elem FC
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- 5% FC
         sub="Genmei Shield",
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- 3% FC
         ammo=empty,
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
-        hands=jse.relic.hands,                                                                                                         -- 11% Elem FC -- Can replace with +7 Merlinic if I want to
-        legs=jse.AF.legs,                                                                                                              -- 11% FC
+        hands=jse.relic.hands,                                                                                                          -- 11% Elem FC -- Can replace with +7 Merlinic if I want to
+        legs=jse.AF.legs,                                                                                                               -- 11% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
         neck="Baetyl Pendant",                                                                                                          -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
         left_ear="Malignance Earring",                                                                                                  -- 4% FC
         right_ear="Loquacious Earring",                                                                                                 -- 2% FC
-        left_ring="Weather. Ring",                                                                                                      -- 5% FC 3% Occ
+        left_ring="Kishar Ring",                                                                                                        -- 4% FC
         right_ring="Prolix Ring",                                                                                                       -- 2% FC
-        back=jse.capes.enfeebling_healing_fc,                                                                                          -- 10% FC
+        back=jse.capes.enfeebling_healing_fc,                                                                                           -- 10% FC
+    }
+    ]]
+
+    -- Parity with BLM set; also no longer need to equip a weapon or ranged in this set.
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 81% FC, 2% Occ
+        range=empty,
+        ammo="Impatiens",                                                                                                               -- 2% Occ
+        head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
+        body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
+        hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+8 "Mag.Atk.Bns."+8','"Fast Cast"+7','MND+5','Mag. Acc.+11',}},           -- 7% FC
+        legs="Orvail Pants +1",                                                                                                         -- 5% FC
+        feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
+        neck="Baetyl Pendant",                                                                                                          -- 4% FC
+        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
+        left_ear="Malignance Earring",                                                                                                  -- 4% FC
+        right_ear="Loquacious Earring",                                                                                                 -- 2% FC
+        left_ring="Kishar Ring",                                                                                                        -- 4% FC
+        right_ring="Prolix Ring",                                                                                                       -- 2% FC
+        back=jse.capes.enfeebling_healing_fc,                                                                                           -- 10% FC
     }
 
     sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
@@ -325,7 +341,7 @@ function get_sets()
         waist="Rumination Sash",
         left_ear="Malignance Earring",
         right_ear={ name="Azimuth Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Damage taken-3%',}},
-        left_ring="Stikini Ring",
+        left_ring="Kishar Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     }
@@ -607,8 +623,6 @@ function equip_set_and_weapon(set)
     end
 end
 
--- TODO: If you have a weapon or shield in your normal idle, you will reset TP every time you disengage
--- Solution? Maybe TP mode = Force
 function idle()
     if toggle_tp == "On" and player.status == "Engaged" then
         -- TODO: Expand this maybe to put on a luopan-aware set if necessary.
@@ -665,7 +679,6 @@ function precast(spell)
 
     local function equip_if_ja_match(spell_name)
         if sets.ja[spell_name] then
-            --equip(sets.ja[spell_name])
             equip_set_and_weapon(sets.ja[spell_name])
             return true
         end
@@ -679,7 +692,6 @@ function precast(spell)
 
     -- If the weapon skill name matches.
     if sets.ws[spell.name] then
-        --equip(sets.ws[spell.name])
         equip_set_and_weapon(sets.ws[spell.name])
 
         -- Hachirin-no-Obi overlay. Do not apply this to Myrkr.
@@ -694,11 +706,9 @@ function precast(spell)
     if spell.action_type == "Magic" then
         if sets.precast[spell.name] then
             -- If the spell name matches.
-            --equip(sets.precast[spell.name])
             equip_set_and_weapon(sets.precast[spell.name])
         else
             -- General purpose
-            --equip(sets.precast.fast_cast)
             equip_set_and_weapon(sets.precast.fast_cast)
         end
         return
@@ -712,13 +722,9 @@ function precast(spell)
 
     -- Unhandled Weapon Skills
     if spell.action_type == "Ability" then
-        --equip(sets.ws.default)
         equip_set_and_weapon(sets.ws.default)
         return
     end
-
-    -- Literally anything else
-    add_to_chat(123, "How did you get here? Precast action: " .. spell.name)
 end
 
 function midcast(spell)
