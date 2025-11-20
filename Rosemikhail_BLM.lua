@@ -202,6 +202,7 @@ function get_sets()
     sets.ja = {}                    -- Leave this empty
     sets.ws = {}                    -- Leave this empty
     sets.melee = {}                 -- Leave this empty
+    sets.overlay = {}               -- Leave this empty
 
     ----------------------------------------------------------------
     -- PRECAST
@@ -429,14 +430,14 @@ function get_sets()
         head="Pixie Hairpin +1",
         body="Shango Robe",
         --hands=
-        legs=jse.AF.legs,
-        feet=jse.relic.feet,
+        --legs="",
+        --feet="",
         neck="Erra Pendant",
         waist="Fucho-no-Obi",
-        --left_ear=
+        left_ear="Barkaro. Earring",
         --right_ear=
         left_ring="Evanescence Ring",
-        --right_ring=
+        right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
@@ -463,8 +464,8 @@ function get_sets()
         feet=jse.empyrean.feet,                                                                                                                         -- -10% DT
         neck="Loricate Torque +1",                                                                                                                      -- -6% DT
         waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
-        left_ear="Nehalennia Earring",                                                                                                                  -- -3% MDT
-        right_ear="Etiolation Earring",
+        left_ear="Nehalennia Earring",
+        right_ear="Etiolation Earring",                                                                                                                 -- -3% MDT
         left_ring="Murky Ring",                                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                                    -- -10% DT
         back=jse.capes.idle_fc,                                                                                                                         -- -10% PDT
@@ -544,7 +545,7 @@ function get_sets()
         body=jse.relic.body,
     }
 
-    sets.ja["Mana Wall"] = {                                                                                                            -- OVERALL -54% DT, -10% PDT, -3% MDT
+    sets.ja["Mana Wall"] = {                                                                                                            -- OVERALL -54% DT, -10% PDT
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=jse.empyrean.head,                                                                                                         -- -10% DT
         body=jse.AF.body,
@@ -552,7 +553,7 @@ function get_sets()
         legs=jse.empyrean.legs,                                                                                                         -- 
         feet=jse.empyrean.feet,                                                                                                         -- -10% DT
         neck="Unmoving Collar +1",
-        waist="Slipor Sash",                                                                                                            -- -3% MDT
+        waist="Embla Sash",                                                                                                             -- Sublimation +3
         left_ear="Ethereal Earring",                                                                                                    -- Damage to MP
         right_ear="Friomisi Earring",                                                                                                   -- Soon replaced but I won't say no to more damage during mana wall
         left_ring="Murky Ring",                                                                                                         -- -10% DT
@@ -641,7 +642,7 @@ function get_sets()
         ammo="Strobilus",
         head={ name="Kaabnax Hat", augments={'HP+30','MP+30','MP+30',}},                                                                -- Want to replace with Amalric Coif +1 augmented
         body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
-        hands=jse.AF.hands,
+        hands="Otomi Gloves",
         legs=jse.AF.legs,                                                                                                               -- Want to replace with Amalric Slops +1 augmented
         feet=jse.AF.feet,                                                                                                               -- Want to replace with Psycloth Boots augmented
         neck="Dualism Collar +1",
@@ -654,6 +655,14 @@ function get_sets()
     }
 
     --TODO: Black Halo when I unlock it
+
+    ----------------------------------------------------------------
+    -- OVERLAY 
+    ----------------------------------------------------------------
+
+    sets.overlay.sublimation = {
+        waist="Embla Sash",                                                                                                             -- Sublimation +3
+    }
 end
 
 ----------------------------------------------------------------
@@ -676,6 +685,7 @@ function equip_set_and_weapon(set)
     end
 end
 
+-- Sublimation won't apply the overlay if we're currently TPing. TODO: Maybe add a toggle for this.
 function idle()
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
@@ -692,11 +702,15 @@ function idle()
         return
     end
 
+    -- Choose between TP set and regular idle
     if toggle_tp == "On" and player.status == "Engaged" then
         equip_set_and_weapon(sets.melee.TP)
     else
-        -- Normal idle equip
         equip_set_and_weapon(sets.idle[idle_mode.current])
+
+        if buffactive["Sublimation: Activated"] then
+            equip(sets.overlay.sublimation)
+        end
     end
 
     -- Speed overlay
@@ -926,9 +940,15 @@ function aftercast(spell)
 end
 
 function buff_change(name, gain, buff_details)
-    -- We wait until here to select gear, as Gearswap doesn't immediately register Mana Wall in aftercast.
-    if name == "Mana Wall" and not midaction() then
-        idle()
+    if not midaction() then
+        -- We wait until here to select gear, as Gearswap doesn't immediately register Mana Wall in aftercast.
+        if name == "Mana Wall" then
+            idle()
+        end
+
+        if name == "Sublimation: Activated" then
+            idle() 
+        end
     end
 end
 
