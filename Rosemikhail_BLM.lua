@@ -11,8 +11,7 @@ Potential enhancements:
 - Save certain toggles and sets between reloads
 - Accuracy mode/toggle
     - Would be checked in midcast based on whatever the mode/toggle is set to
-- Embla Sash/Sublimation idle overlay set
-    - Will this apply to the engaged set or just the regular idle?
+- Toggle for mana wall set
 ]]
 
 ----------------------------------------------------------------
@@ -39,7 +38,7 @@ nuking_mode_pairs = {
 }
 
 -- Midcast helpers
-match_list = S{"Cure", "Aspir", "Drain", "Regen", "Refresh"}
+match_list = S{"Cure", "Aspir", "Drain", "Regen"}
 elemental_debuffs = S{'Burn','Frost','Choke','Rasp','Shock','Drown'}
 cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja', 'Comet'}
 
@@ -145,15 +144,15 @@ function get_sets()
     }
 
     jse.relic = {
-        head={ name="Arch. Petasos +1", augments={'Increases Ancient Magic damage and magic burst damage',}},
-        body={ name="Arch. Coat +2", augments={'Enhances "Manafont" effect',}},
-        hands={ name="Arch. Gloves +1", augments={'Increases Elemental Magic accuracy',}},
-        legs={ name="Arch. Tonban +4", augments={'Increases Elemental Magic debuff time and potency',}},
-        feet={ name="Arch. Sabots +2", augments={'Increases Aspir absorption amount',}},
+        head="Arch. Petasos +1",
+        body="Arch. Coat +2",
+        hands="Arch. Gloves +1",
+        legs="Arch. Tonban +4",
+        feet="Arch. Sabots +4",
     }
 
     jse.empyrean = {
-        head="Wicce Petasos +2",
+        head="Wicce Petasos +3",
         body="Wicce Coat +3",
         hands="Wicce Gloves +3",
         legs="Wicce Chausses +3",
@@ -187,6 +186,7 @@ function get_sets()
             main="Wizard's Rod",
             sub="Ammurapi Shield",
         },
+        -- Soon Malevolence and Ammurapi Shield
     }
 
     -- Consider Malignance pole for later.
@@ -230,8 +230,9 @@ function get_sets()
     })
 
     sets.precast["Death"] = set_combine(sets.precast.fast_cast, {
-        left_ring="Mephitas's Ring +1",
-        right_ring="Mephitas's Ring",
+        legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
+        left_ring="Mephitas's Ring",
+        right_ring="Mephitas's Ring +1",
         back=jse.capes.death,
     })
 
@@ -251,7 +252,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Saevus Pendant +1", -- Sorcerer's Stole +1/+2 (augmented) Hmmmm wouldn't this be better if I had the accuracy?
+        neck={ name="Src. Stole +1", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring", -- Regal Earring
@@ -260,24 +261,25 @@ function get_sets()
         back=jse.capes.nuking
     }
 
-    sets.midcast["Burst"] = {                                                                                           -- 36% MB, 17% MB II
+    sets.midcast["Burst"] = {                                                                                           -- 36% MB, 11% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Ea Hat",                                                                                                  -- 6% MB 6% MB II
         body=jse.empyrean.body,                                                                                         -- 5% MB II
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},                      -- 6% MB II
+        --hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}}, -- 6% MB II
+        hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,                                                                                         -- 15% MB
         feet=jse.empyrean.feet,
-        neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB   This has no acc, maybe sacrifice a little mb and use Sorcerer's Stole +1/+2 (augmented)
+        neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB Sorcerer's Stole +1 is comparable if no weather/hachirin-no-obi. Why? idk. Use instead after capping MB for the other stats
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
         left_ring="Freke Ring",
-        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},                                                   -- I won't pretend to understand why this is better, but the sim says it is
+        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},                                                   -- Mujin Band is better if no weather/hachirin-no-obi. Why? idk.
         back=jse.capes.nuking                                                                                           -- 5% MB
     }
 
     sets.midcast["Occult Acumen"] = set_combine(sets.midcast["Free Nuke"], { -- I have no idea when it comes to Occult Acumen. Panic TP?
-        --ammo=
+        ammo="Seraphic Ampulla",
         head="Mallquis Chapeau +2",
         --body=
         --hands=
@@ -288,7 +290,7 @@ function get_sets()
         left_ear="Steelflash Earring",
         right_ear="Bladeborn Earring",
         left_ring="Rajas Ring",
-        --right_ring=
+        right_ring="Petrov Ring",
         back=jse.capes.occult_acumen,
     })
 
@@ -296,8 +298,8 @@ function get_sets()
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Pixie Hairpin +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
-        left_ring="Mephitas's Ring +1",
-        right_ring="Mephitas's Ring",
+        left_ring="Archon Ring",
+        right_ring="Mephitas's Ring +1",
         back=jse.capes.death,
     })
 
@@ -305,8 +307,8 @@ function get_sets()
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Pixie Hairpin +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
-        left_ring="Mephitas's Ring +1",
-        right_ring="Mephitas's Ring",
+        left_ring="Archon Ring",
+        right_ring="Mephitas's Ring +1",
         back=jse.capes.death,
     })
     
@@ -319,7 +321,7 @@ function get_sets()
         body=jse.relic.body,
         hands=jse.AF.hands,                                            -- Replace with +3 Archmage hands if and when I get them...
         feet=jse.relic.feet,
-        --left_ear="Ilmr Earring",                                     --  When I get one
+        right_ear="Ilmr Earring",
     })
 
     sets.midcast["Comet"] = set_combine(sets.midcast["Free Nuke"], {
@@ -333,7 +335,7 @@ function get_sets()
 
     -- Eventually when I have more Wicce upgraded, they may end up beating out the Spaekona macc bonuses.
     sets.midcast["Enfeebling Magic"] = {
-        ammo="Kalboron Stone",
+        ammo="Pemphredo Tathlum",
         head=empty,
         body={ name="Cohort Cloak +1", augments={'Path: A',}},
         hands=jse.AF.hands,
@@ -342,7 +344,7 @@ function get_sets()
         neck="Incanter's Torque",
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+10',}},
         left_ring="Kishar Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -350,7 +352,7 @@ function get_sets()
 
     -- Eventually this prefers Wicce+3 head and Spae body for the slightly higher elemental magic skill + accuracy, it seems...
     sets.midcast.elemental_debuff = {
-        ammo="Kalboron Stone",
+        ammo="Pemphredo Tathlum",
         head=empty,
         body={ name="Cohort Cloak +1", augments={'Path: A',}},
         hands=jse.AF.hands,
@@ -359,7 +361,7 @@ function get_sets()
         neck="Incanter's Torque",
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+10',}},
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -372,16 +374,16 @@ function get_sets()
     
     -- Impact likes more elemental magic skill
     sets.midcast["Impact"] = {
-        ammo="Kalboron Stone",
+        ammo="Pemphredo Tathlum",
         head=empty,
         body="Crepuscular Cloak",
         hands=jse.AF.hands,
         legs=jse.AF.legs,
         feet=jse.relic.feet,
-        neck="Incanter's Torque",
+        neck={ name="Src. Stole +1", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        right_ear="Ilmr Earring", -- Replace with Regal Earring (and move Ilmr to Malignance's spot)
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -409,12 +411,13 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
-    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +54% duration
-        ammo="Staunch Tathlum",
+    -- Could add Gada and Ammurapi if I felt special and cool and didn't mind losing TP
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +55% duration
+        ammo="Pemphredo Tathlum",
         head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +8',}},                                                          -- +8% duration
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
         hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +9',}},                                     -- +9% duration
-        legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +8',}},                                                      -- +8% duration
+        legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
         feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
         neck="Incanter's Torque",
         waist="Embla Sash",                                                                                                         -- +10% duration
@@ -426,18 +429,18 @@ function get_sets()
     })
 
     sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
-        --ammo=
+        ammo="Pemphredo Tathlum",
         head="Pixie Hairpin +1",
         body="Shango Robe",
-        --hands=
-        --legs="",
+        hands=jse.relic.hands,
+        legs=jse.AF.legs,
         --feet="",
         neck="Erra Pendant",
         waist="Fucho-no-Obi",
-        left_ear="Barkaro. Earring",
-        --right_ear=
-        left_ring="Evanescence Ring",
-        right_ring="Stikini Ring",
+        --left_ear=,
+        right_ear="Barkaro. Earring",
+        left_ring="Archon Ring",
+        right_ring="Evanescence Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
@@ -445,10 +448,6 @@ function get_sets()
 
     sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
         main="Bolelabunga",                                                                                                         -- 10% potency
-    })
-
-    sets.midcast["Refresh"] = set_combine(sets.midcast["Enhancing Magic"], {
-        main="Bolelabunga",
     })
 
     ----------------------------------------------------------------
@@ -502,10 +501,10 @@ function get_sets()
         feet="Serpentes Sabots",
         neck="Dualism Collar +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
-        left_ear="Etiolation Earring",
-        right_ear="Nehalennia Earring",
-        left_ring="Mephitas's Ring +1",
-        right_ring="Mephitas's Ring",
+        left_ear="Nehalennia Earring",
+        right_ear="Etiolation Earring",
+        left_ring="Mephitas's Ring",
+        right_ring="Mephitas's Ring +1",
         back=jse.capes.death,
     }
 
@@ -515,19 +514,23 @@ function get_sets()
     
     -- This set is trying its best for accuracy but is suffering; it is a work in progress
     -- Nyame RP will help a lot, as will stuff like Chirich
-    sets.melee.TP = {
+    -- Petrov ring for TP? But my DT is probably not great...
+    -- It's not technically BEST but Nyame for DT and evasion is probably best to stick with
+
+    -- Nyame will beat this stuff when augmented path B
+    sets.melee.TP = { -- 1267 accuracy, -58% DT
         ammo="Amar Cluster",
         head="Null Masque",
-        body="Nyame Mail",
-        hands="Mallquis Cuffs +2",
-        legs="Jhakri Slops +2",
-        feet="Battlecast Gaiters",
-        neck="Loricate Torque +1",
-        waist="Grunfeld Rope",
-        left_ear="Malignance Earring",
-        right_ear="Odnowa Earring +1",
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet, -- Could instead be Battlecast Gaiters
+        neck="Null Loop",
+        waist="Null Belt", -- Could instead be Grunfeld
+        left_ear="Odnowa Earring +1",
+        right_ear={ name="Moonshade Earring", augments={'"Mag.Atk.Bns."+4','TP Bonus +250',}},
         left_ring="Murky Ring",
-        right_ring="Defending Ring",
+        right_ring="Petrov Ring",
         back="Null Shawl",
     }
 
@@ -561,34 +564,35 @@ function get_sets()
         back=jse.capes.idle_fc,                                                                                                         -- -10% PDT
     }
 
-    sets.midcast.stun_enmity = set_combine(sets.ja["Mana Wall"], {  -- OVERALL +19 enmity
-        left_ring="Vengeful Ring",                                  -- +3 enmity
+    sets.midcast.stun_enmity = set_combine(sets.ja["Mana Wall"], {  -- OVERALL +23 enmity
+        
         neck="Unmoving Collar +1",                                  -- +10 enmity
         left_ear="Cryptic Earring",                                 -- +4 enmity 
         right_ear="Friomisi Earring",                               -- +2 enmity
+        left_ring="Vengeful Ring",                                  -- +3 enmity TODO: Replace with Eihwaz
+        right_ring="Petrov Ring",                                   -- +4 enmity TODO: Replace with Supershear
     })
 
     ----------------------------------------------------------------
     -- WEAPONSKILLS 
     ----------------------------------------------------------------
 
-    -- Would it just be better to use Nyame anyway for much of these sets for the sake of the higher magic evasion? I do have decent DT in all of them anyway.
-
     sets.ws.default = { -- Hybrid DT, generic for physical weaponskills (idk what else to put here)
         ammo="Amar Cluster",
-        head="Jhakri Coronal +2",
-        body="Nyame Mail",
-        hands="Jhakri Cuffs +2",
-        legs="Nyame Flanchard",
-        feet="Nyame Sollerets",
-        neck="Loricate Torque +1",
-        waist="Grunfeld Rope",
+        head=jse.empyrean.head,
+        body=jse.AF.body,
+        hands=jse.AF.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
         left_ear="Odnowa Earring +1",
         right_ear="Moonshade Earring",
-        left_ring="Murky Ring",
-        right_ring="Defending Ring",
-        back="Alabaster Mantle",
+        left_ring="Rufescent Ring",
+        right_ring="Petrov Ring",
+        back="Null Shawl",
     }
+
 
     sets.ws["Aeolian Edge"] = { -- Hybrid DT, requires Malevolence/some other dagger + RDM sub
         ammo="Sroda Tathlum",
@@ -599,29 +603,30 @@ function get_sets()
         feet=jse.empyrean.feet,
         neck="Saevus Pendant +1",
         waist="Eschan Stone",
-        left_ear="Moonshade Earring",
-        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+9',}},
+        left_ear="Malignance Earring",
+        right_ear="Moonshade Earring",
         left_ring="Murky Ring",
-        right_ring="Defending Ring",
+        right_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},
         back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
     }
 
     sets.ws["Realmrazer"] = { -- Hybrid DT, requires club
         ammo="Amar Cluster",
         head="Null Masque",
-        body="Nyame Mail",
+        body=jse.AF.body,
         hands=jse.empyrean.hands,
-        legs="Nyame Flanchard",
-        feet="Nyame Sollerets",
-        neck="Src. Stole +1",
-        waist="Grunfeld Rope",
-        left_ear="Malignance Earring",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
+        left_ear="Moonshade Earring",
         right_ear="Odnowa Earring +1",
         left_ring="Rufescent Ring",
-        right_ring="Metamor. Ring +1",
+        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},
         back="Null Shawl",
     }
 
+    -- This kinda targets Triboulex
     sets.ws["Vidohunir"] = { -- Hybrid DT, requires staff
         ammo="Ghastly Tathlum +1",
         head="Pixie Hairpin +1",
@@ -629,12 +634,12 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Loricate Torque +1",
+        neck={ name="Src. Stole +1", augments={'Path: A',}},
         waist="Acuity Belt +1",
         left_ear="Malignance Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Freke Ring",
-        right_ring="Defending Ring",
+        right_ear="Barkaro. Earring",
+        left_ring="Murky Ring",
+        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},
         back=jse.capes.nuking,
     }
 
@@ -644,20 +649,20 @@ function get_sets()
         body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
         hands="Otomi Gloves",
         legs=jse.AF.legs,                                                                                                               -- Want to replace with Amalric Slops +1 augmented
-        feet=jse.AF.feet,                                                                                                               -- Want to replace with Psycloth Boots augmented
+        feet={ name="Psycloth Boots", augments={'MP+50','INT+7','"Conserve MP"+6',}},
         neck="Dualism Collar +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
         left_ear="Nehalennia Earring",
         right_ear={ name="Moonshade Earring", augments={'"Mag.Atk.Bns."+4','TP Bonus +250',}},
-        left_ring="Mephitas's Ring +1",
-        right_ring="Mephitas's Ring",
+        left_ring="Mephitas's Ring",
+        right_ring="Mephitas's Ring +1",
         back=jse.capes.idle_fc,
     }
 
     --TODO: Black Halo when I unlock it
 
     ----------------------------------------------------------------
-    -- OVERLAY 
+    -- OVERLAY - Useful for items that might need to overlay multiple different sets (varying idles, etc.)
     ----------------------------------------------------------------
 
     sets.overlay.sublimation = {
@@ -835,6 +840,7 @@ function precast(spell)
 end
 
 -- spell.action_type == "Magic" ensures that job ability gear survives into midcast, as otherwise they won't work.
+-- Could probably just early return instead =w=
 function midcast(spell)
     -- Mana Wall
     if buffactive["Mana Wall"] and spell.action_type == "Magic"  then
