@@ -128,8 +128,7 @@ idle_mode = M{"PDT", "MDT", "Refresh"}
 weapon_mode = M{"Staff", "StaffAcc", "Wizard"}
 
 toggle_speed = "Off"
-toggle_tp = "Off" -- Default off for a caster because you might only engage for trusts
-toggle_weapon_lock = "Off" -- This is mostly to avoid losing TP in cases of your idle having something that resets your TP
+toggle_tp = "Off" -- This will disable weapon swapping as well
 
 -- Command helpers
 nuking_mode_pairs = {
@@ -157,7 +156,7 @@ send_command("bind f12 gs c toggletextbox")
 -- Help Text
 add_to_chat(123, "F1-F3: Switch nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
-add_to_chat(123, "F7: Toggle TP mode, F8: Toggle weapon lock")
+add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear")
 add_to_chat(123, "F12: Hide information text box")
 
@@ -190,12 +189,11 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Mode: %s | Wep: %s | Idle: %s | TP: %s | Wep. Lock: %s | Speed: %s",
+        "Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s",
         nuking_mode.current,
         weapon_mode.current,
         idle_mode.current,
         format_toggle(toggle_tp),
-        format_toggle(toggle_weapon_lock),
         format_toggle(toggle_speed)
     )
 
@@ -573,16 +571,16 @@ function get_sets()
     sets.melee.TP = {
         ammo="Amar Cluster",
         head="Null Masque",
-        body="Nyame Mail",
-        hands="Mallquis Cuffs +2",
-        legs="Jhakri Slops +2",
-        feet="Battlecast Gaiters",
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet, -- Could instead be Battlecast Gaiters
         neck="Null Loop",
-        waist="Grunfeld Rope",
-        left_ear="Malignance Earring",
+        waist="Null Belt", -- Could instead be Grunfeld
+        left_ear="Cessance Earring",
         right_ear="Odnowa Earring +1",
         left_ring="Murky Ring",
-        right_ring="Defending Ring",
+        right_ring="Petrov Ring",
         back="Null Shawl",
     }
 
@@ -691,12 +689,6 @@ end
 
 function equip_set_and_weapon(set)
     equip(set)
-
-    -- Force the weapon set on, regardless of what the main set would usually wear, preventing any potential TP loss
-    if toggle_weapon_lock == "On" then
-        equip(weapon_sets[weapon_mode.current])
-        return
-    end
 
     -- This will only add the current weapon set to sets that have neither a main weapon or a sub (like a shield)
     if not set.main and not set.sub then
@@ -895,11 +887,14 @@ function self_command(command)
 
     elseif main_command == "toggletp" then
         toggle_tp = handle_toggle(toggle_tp, "TP")
+
+        if toggle_tp == "On" then
+            send_command("gs disable main;gs disable sub;gs disable range")
+        else
+            send_command("gs enable main;gs enable sub;gs enable range")
+        end
+        
         idle()
-    
-    elseif main_command == "toggleweaponlock" then
-        toggle_weapon_lock = handle_toggle(toggle_weapon_lock, "Weapon Lock")
-        -- No need to idle as this only really affects when we next change weapon set
 
     elseif main_command == "togglespeed" then
         toggle_speed = handle_toggle(toggle_speed, "Speed")

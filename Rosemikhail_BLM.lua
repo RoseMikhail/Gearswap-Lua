@@ -27,8 +27,7 @@ weapon_mode = M{"Staff", "StaffAcc", "Wizard"}
 toggle_speed = "Off"
 toggle_af_body = "Off"
 toggle_death = "Off"
-toggle_tp = "Off" -- Default off for a caster because you might only engage for trusts
-toggle_weapon_lock = "Off" -- This is mostly to avoid losing TP in cases of your idle having something that resets your TP
+toggle_tp = "Off" -- This will disable weapon swapping as well
 
 -- Command helpers
 nuking_mode_pairs = {
@@ -60,7 +59,7 @@ send_command("bind f12 gs c toggletextbox")
 -- Help Text
 add_to_chat(123, "F1-F3: Switch nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
-add_to_chat(123, "F7: Toggle TP mode, F8: Toggle weapon lock")
+add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear, F10: Toggle AF body")
 add_to_chat(123, "F11: Toggle Death, F12: Hide information text box")
 
@@ -93,12 +92,11 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Mode: %s | Wep: %s | Idle: %s | TP: %s | Wep. Lock: %s | Speed: %s | AF Body: %s | Death: %s",
+        "Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s | AF Body: %s | Death: %s",
         nuking_mode.current,
         weapon_mode.current,
         idle_mode.current,
         format_toggle(toggle_tp),
-        format_toggle(toggle_weapon_lock),
         format_toggle(toggle_speed),
         format_toggle(toggle_af_body),
         format_toggle(toggle_death)
@@ -527,8 +525,8 @@ function get_sets()
         feet=jse.empyrean.feet, -- Could instead be Battlecast Gaiters
         neck="Null Loop",
         waist="Null Belt", -- Could instead be Grunfeld
-        left_ear="Odnowa Earring +1",
-        right_ear={ name="Moonshade Earring", augments={'"Mag.Atk.Bns."+4','TP Bonus +250',}},
+        left_ear="Cessance Earring",
+        right_ear="Odnowa Earring +1",
         left_ring="Murky Ring",
         right_ring="Petrov Ring",
         back="Null Shawl",
@@ -586,8 +584,8 @@ function get_sets()
         feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
-        left_ear="Odnowa Earring +1",
-        right_ear="Moonshade Earring",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
         left_ring="Rufescent Ring",
         right_ring="Petrov Ring",
         back="Null Shawl",
@@ -653,7 +651,7 @@ function get_sets()
         neck="Dualism Collar +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
         left_ear="Nehalennia Earring",
-        right_ear={ name="Moonshade Earring", augments={'"Mag.Atk.Bns."+4','TP Bonus +250',}},
+        right_ear="Moonshade Earring",
         left_ring="Mephitas's Ring",
         right_ring="Mephitas's Ring +1",
         back=jse.capes.idle_fc,
@@ -676,12 +674,6 @@ end
 
 function equip_set_and_weapon(set)
     equip(set)
-
-    -- Force the weapon set on, regardless of what the main set would usually wear, preventing any potential TP loss
-    if toggle_weapon_lock == "On" then
-        equip(weapon_sets[weapon_mode.current])
-        return
-    end
 
     -- This will only add the current weapon set to sets that have neither a main weapon or a sub (like a shield)
     if not set.main and not set.sub then
@@ -987,11 +979,14 @@ function self_command(command)
 
     elseif main_command == "toggletp" then
         toggle_tp = handle_toggle(toggle_tp, "TP")
+
+        if toggle_tp == "On" then
+            send_command("gs disable main;gs disable sub;gs disable range")
+        else
+            send_command("gs enable main;gs enable sub;gs enable range")
+        end
+        
         idle()
-    
-    elseif main_command == "toggleweaponlock" then
-        toggle_weapon_lock = handle_toggle(toggle_weapon_lock, "Weapon Lock")
-        -- No need to idle as this only really affects when we next change weapon set
 
     elseif main_command == "toggleafbody" then
         toggle_af_body = handle_toggle(toggle_af_body, "AF Body")
