@@ -4,48 +4,7 @@ include("Modes.lua")
 -- Checks to add
 ----------------------------------------------------------------
 --[[
-
--- Apparently relic head is good for nuking? ill have to looksee later
-
--- Sim WS and Nuking spells
-
--- Likely need to create a list that contains all of the helix spells for the sake of checking
-
 -- Create JA sets for all of the gear I might have lmao GOD THERE'S SO MUCH TO DO FOR SCH
-
-- When casting light magic (Light Helix, Dia, Banish, Banishga whatever, for example!!!), use Daybreak
-    - Maybe extend this to Geo but like who cares for Dia lol
-    - Probably want a light magic match list
-
-    - Gear specific to each helix! Pixie Hairpin +1 for Noctohelix and Kaustra
-    - Marin Staff +1 for Amenohelix (though will I really swap for that?....)
-    - Daybreak for Luminohelix
-    - If I happen to ever get it, Quanpur for Geohelix...
-        - Not sure how I'll handle this; maybe a helix table?
-            - If spell is inside helix table, equip relevant helix set
-            -- Could just handle it like normal and just have a general helix set (which can steal the geo check kinda, for geo/indi) + some specific named helix sets, wouldn't have to do anything too crazy =w=
-            - Potentially stealable for BLM! but how much do I care about on helixes on blm, really?
-
-    - Helix sets - you want as much "magic damage" as you can get, it seems
-        - Free nuke AND burst sets
-
-    
-
-    - Barspell set specifically for 500 skill + duration I guess https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Enhancing
-
-    - Fastcast set specifically for White and Black magic Peda. M.Board +3 and Acad. Loafers +3 - even faster casts?? 90% is the cap though (10% more than usual)
-        - Doesn't work when Acession, Alacrity, Celerity or Manifestation would affect the spell
-        - If player.buffs don't include  (the above) and magictype = black or white, equip one or the other? (or maybe a set that uses both and has more DT on it?)
-            - https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Fast_Cast_Sets
-        Probably like this:
-        - FC set for no arts for whatever reason
-        - FC set for Dark Arts/Addendum: Black (use when buffs are up and its spell.type == "BlackMagic")
-        - FC set for Light Arts/Addendum: White (use when buffs are up and its spell.type == "WhiteMagic")
-        - FC set that is like Dark arts but for Impact
-
-    - In my satchel: incantor stone for fast cast bbg
-
-    - On light weather: Equip chatoyant staff, twilight cape, khonsu, hachirin no obi; extend as part of hachirin check FOR SPECIFICALLY HEALING; or maybe have another check
 
     - Cursna set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Cursna
 
@@ -108,6 +67,9 @@ end
     -- Review Aspir/Drain set and the AF body stuff
 
     -- jse Earring?
+
+    -- Check for Cure Mode - Are we doing max potency or cure DT?
+    -- Check for Regen Mode - Are we doing max potency or max duration or a mix?
 ]]
 ----------------------------------------------------------------
 -- NOTES
@@ -117,6 +79,10 @@ Potential enhancements:
 - Save certain toggles and sets between reloads
 - Accuracy mode/toggle
     - Would be checked in midcast based on whatever the mode/toggle is set to
+-- When Musa/more sources of fastcast have been obtained, consider creating a Grimoire fastcast set
+        - In other words, I need to be able to get 80% regular fastcast in all slots minus the head and feet for this to become viable as a set
+        - Only for when we're casting white or dark magic under the correct art/addendum
+        - Doesn't work when Accession, Alacrity, Celerity or Manifestation would affect the spell
 ]]
 ----------------------------------------------------------------
 -- VARIABLES
@@ -139,6 +105,7 @@ nuking_mode_pairs = {
 
 -- Midcast helpers
 match_list = S{"Cure", "Aspir", "Drain", "Regen"}
+helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix", "Geohelix II", "Hydrohelix II", "Anemohelix II", "Pyrohelix II", "Cryohelix II", "Ionohelix II", "Noctohelix II", "Luminohelix II",}
 
 -- Bindings
 send_command("bind f1 gs c nukemode freenuke")
@@ -302,24 +269,21 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 71% FC, 2% Occ
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 71% FC, 2% Occ - Will be 81% with cape
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
         hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+8 "Mag.Atk.Bns."+8','"Fast Cast"+7','MND+5','Mag. Acc.+11',}},           -- 7% FC
         legs="Orvail Pants +1",                                                                                                         -- 5% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
-        neck="Baetyl Pendant",                                                                                                          -- 4% FC
+        neck="Voltsurge Torque",                                                                                                        -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
         left_ear="Malignance Earring",                                                                                                  -- 4% FC
         right_ear="Loquacious Earring",                                                                                                 -- 2% FC
         left_ring="Kishar Ring",                                                                                                        -- 4% FC
         right_ring="Prolix Ring",                                                                                                       -- 2% FC
-        --back="TODO: PUT SOMETHING HERE", -- this wants to be Fi Follet Cape +1
+        --back="TODO: PUT SOMETHING HERE", -- this wants to be Fi Follet Cape +1                                                        -- 10% FC
     }
-
-    -- TODO: Fill
-    sets.precast.grimoire = {}
 
     sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
         head=empty,
@@ -370,7 +334,7 @@ function get_sets()
         right_ear="Barkaro. Earring",
         left_ring="Locus Ring",                                                                                         -- 5% MB
         right_ring="Mujin Band",                                                                                        -- 5% MB II
-        back=jse.capes.nuking_idle
+        back=jse.capes.nuking_idle,
     }
 
     sets.midcast["Occult Acumen"] = set_combine(sets.midcast["Free Nuke"], { -- I have no idea when it comes to Occult Acumen. Panic TP?
@@ -388,6 +352,40 @@ function get_sets()
         right_ring="Petrov Ring",
         back=jse.capes.occult_acumen,
     })
+
+    sets.midcast.helix = {} -- Keep empty. This is probably ugly and bad. Think harder later.
+
+    sets.midcast.helix["Free Nuke"] = {
+        --ammo=,
+        --head=,
+        --body=,
+        --hands=,
+        --legs=,
+        --feet=,
+        --neck=,
+        --waist=,
+        --left_ear=,
+        --right_ear=,
+        --left_ring=,
+        --right_ring=,
+        --back=,
+    }
+
+    sets.midcast.helix["Burst"] = {
+        --ammo=,
+        --head=,
+        --body=,
+        --hands=,
+        --legs=,
+        --feet=,
+        --neck=,
+        --waist=,
+        --left_ear=,
+        --right_ear=,
+        --left_ring=,
+        --right_ring=,
+        --back=,
+    }
 
     ----------------------------------------------------------------
     -- ENFEEBLING MIDCAST
@@ -434,32 +432,8 @@ function get_sets()
     }
 
     ----------------------------------------------------------------
-    -- OTHER MIDCAST
+    -- ENHANCING MIDCAST
     ----------------------------------------------------------------
-
-    -- Consider switching to Chatoyant Staff + Khonsu when I overcap
-    -- Consider DT pieces where possible to get to -50% DT
-    -- I don't need healing skill pieces, so start there
-    -- Empy chest + AF legs, figure out hands...
-    -- Potentially replace neck with loricate
-    -- Hybrid set suggests mephitas ring +1 but I think I can murky ring instead
-    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50% Cure Potency, +33% Conserve MP, -10% PDT, 28% DT (38% PDT, 28% MDT)
-        main="Daybreak",                                                                                                            -- 30% Cure Potency
-        sub="Genmei Shield",                                                                                                        -- -10% PDT
-        ammo="Staunch Tathlum",                                                                                                     -- -2% DT
-        head={ name="Vanya Hood", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},      -- +10% Cure Potency, +6% Conserve MP
-        body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +6% Conserve MP
-        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +5% Cure Potency, +6% Conserve MP
-        neck="Loricate Torque +1",                                                                                                  -- -6% DT
-        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                 -- +15% Conserve MP
-        left_ear="Mendi. Earring",                                                                                                  -- +5% Cure Potency
-        right_ear="Meili Earring", -- Replace with DT/Conserve MP
-        left_ring="Murky Ring",                                                                                                     -- -10% DT
-        right_ring="Defending Ring",                                                                                                -- -10% DT
-        back={ name="Aurist's Cape +1", augments={'Path: A',}}, -- Fi Folet +1 has conserve mp of +5 ORRRRRRRRRR REPLACE WITH MND/EVA/PDT CAPE
-    })
 
     -- TODO: Improve Telchine to 10% if possible
     -- TODO: Relic body +2 (8%) then +3 (12%)
@@ -493,6 +467,54 @@ function get_sets()
         hands=jse.empyrean.hands,                                                                                                   -- Perpetuance +60% duration
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
+
+    sets.midcast.barspell = {
+        --ammo=,
+        --head=,
+        --body=,
+        --hands=,
+        --legs=,
+        --feet=,
+        --neck=,
+        --waist=,
+        --left_ear=,
+        --right_ear=,
+        --left_ring=,
+        --right_ring=,
+        --back=,
+    }
+
+    ----------------------------------------------------------------
+    -- CURING MIDCAST
+    ----------------------------------------------------------------
+
+    -- Consider switching to Chatoyant Staff + Khonsu when I overcap
+    -- Consider DT pieces where possible to get to -50% DT
+    -- I don't need healing skill pieces, so start there
+    -- Empy chest + AF legs, figure out hands...
+    -- Potentially replace neck with loricate
+    -- Hybrid set suggests mephitas ring +1 but I think I can murky ring instead
+    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50% Cure Potency, +33% Conserve MP, -10% PDT, 28% DT (38% PDT, 28% MDT)
+        main="Daybreak",                                                                                                            -- 30% Cure Potency
+        sub="Genmei Shield",                                                                                                        -- -10% PDT
+        ammo="Staunch Tathlum",                                                                                                     -- -2% DT
+        head={ name="Vanya Hood", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},      -- +10% Cure Potency, +6% Conserve MP
+        body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +6% Conserve MP
+        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +5% Cure Potency, +6% Conserve MP
+        neck="Loricate Torque +1",                                                                                                  -- -6% DT
+        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                 -- +15% Conserve MP
+        left_ear="Mendi. Earring",                                                                                                  -- +5% Cure Potency
+        right_ear="Meili Earring", -- Replace with DT/Conserve MP
+        left_ring="Murky Ring",                                                                                                     -- -10% DT
+        right_ring="Defending Ring",                                                                                                -- -10% DT
+        back={ name="Aurist's Cape +1", augments={'Path: A',}}, -- Fi Folet +1 has conserve mp of +5 ORRRRRRRRRR REPLACE WITH MND/EVA/PDT CAPE
+    })
+
+    ----------------------------------------------------------------
+    -- OTHER MIDCAST
+    ----------------------------------------------------------------
 
     -- TODO: Maybe go for Merly aspir/drain but also are you trying to wreck my wardrobes?
     sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
@@ -742,10 +764,6 @@ end
 -- GEARSWAP FUNCTIONS
 ----------------------------------------------------------------
 
--- Precast does not overlay weapons
--- Midcast does to compensate for any precast weapons (for example, FC)
--- Aftercast does to compensate for any midcast weapons (for example, dispelga or cure - this lets us TP normally for say, a staff, even outside of a TP set)
-
 function precast(spell)
     if toggle_speed == "On" then
         add_to_chat(123, "Consider disabling the speed toggle!")
@@ -815,9 +833,39 @@ function midcast(spell)
         end
     end
 
-    -- If the spell name EXACTLY matches.
+    -- If the spell name EXACTLY matches
     if not matched and sets.midcast[spell.name] then
         equip_set_and_weapon(sets.midcast[spell.name])
+        matched = true
+    end
+
+    -- If the spell is a barspell
+    if not matched and spell.name:match("^Bar") then
+        equip_set_and_weapon(sets.midcast.barspell)
+        matched = true
+    end
+
+    -- If the spell is contained within helix_spells and isn't explicitly defined
+    if not matched and helix_spells:contains(spell.name) then
+        equip_set_and_weapon(sets.midcast.helix[nuking_mode.current])
+
+        if spell.name:match("Noctohelix") then
+            equip({head="Pixie Hairpin +1", left_ring="Archon Ring",})
+        end
+
+        if spell.name:match("Anemohelix") then
+            equip({main={ name="Marin Staff +1", augments={'Path: A',}}, sub="Enki Strap",}) -- Possibly amend later to match a nuking mode idk?
+        end
+
+        if spell.name:match("Luminohelix") then
+            equip({main="Daybreak", sub="Ammurapi Shield",})
+        end
+
+        -- If I happen to get the item.
+        --if spell.name:match("Geohelix") then
+        --    equip({neck="Quanpur Necklace"})
+        --end
+
         matched = true
     end
 
@@ -842,7 +890,10 @@ function midcast(spell)
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" then
         -- This will still trigger on stuff like Klimaform but eeh
         equip({waist="Hachirin-no-Obi"})
-        -- Chatoyant staff check?
+        
+        if spell.skill == "Healing Magic" then
+            equip({main="Chatoyant Staff", sub="Khonsu",})
+        end
     end
 end
 
