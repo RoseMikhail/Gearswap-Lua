@@ -10,8 +10,8 @@ Potential enhancements:
 - Save certain toggles and sets between reloads
 - Accuracy mode/toggle
     - Would be checked in midcast based on whatever the mode/toggle is set to
--- Someday TODO: When I have Idris, I need a buff check for Entrust as Geomancy+ doesn't affect it. I will need to use my Gada +10% indocolore duration.
--- Potentially make an override to force the PDT idle set regardless of whether I have a bubble out.
+- Potentially make an override to force the PDT idle set regardless of whether I have a bubble out.
+- Steal barspell logic from Scholar
 ]]
 
 ----------------------------------------------------------------
@@ -198,7 +198,7 @@ function get_sets()
         hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+8 "Mag.Atk.Bns."+8','"Fast Cast"+7','MND+5','Mag. Acc.+11',}},           -- 7% FC
         legs="Orvail Pants +1",                                                                                                         -- 5% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
-        neck="Baetyl Pendant",                                                                                                          -- 4% FC
+        neck="Voltsurge Torque",                                                                                                        -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
         left_ear="Malignance Earring",                                                                                                  -- 4% FC
         right_ear="Loquacious Earring",                                                                                                 -- 2% FC
@@ -555,15 +555,15 @@ function get_sets()
     sets.ws.default = { -- Hybrid DT, generic for physical weaponskills (idk what else to put here)
         range=empty,
         ammo="Amar Cluster",
-        head="Null Masque",
-        body="Jhakri Robe +2",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
         hands=jse.empyrean.hands,
-        legs="Jhakri Slops +2",
-        feet="Jhakri Pigaches +2",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
-        left_ear="Odnowa Earring +1",
-        right_ear="Moonshade Earring",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
         left_ring="Murky Ring",
         right_ring="Rufescent Ring",
         back="Null Shawl",
@@ -572,16 +572,16 @@ function get_sets()
     sets.ws["Realmrazer"] = { -- Hybrid DT, requires club
         range=empty,
         ammo="Amar Cluster",
-        head="Null Masque",
+        head=jse.empyrean.head,
         body=jse.empyrean.body,
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
-        feet="Jhakri Pigaches +2",
+        feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
         left_ear="Moonshade Earring",
         right_ear="Odnowa Earring +1",
-        left_ring="Murky Ring",
+        left_ring="Metamor. Ring +1",
         right_ring="Rufescent Ring",
         back="Null Shawl",
     }
@@ -592,48 +592,48 @@ function get_sets()
         head=jse.empyrean.head,
         body=jse.empyrean.body,
         hands="Jhakri Cuffs +2",
-        legs="Nyame Flanchard",
-        feet="Nyame Sollerets",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
         left_ear="Moonshade Earring",
         right_ear="Odnowa Earring +1",
         left_ring="Murky Ring",
-        right_ring="Metamor. Ring +1",
+        right_ring="Rufescent Ring",
         back="Alabaster Mantle",
     }
 
     sets.ws["Judgement"] = {
         range=empty,
         ammo="Amar Cluster",
-        head="Null Masque",
+        head=jse.empyrean.head,
         body=jse.empyrean.body,
         hands="Jhakri Cuffs +2",
-        legs="Nyame Flanchard",
-        feet="Nyame Sollerets",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
-        left_ear="Odnowa Earring +1",
-        right_ear="Moonshade Earring",
-        left_ring="Rufescent Ring",
-        right_ring="Defending Ring",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
         back="Alabaster Mantle",
     }
 
     sets.ws["Black Halo"] = {
         range=empty,
         ammo="Amar Cluster",
-        head="Null Masque",
+        head=jse.empyrean.head,
         body=jse.empyrean.body,
         hands="Jhakri Cuffs +2",
-        legs="Nyame Flanchard",
-        feet="Nyame Sollerets",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
-        left_ear="Odnowa Earring +1",
-        right_ear="Moonshade Earring",
-        left_ring="Rufescent Ring",
-        right_ring="Defending Ring",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
         back="Alabaster Mantle",
     }
 end
@@ -695,10 +695,6 @@ end
 ----------------------------------------------------------------
 -- GEARSWAP FUNCTIONS 
 ----------------------------------------------------------------
-
--- Precast does not overlay weapons
--- Midcast does to compensate for any precast weapons (for example, FC)
--- Aftercast does to compensate for any midcast weapons (for example, dispelga or cure - this lets us TP normally for say, a staff, even outside of a TP set)
 
 function precast(spell)
     if toggle_speed == "On" then
@@ -773,7 +769,7 @@ function midcast(spell)
         matched = true
     end
 
-    -- If the spell matches one of the match_list spells.#
+    -- If the spell matches one of the match_list spells.
     -- Note: This HAS to be after the Geo/Indi spells otherwise it'll match those too
     if not matched then
         for match in match_list:it() do
@@ -811,7 +807,10 @@ function midcast(spell)
     -- Hachirin-no-Obi overlay
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" then
         equip({waist="Hachirin-no-Obi"})
-        -- Chatoyant staff check?
+
+        if spell.skill == "Healing Magic" then
+            equip({main="Chatoyant Staff", sub="Khonsu",})
+        end
     end
 end
 

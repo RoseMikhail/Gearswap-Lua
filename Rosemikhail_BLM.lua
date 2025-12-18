@@ -12,6 +12,7 @@ Potential enhancements:
 - Accuracy mode/toggle
     - Would be checked in midcast based on whatever the mode/toggle is set to
 - Toggle for mana wall set
+- Steal helix logic from Scholar, though how often will this actually be relevant...?
 ]]
 
 ----------------------------------------------------------------
@@ -213,7 +214,7 @@ function get_sets()
         hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+8 "Mag.Atk.Bns."+8','"Fast Cast"+7','MND+5','Mag. Acc.+11',}},           -- 7% FC
         legs="Orvail Pants +1",                                                                                                         -- 5% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
-        neck="Baetyl Pendant",                                                                                                          -- 4% FC
+        neck="Voltsurge Torque",                                                                                                        -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
         left_ear="Malignance Earring",                                                                                                  -- 4% FC
         right_ear="Loquacious Earring",                                                                                                 -- 2% FC
@@ -496,7 +497,7 @@ function get_sets()
         body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
         hands=jse.AF.hands,
         legs=jse.AF.legs,
-        feet="Serpentes Sabots",
+        feet={ name="Psycloth Boots", augments={'MP+50','INT+7','"Conserve MP"+6',}},
         neck="Dualism Collar +1",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
         left_ear="Nehalennia Earring",
@@ -556,14 +557,13 @@ function get_sets()
         neck="Unmoving Collar +1",
         waist="Embla Sash",                                                                                                             -- Sublimation +3
         left_ear="Ethereal Earring",                                                                                                    -- Damage to MP
-        right_ear="Friomisi Earring",                                                                                                   -- Soon replaced but I won't say no to more damage during mana wall
+        right_ear="Malignance Earring",                                                                                                 -- Soon replaced but I won't say no to more damage during mana wall
         left_ring="Murky Ring",                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                    -- -10% DT
         back=jse.capes.idle_fc,                                                                                                         -- -10% PDT
     }
 
     sets.midcast.stun_enmity = set_combine(sets.ja["Mana Wall"], {  -- OVERALL +23 enmity
-        
         neck="Unmoving Collar +1",                                  -- +10 enmity
         left_ear="Cryptic Earring",                                 -- +4 enmity 
         right_ear="Friomisi Earring",                               -- +2 enmity
@@ -743,10 +743,6 @@ end
 -- GEARSWAP FUNCTIONS
 ----------------------------------------------------------------
 
--- Precast does not overlay weapons
--- Midcast does to compensate for any precast weapons (for example, FC)
--- Aftercast does to compensate for any midcast weapons (for example, dispelga or cure - this lets us TP normally for say, a staff, even outside of a TP set)
-
 function precast(spell)
     if toggle_speed == "On" then
         add_to_chat(123, "Consider disabling the speed toggle!")
@@ -924,7 +920,10 @@ function midcast(spell)
     if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" then
         -- This will still trigger on stuff like Klimaform but eeh
         equip({waist="Hachirin-no-Obi"})
-        -- Chatoyant staff check?
+
+        if spell.skill == "Healing Magic" then
+            equip({main="Chatoyant Staff", sub="Khonsu",})
+        end
     end
 end
 
