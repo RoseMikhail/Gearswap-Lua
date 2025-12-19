@@ -979,13 +979,14 @@ function self_command(command)
     elseif main_command == "toggletp" then
         toggle_tp = handle_toggle(toggle_tp, "TP")
 
+        idle()
+
         if toggle_tp == "On" then
+            equip(weapon_sets[weapon_mode.current])
             send_command("gs disable main;gs disable sub;gs disable range")
         else
             send_command("gs enable main;gs enable sub;gs enable range")
         end
-        
-        idle()
 
     elseif main_command == "toggleafbody" then
         toggle_af_body = handle_toggle(toggle_af_body, "AF Body")

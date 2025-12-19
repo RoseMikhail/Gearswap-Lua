@@ -869,8 +869,6 @@ function self_command(command)
             send_command("gs enable main;gs enable sub;gs enable range")
         end
 
-        --idle()
-
     elseif main_command == "togglespeed" then
         toggle_speed = handle_toggle(toggle_speed, "Speed")
         idle()
