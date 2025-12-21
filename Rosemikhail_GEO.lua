@@ -267,6 +267,7 @@ function get_sets()
 
     -- GEO SET CONSERVE MP: 43(GEO)+6+4+15+2 = 70%
     -- INDI SET CONSERVE MP: 43(GEO)+15+2 = 60%
+    -- back="Fi Follet Cape +1", potentially conserve for geocoloure
     
     sets.midcast.geocolure = {                                                                                                  -- 981 total at present
         --main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                          -- Skill, 6% Conserve MP

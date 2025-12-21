@@ -4,6 +4,9 @@ include("Modes.lua")
 -- Checks to add
 ----------------------------------------------------------------
 --[[
+
+- Sort my scholar macros out
+
 -- Create JA sets for all of the gear I might have lmao GOD THERE'S SO MUCH TO DO FOR SCH
 
     - Cursna set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Cursna
@@ -44,6 +47,7 @@ end
     - Immanence skillchaining set; idk how to set this up. https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Utility_Nuking_Sets
         - Something like "If Immanence buff is up, overlay this". However, it won't skillchain on the first Immanence, so maybe I need a variable? I'm not sure
         - Could just say fuck it lol
+        - it WILL use my regular freenuke/burst if I don't check for this, which i dont really want
 
     - Ebullience/Rapture check
 
@@ -269,7 +273,7 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 71% FC, 2% Occ - Will be 81% with cape
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 81% FC, 2% Occ
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
@@ -282,7 +286,7 @@ function get_sets()
         right_ear="Loquacious Earring",                                                                                                 -- 2% FC
         left_ring="Kishar Ring",                                                                                                        -- 4% FC
         right_ring="Prolix Ring",                                                                                                       -- 2% FC
-        --back="TODO: PUT SOMETHING HERE", -- this wants to be Fi Follet Cape +1                                                        -- 10% FC
+        back="Fi Follet Cape +1",                                                                                                       -- 10% FC
     }
 
     sets.precast["Impact"] = set_combine(sets.precast.fast_cast, {
@@ -355,7 +359,7 @@ function get_sets()
 
     sets.midcast.helix = {} -- Keep empty. This is probably ugly and bad. Think harder later.
 
-    sets.midcast.helix["Free Nuke"] = {
+    sets.midcast.helix["Free Nuke"] = set_combine(sets.midcast["Free Nuke"], {
         --ammo=,
         --head=,
         --body=,
@@ -369,9 +373,9 @@ function get_sets()
         --left_ring=,
         --right_ring=,
         --back=,
-    }
+    })
 
-    sets.midcast.helix["Burst"] = {
+    sets.midcast.helix["Burst"] = set_combine(sets.midcast["Burst"], {
         --ammo=,
         --head=,
         --body=,
@@ -385,7 +389,7 @@ function get_sets()
         --left_ring=,
         --right_ring=,
         --back=,
-    }
+    })
 
     ----------------------------------------------------------------
     -- ENFEEBLING MIDCAST
@@ -439,11 +443,14 @@ function get_sets()
     -- TODO: Relic body +2 (8%) then +3 (12%)
     -- TOOD: Musa someday for 20% BUT LMAO
     -- TODO: Skill items: Mimir Earring, Fi Folet Cape +1, Andoaa Earring (+24 in total). Relic body will be better +3 for duration (+12%) and enhancing skill (+19). WORSE duration at +2. Stikini +1 x2...
-    -- Increase enhancing skill to 500. Currently 470. Note that some spells are better at 500, so maybe accept 2% worse duration and just use relic body at +2.
-    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +71% duration
+    -- Increase enhancing skill to 500. Currently 479. Note that some spells are better at 500, so maybe accept 2% worse duration and just use relic body at +2.
+
+    -- Probably accept slightly less duration for the relic body's higher enhancing skill
+    sets.midcast["Enhancing Magic"] = {                                                                                               -- +71% duration
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
+        ammo="Pemphredo Tathlum",
         head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +8',}},                                                          -- +8% duration
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
         hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +9',}},                                     -- +9% duratiom. This should be replaced by empy hands during Perpetuance
@@ -455,11 +462,13 @@ function get_sets()
         right_ear="Gwati Earring",
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
-        back={ name="Aurist's Cape +1", augments={'Path: A',}},
-    })
+        back="Fi Follet Cape +1",
+    }
 
     -- Do not replace telchine body for duration. Unless ofc you're using Relic +3 I think. Regen duration +12!!
     -- Fill other slots with Conserve MP.
+
+    -- Technically the hands only need to be on for perpetuance, could use telchine hands otherwise
     sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
         main="Bolelabunga",                                                                                                         -- +10% potency
         head=jse.empyrean.head,                                                                                                     -- +20% potency
@@ -468,7 +477,7 @@ function get_sets()
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
 
-    sets.midcast.barspell = {
+    sets.midcast.barspell = set_combine(sets.midcast["Enhancing Magic"], {
         --ammo=,
         --head=,
         --body=,
@@ -481,8 +490,8 @@ function get_sets()
         --right_ear=,
         --left_ring=,
         --right_ring=,
-        --back=,
-    }
+        back="Fi Follet Cape +1",
+    })
 
     ----------------------------------------------------------------
     -- CURING MIDCAST
@@ -494,6 +503,8 @@ function get_sets()
     -- Empy chest + AF legs, figure out hands...
     -- Potentially replace neck with loricate
     -- Hybrid set suggests mephitas ring +1 but I think I can murky ring instead
+    --back="Fi Follet Cape +1", is a good conserve piece
+
     sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50% Cure Potency, +33% Conserve MP, -10% PDT, 28% DT (38% PDT, 28% MDT)
         main="Daybreak",                                                                                                            -- 30% Cure Potency
         sub="Genmei Shield",                                                                                                        -- -10% PDT
@@ -701,6 +712,8 @@ function get_sets()
     ----------------------------------------------------------------
 
     sets.overlay.sublimation = {
+        head=jse.AF.head,                                                                                                               -- Sublimation +4
+        --body=jse.relic.body,                                                                                                            -- Sublimation +2
         waist="Embla Sash",                                                                                                             -- Sublimation +3
     }
 end
