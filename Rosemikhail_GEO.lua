@@ -8,8 +8,6 @@ include("Modes.lua")
 --[[
 Potential enhancements:
 - Save certain toggles and sets between reloads
-- Accuracy mode/toggle
-    - Would be checked in midcast based on whatever the mode/toggle is set to
 - Potentially make an override to force the PDT idle set regardless of whether I have a bubble out.
 - Steal barspell logic from Scholar
 ]]
@@ -21,7 +19,7 @@ Potential enhancements:
 -- Modes
 nuking_mode = M{"Free Nuke", "Burst"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
-weapon_mode = M{"Wizard", "Daybreak", "Idris"}
+weapon_mode = M{"Wizard", "Daybreak", "Idris", "Maxentius"}
 
 toggle_speed = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
@@ -42,7 +40,6 @@ send_command("bind f2 gs c nukemode burst")
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
 send_command("bind f7 gs c toggletp")
-send_command("bind f8 gs c toggleweaponlock")
 
 send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
@@ -57,15 +54,6 @@ add_to_chat(123, "F12: Hide information text box")
 ----------------------------------------------------------------
 -- INFORMATION BOX
 ----------------------------------------------------------------
-
---[[
-default_settings = {
-  bg = { alpha = 100 },
-  pos = { x = -210, y = 21 },
-  flags = { draggable = false, right = true },
-  text = { font = "Arial", size = 13 },
-}
-]]
 
 default_settings = {
   bg = { alpha = 0 },
@@ -101,7 +89,7 @@ build_info_box()
 ----------------------------------------------------------------
 
 -- Lockstyle
-send_command("wait 3;input /lockstyleset 22") -- Geomancer Relic
+send_command("wait 3;input /lockstyleset 5") -- Geomancer Relic
 
 function update_macro_book()
     -- GEO/RDM macro book
@@ -140,8 +128,8 @@ function get_sets()
     jse.empyrean = {
         head= "Azimuth Hood +3",
         body= "Azimuth Coat +3",
-        hands= "Azimuth Gloves +2",
-        legs= "Azimuth Tights +2",
+        hands= "Azimuth Gloves +3",
+        legs= "Azimuth Tights +3",
         feet= "Azimuth Gaiters +3",
     }
 
@@ -171,6 +159,10 @@ function get_sets()
             sub="Genmei Shield",
             range=empty,
         },
+        ["Maxentius"] = {
+            main="Maxentius",
+            sub="Ammurapi Shield",
+        },
     }
 
     ----------------------------------------------------------------
@@ -184,6 +176,7 @@ function get_sets()
     sets.ja = {}                    -- Leave this empty
     sets.ws = {}                    -- Leave this empty
     sets.melee = {}                 -- Leave this empty
+    sets.buff = {}                  -- Leave this empty
 
     ----------------------------------------------------------------
     -- PRECAST
@@ -221,15 +214,14 @@ function get_sets()
     -- NUKE MIDCAST MODES
     ----------------------------------------------------------------
 
-    -- Idris becomes pretty good when augmented via afterglow, but I'm thinking kinda whatever
-    -- TODO: Determine whether the +3 Empyrean gear is better or not.
+    -- SIM what these actually should be, but it looks like Empyrean +3 beats all
 
     sets.midcast["Free Nuke"] = {
         range=empty,
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=jse.empyrean.head,
-        body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Saevus Pendant +1",
@@ -241,15 +233,14 @@ function get_sets()
         back=jse.capes.nuking,
     }
 
-    -- Picking up more of the Ea set might make this better, but it isn't a priority.
-    sets.midcast["Burst"] = {                                                                           -- 35% MB, 24% MB II
+    sets.midcast["Burst"] = {                                                                           -- 37% MB, 17% MB II
         range=empty,
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
-        head="Ea Hat",                                                                                  -- 6% MB 6% MB II
-        body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},      -- Someday Ea +1 apparently
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},      -- 6% MB II
-        legs="Ea Slops",                                                                                -- 7% MB 7% MB II
-        feet="Jhakri Pigaches +2",                                                                      -- 7% MB
+        head="Ea Hat +1",                                                                               -- 7% MB 7% MB II
+        body=jse.empyrean.body,                                                                         -- 5% MB II
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,                                                                         -- 14% MB
+        feet=jse.empyrean.feet,
         neck="Mizu. Kubikazari",                                                                        -- 10% MB
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
@@ -503,7 +494,6 @@ function get_sets()
     
     -- This set is trying its best for accuracy but is suffering; it is a work in progress
     -- Nyame RP will help a lot, as will stuff like Chirich
-    -- Petrov ring for TP? But my DT is probably not great...
     sets.melee.TP = {
         range=empty,
         ammo="Amar Cluster",
@@ -516,8 +506,8 @@ function get_sets()
         waist="Null Belt", -- Could instead be Grunfeld
         left_ear="Cessance Earring",
         right_ear="Odnowa Earring +1",
-        left_ring="Murky Ring",
-        right_ring="Petrov Ring",
+        left_ring="Petrov Ring",
+        right_ring="Lehko's Ring",
         back="Null Shawl",
     }
 
@@ -570,7 +560,7 @@ function get_sets()
         back="Null Shawl",
     }
 
-    sets.ws["Realmrazer"] = { -- Hybrid DT, requires club
+    sets.ws["Realmrazer"] = { -- MND scaling, Hybrid DT
         range=empty,
         ammo="Amar Cluster",
         head=jse.empyrean.head,
@@ -587,12 +577,12 @@ function get_sets()
         back="Null Shawl",
     }
 
-    sets.ws["Exudation"] = {
+    sets.ws["Exudation"] = { -- INT/MND scaling
         range=empty,
         ammo="Amar Cluster",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
-        hands="Jhakri Cuffs +2",
+        hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Null Loop",
@@ -604,12 +594,29 @@ function get_sets()
         back="Alabaster Mantle",
     }
 
-    sets.ws["Judgement"] = {
+    sets.ws["Aeolian Edge"] = { -- DEX/INT scaling, re-sim this
+        range=empty,
+        ammo="Sroda Tathlum",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Saevus Pendant +1",
+        waist="Eschan Stone",
+        left_ear="Malignance Earring",
+        right_ear="Moonshade Earring",
+        left_ring="Murky Ring",
+        right_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},
+        back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
+    }
+
+    sets.ws["Black Halo"] = { -- MND+/STR scaling
         range=empty,
         ammo="Amar Cluster",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
-        hands="Jhakri Cuffs +2",
+        hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Null Loop",
@@ -621,12 +628,12 @@ function get_sets()
         back="Alabaster Mantle",
     }
 
-    sets.ws["Black Halo"] = {
+    sets.ws["Judgment"] = { -- STR/MND scaling
         range=empty,
         ammo="Amar Cluster",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
-        hands="Jhakri Cuffs +2",
+        hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Null Loop",
@@ -740,7 +747,7 @@ function precast(spell)
     end
 
     -- Unhandled Job Abilities
-    if spell.type == "JobAbility" then
+    if spell.type == "JobAbility" or spell.type == "Scholar" then
         -- Stay in idle.
         return
     end
@@ -891,7 +898,6 @@ function file_unload(file_name)
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
-    send_command("unbind f8")
 
     send_command("unbind f9")
     send_command("unbind f12")

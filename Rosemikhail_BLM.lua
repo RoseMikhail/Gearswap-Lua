@@ -9,9 +9,7 @@ include("Modes.lua")
 Potential enhancements:
 - Allow dispelga and impact during mana wall and death
 - Save certain toggles and sets between reloads
-- Accuracy mode/toggle
-    - Would be checked in midcast based on whatever the mode/toggle is set to
-- Toggle for mana wall set
+- Toggle for Mana Wall set
 - Steal helix logic from Scholar, though how often will this actually be relevant...?
 ]]
 
@@ -22,8 +20,7 @@ Potential enhancements:
 -- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
-weapon_mode = M{"Staff", "StaffAcc", "Wizard"}
--- TODO: As long as StaffAcc exists with Khonsu in it, dirty Mana Wall checks to not equip Khonsu will exist lol
+weapon_mode = M{"Staff", "Wizard", "Maxentius"}
 
 toggle_speed = "Off"
 toggle_af_body = "Off"
@@ -50,7 +47,6 @@ send_command("bind f3 gs c nukemode occultacumen")
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
 send_command("bind f7 gs c toggletp")
-send_command("bind f8 gs c toggleweaponlock")
 
 send_command("bind f9 gs c togglespeed")
 send_command("bind f10 gs c toggleafbody")
@@ -67,15 +63,6 @@ add_to_chat(123, "F11: Toggle Death, F12: Hide information text box")
 ----------------------------------------------------------------
 -- INFORMATION BOX
 ----------------------------------------------------------------
-
---[[
-default_settings = {
-  bg = { alpha = 100 },
-  pos = { x = -210, y = 21 },
-  flags = { draggable = false, right = true },
-  text = { font = "Arial", size = 13 },
-}
-]]
 
 default_settings = {
   bg = { alpha = 0 },
@@ -113,7 +100,7 @@ build_info_box()
 ----------------------------------------------------------------
 
 -- Lockstyle
-send_command("wait 3;input /lockstyleset 5") -- Furia
+send_command("wait 3;input /lockstyleset 40") -- Furia
 
 function update_macro_book()
     -- BLM/SCH macro book
@@ -177,12 +164,12 @@ function get_sets()
             main={ name="Marin Staff +1", augments={'Path: A',}},
             sub="Enki Strap",
         },
-        ["StaffAcc"] = {
-            main={ name="Marin Staff +1", augments={'Path: A',}},
-            sub="Khonsu", -- Mana Wall checks will try to replace "Khonsu" with the sub from the regular Staff set to avoid enmity decrease
-        },
         ["Wizard"] = {
             main="Wizard's Rod",
+            sub="Ammurapi Shield",
+        },
+        ["Maxentius"] = {
+            main="Maxentius",
             sub="Ammurapi Shield",
         },
         -- Soon Malevolence and Ammurapi Shield
@@ -201,7 +188,7 @@ function get_sets()
     sets.ja = {}                    -- Leave this empty
     sets.ws = {}                    -- Leave this empty
     sets.melee = {}                 -- Leave this empty
-    sets.overlay = {}               -- Leave this empty
+    sets.buff = {}                  -- Leave this empty
 
     ----------------------------------------------------------------
     -- PRECAST
@@ -260,9 +247,9 @@ function get_sets()
         back=jse.capes.nuking
     }
 
-    sets.midcast["Burst"] = {                                                                                           -- 36% MB, 11% MB II
+    sets.midcast["Burst"] = {                                                                                           -- 37% MB, 12% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
-        head="Ea Hat",                                                                                                  -- 6% MB 6% MB II
+        head="Ea Hat +1",                                                                                               -- 7% MB 7% MB II
         body=jse.empyrean.body,                                                                                         -- 5% MB II
         --hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}}, -- 6% MB II
         hands=jse.empyrean.hands,
@@ -277,7 +264,7 @@ function get_sets()
         back=jse.capes.nuking                                                                                           -- 5% MB
     }
 
-    sets.midcast["Occult Acumen"] = set_combine(sets.midcast["Free Nuke"], { -- I have no idea when it comes to Occult Acumen. Panic TP?
+    sets.midcast["Occult Acumen"] = set_combine(sets.midcast["Free Nuke"], {
         ammo="Seraphic Ampulla",
         head="Mallquis Chapeau +2",
         --body=
@@ -288,8 +275,8 @@ function get_sets()
         waist="Oneiros Rope",
         left_ear="Steelflash Earring",
         right_ear="Bladeborn Earring",
-        left_ring="Rajas Ring",
-        right_ring="Petrov Ring",
+        left_ring="Petrov Ring",
+        right_ring="Lehko's Ring",
         back=jse.capes.occult_acumen,
     })
 
@@ -325,7 +312,7 @@ function get_sets()
 
     sets.midcast["Comet"] = set_combine(sets.midcast["Free Nuke"], {
         head="Pixie Hairpin +1",
-        -- TODO: Add Archon Ring when I get it
+        left_ring="Archon Ring",
     })
 
     ----------------------------------------------------------------
@@ -513,11 +500,10 @@ function get_sets()
     
     -- This set is trying its best for accuracy but is suffering; it is a work in progress
     -- Nyame RP will help a lot, as will stuff like Chirich
-    -- Petrov ring for TP? But my DT is probably not great...
     -- It's not technically BEST but Nyame for DT and evasion is probably best to stick with
 
     -- Nyame will beat this stuff when augmented path B
-    sets.melee.TP = { -- 1267 accuracy, -58% DT
+    sets.melee.TP = { -- 1267 accuracy, -48% DT
         ammo="Amar Cluster",
         head="Null Masque",
         body=jse.empyrean.body,
@@ -528,8 +514,8 @@ function get_sets()
         waist="Null Belt", -- Could instead be Grunfeld
         left_ear="Cessance Earring",
         right_ear="Odnowa Earring +1",
-        left_ring="Murky Ring",
-        right_ring="Petrov Ring",
+        left_ring="Petrov Ring",
+        right_ring="Lehko's Ring",
         back="Null Shawl",
     }
 
@@ -547,7 +533,7 @@ function get_sets()
         body=jse.relic.body,
     }
 
-    sets.ja["Mana Wall"] = {                                                                                                            -- OVERALL -54% DT, -10% PDT
+    sets.ja["Mana Wall"] = {                                                                                                            -- OVERALL -57% DT, -10% PDT
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=jse.empyrean.head,                                                                                                         -- -10% DT
         body=jse.AF.body,
@@ -555,7 +541,7 @@ function get_sets()
         legs=jse.empyrean.legs,                                                                                                         -- 
         feet=jse.empyrean.feet,                                                                                                         -- -10% DT
         neck="Unmoving Collar +1",
-        waist="Embla Sash",                                                                                                             -- Sublimation +3
+        waist="Plat. Mog. Belt",                                                                                                        -- -3% DT
         left_ear="Ethereal Earring",                                                                                                    -- Damage to MP
         right_ear="Malignance Earring",                                                                                                 -- Soon replaced but I won't say no to more damage during mana wall
         left_ring="Murky Ring",                                                                                                         -- -10% DT
@@ -592,7 +578,7 @@ function get_sets()
     }
 
 
-    sets.ws["Aeolian Edge"] = { -- Hybrid DT, requires Malevolence/some other dagger + RDM sub
+    sets.ws["Aeolian Edge"] = { -- DEX/INT scaling, Hybrid DT, requires RDM sub
         ammo="Sroda Tathlum",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
@@ -608,7 +594,23 @@ function get_sets()
         back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
     }
 
-    sets.ws["Realmrazer"] = { -- Hybrid DT, requires club
+    sets.ws["Black Halo"] = { -- MND/STR scaling, Hybrid DT, re-sim this
+        ammo="Amar Cluster",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
+        back="Alabaster Mantle",
+    }
+
+    sets.ws["Realmrazer"] = { -- MND scaling, Hybrid DT
         ammo="Amar Cluster",
         head="Null Masque",
         body=jse.AF.body,
@@ -657,13 +659,11 @@ function get_sets()
         back=jse.capes.idle_fc,
     }
 
-    --TODO: Black Halo when I unlock it
-
     ----------------------------------------------------------------
-    -- OVERLAY - Useful for items that might need to overlay multiple different sets (varying idles, etc.)
+    -- BUFF
     ----------------------------------------------------------------
 
-    sets.overlay.sublimation = {
+    sets.buff.sublimation = {
         waist="Embla Sash",                                                                                                             -- Sublimation +3
     }
 end
@@ -682,15 +682,10 @@ function equip_set_and_weapon(set)
     end
 end
 
--- Sublimation won't apply the overlay if we're currently TPing. TODO: Maybe add a toggle for this.
+-- Sublimation won't apply the overlay if we're currently TPing.
 function idle()
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
-
-        -- Dirty check to avoid enmity decrease
-        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
-            equip({sub=weapon_sets["Staff"].sub})
-        end
         return
     end
 
@@ -706,7 +701,7 @@ function idle()
         equip_set_and_weapon(sets.idle[idle_mode.current])
 
         if buffactive["Sublimation: Activated"] then
-            equip(sets.overlay.sublimation)
+            equip(sets.buff.sublimation)
         end
     end
 
@@ -760,11 +755,6 @@ function precast(spell)
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
         equip_if_ja_match(spell.name)
-
-        -- Dirty check to avoid enmity decrease
-        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
-            equip({sub=weapon_sets["Staff"].sub})
-        end
         return
     end
 
@@ -815,7 +805,7 @@ function precast(spell)
     end
 
     -- Unhandled Job Abilities
-    if spell.type == "JobAbility" then
+    if spell.type == "JobAbility" or spell.type == "Scholar" then
         -- Stay in idle.
         return
     end
@@ -836,11 +826,6 @@ function midcast(spell)
             equip_set_and_weapon(sets.midcast.stun_enmity)
         else
             equip_set_and_weapon(sets.ja["Mana Wall"])
-        end
-
-        -- Dirty check to avoid enmity decrease
-        if weapon_sets[weapon_mode.current].sub == "Khonsu" then
-            equip({sub=weapon_sets["Staff"].sub})
         end
         return
     end
@@ -1018,7 +1003,6 @@ function file_unload(file_name)
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
-    send_command("unbind f8")
     
     send_command("unbind f9")
     send_command("unbind f10")
