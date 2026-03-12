@@ -5,75 +5,53 @@ include("Modes.lua")
 ----------------------------------------------------------------
 --[[
 
-- Sort my scholar macros out
+//// FUNCTIONALITY /////
+-- Create JA sets and checks
+    - AF gear
+    - Relic gear (though I might need to comment it out to start with)
+        - head: maybe consider the focalization thing, but I'm not sure if I care
+    - Empyrean gear
+        - Ebullience/Rapture check
+            - If either buff is active, equip arbatel bonnet (empyrean head) when casting either Healing Magic or Black Magic
+        - Perpetuance check
+            - If perpetuance buff is active, equip empyrean hands when casting White Magic Enhancing Magic
+        - Technically there could be a check for the empyrean +3 legs for penury/parsimony, but I'm pretty sure I'm always going to be nuking in them anyway
+        - Same shit for the empyrean feet + klimaform, but yeah, I'll be wearing these anyway...
+    
 
--- Create JA sets for all of the gear I might have lmao GOD THERE'S SO MUCH TO DO FOR SCH
+-- for other jobs too but I think chatoyant doesn't work on both day and weather
 
-    - Cursna set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Cursna
-
-    - Regen set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Regen 
-        - Apparently the head is really fucking good for empy so
-        - Mix duration and potency FOR WHEN PERPETUANCE IS UP
-        - Otherwise, use max duration or regen potency, I'm thinking duration is better - maybe set a toggle? or maybe I'll just kill myself trying to pick :3
-        - Toggle between max duration set and normal potency/duration set
-
-    - Check for Perpetuance buff active: equip relevant JSE
-
-    - Stoneskin set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Enhancing
-
-    - Aquaveil set
-
-    - Sublimation set
-
-    - Separate Enfeebling sets for when I'm in Light or Dark arts... maybe a later thing lol
-                - it looks like there's only a distinction because of the AF body having buffs specifically for dark arts, so you could maybe just check if you're in dark arts + casting an enfeeble
-
-if spell.skill == "Enfeebling Magic" then
-    if buffactive["Dark Arts"] or buffactive["Addendum: Black"] then
-        equip(sets.midcast.enfeebling_dark)
-        -- Specifically because AF body gives a buff if you're in Dark Arts
-    else
-        equip(sets.midcast.enfeebling_light)
-        -- Also covering the instance that you're not in any art at all for some reason
-    end
-end
+//// SETS + ASSOCIATED CHECKS /////
+UPDATE THESE SETS BUT MOSTLY JUST FOLLOW WIKI AND PAY ATTENTION TO THE AF/RELIC/EMPYREAN STATS AND SLOT APPROPRIATELY
+- Cursna set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Cursna
+- Regen set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Regen 
+- Stoneskin set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Enhancing
+- Aquaveil set
+- Sublimation set
+- Kaustra
+- Update Myrkr
+- Combine the DT sets; there's no reason not to. Do this for the other jobs too.
+-- Do cure DT set, kaykaus came come later
+-- Do regen duration set, potency toggle can come later
+-- Compare against any other sets in the wiki guide
 
 
-    - To some degree, a lot of this can be applied to BLM and GEO as well
 
-    - Kaustra
-
-    - Check for Immanence buff active: equip relevant JSE
-    - Immanence skillchaining set; idk how to set this up. https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Utility_Nuking_Sets
-        - Something like "If Immanence buff is up, overlay this". However, it won't skillchain on the first Immanence, so maybe I need a variable? I'm not sure
-        - Could just say fuck it lol
-        - it WILL use my regular freenuke/burst if I don't check for this, which i dont really want
-
-    - Ebullience/Rapture check
-
-    - myrkr set check gear for mp
-        - I should remember to check the wildskeeper rewards to get stuff for this lol
-
-    - Stun midcast recast (yeah maybe)
-
-    - DT sets for improved meva and DT... I'll think about this later
-
-    - Doomed set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Misc_Sets
-
-    - Gishdubar sash (do this for the other jobs too) - idk how to check when refresh/cursna/cure effects are being casted on me, but this would be a great overlay
-
-    - Cure set below is kinda hybrid curing; maybe have another for pure potency/potency/enmity reduction and have a toggle for which gets used https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Healing_Gear_Sets
-
-    - Go through the sets and place empyrean, relic and artifact in the relevant places.
-
-    - Chat message or something to say that Sublimation has finished charging - can extend to blm
-
-    -- Review Aspir/Drain set and the AF body stuff
-
-    -- jse Earring?
-
-    -- Check for Cure Mode - Are we doing max potency or cure DT?
-    -- Check for Regen Mode - Are we doing max potency or max duration or a mix?
+//// STRETCH GOALS /////
+- Chat message or something to say that Sublimation has finished charging - can extend to blm
+- Doomed set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Misc_Sets - extend to other jobs
+- Stun midcast recast (yeah maybe) + apply to other jobs
+- Regen potency vs regen toggle
+- Cure DT vs potency toggle
+- When more sources of fastcast have been obtained, consider creating a Grimoire fastcast set
+    - In other words, I need to be able to get 80% regular fastcast in all slots minus the head and feet for this to become viable as a set
+    - Only for when we're casting white or dark magic under the correct art/addendum
+    - Doesn't work when Accession, Alacrity, Celerity or Manifestation would affect the spell
+- Aspir/Drain magic burst set. Apply to BLM/GEO as well.
+- More idle modes- normal one, full DT/meva, etc.
+-- maybe modify "overlay" to be "buff" and change all gear check equips in midcast/etc to singleslot gearsets
+-- Multiple immanence modes? currently I have haste/fc/dt, but consider a subtle blow/haste/fc set and then a separate one for dt, maybe also consider using skilchain+ damage
+-- I could technically have dark and light versions of all of the healing stuff, due to the academic pants, but this seems not very worth it
 ]]
 ----------------------------------------------------------------
 -- NOTES
@@ -81,21 +59,15 @@ end
 --[[
 Potential enhancements:
 - Save certain toggles and sets between reloads
-- Accuracy mode/toggle
-    - Would be checked in midcast based on whatever the mode/toggle is set to
--- When Musa/more sources of fastcast have been obtained, consider creating a Grimoire fastcast set
-        - In other words, I need to be able to get 80% regular fastcast in all slots minus the head and feet for this to become viable as a set
-        - Only for when we're casting white or dark magic under the correct art/addendum
-        - Doesn't work when Accession, Alacrity, Celerity or Manifestation would affect the spell
 ]]
 ----------------------------------------------------------------
 -- VARIABLES
 ----------------------------------------------------------------
 
 -- Modes and toggles
-nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
+nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen", "Vagary Burst"}
 idle_mode = M{"PDT", "MDT", "Refresh"}
-weapon_mode = M{"Staff", "StaffAcc", "Wizard"}
+weapon_mode = M{"Staff", "Wizard", "Maxentius"}
 
 toggle_speed = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
@@ -105,6 +77,7 @@ nuking_mode_pairs = {
     freenuke = "Free Nuke",
     burst = "Burst",
     occultacumen = "Occult Acumen",
+    vagaryburst = "Vagary Burst"
 }
 
 -- Midcast helpers
@@ -115,17 +88,17 @@ helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix
 send_command("bind f1 gs c nukemode freenuke")
 send_command("bind f2 gs c nukemode burst")
 send_command("bind f3 gs c nukemode occultacumen")
+send_command("bind f4 gs c nukemode vagaryburst")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
 send_command("bind f7 gs c toggletp")
-send_command("bind f8 gs c toggleweaponlock")
 
 send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1-F3: Switch nuking mode")
+add_to_chat(123, "F1-F4: Switch nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
 add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear")
@@ -134,15 +107,6 @@ add_to_chat(123, "F12: Hide information text box")
 ----------------------------------------------------------------
 -- INFORMATION BOX
 ----------------------------------------------------------------
-
---[[
-default_settings = {
-  bg = { alpha = 100 },
-  pos = { x = -210, y = 21 },
-  flags = { draggable = false, right = true },
-  text = { font = "Arial", size = 13 },
-}
-]]
 
 default_settings = {
   bg = { alpha = 0 },
@@ -178,7 +142,7 @@ build_info_box()
 ----------------------------------------------------------------
 
 -- Lockstyle
-send_command("wait 3;input /lockstyleset 26") -- SCH Empy
+send_command("wait 3;input /lockstyleset 9") -- SCH Empy
 
 function update_macro_book()
     -- SCH/WHM macro book
@@ -216,11 +180,11 @@ function get_sets()
     }
 
     jse.empyrean = {
-        head="Arbatel Bonnet +2",
-        body="Arbatel Gown +2",
-        hands="Arbatel Bracers +2",
+        head="Arbatel Bonnet +3",
+        body="Arbatel Gown +3",
+        hands="Arbatel Bracers +3",
         legs="Arbatel Pants +2",
-        feet="Arbatel Loafers +2",
+        feet="Arbatel Loafers +3",
     }
 
     jse.capes = {
@@ -231,8 +195,6 @@ function get_sets()
         --wsd="", Vidohunir/WS: INT +30, Macc/Mdmg +20, Weapon Skill Damage +10%
         --curing="" MND+20, Mag. Evasion +10, Eva.+20/Mag.Eva+20, Enmity -10, Damage taken -5%
         -- Maybe high mp cape?
-
-        -- Could add fast cast to a cape anyway just to bridge the time before now and Fi Folet
     }
 
     ----------------------------------------------------------------
@@ -244,12 +206,12 @@ function get_sets()
             main={ name="Marin Staff +1", augments={'Path: A',}},
             sub="Enki Strap",
         },
-        ["StaffAcc"] = {
-            main={ name="Marin Staff +1", augments={'Path: A',}},
-            sub="Khonsu",
-        },
         ["Wizard"] = {
             main="Wizard's Rod",
+            sub="Ammurapi Shield",
+        },
+        ["Maxentius"] = {
+            main="Maxentius",
             sub="Ammurapi Shield",
         },
     }
@@ -267,12 +229,13 @@ function get_sets()
     sets.ja = {}                    -- Leave this empty
     sets.ws = {}                    -- Leave this empty
     sets.melee = {}                 -- Leave this empty
-    sets.overlay = {}               -- Leave this empty
+    sets.buff = {}                  -- Leave this empty
 
     ----------------------------------------------------------------
     -- PRECAST
     ----------------------------------------------------------------
 
+    -- When I can overcap FC considerably more, consider looking into setting up grimoire casting.
     sets.precast.fast_cast = {                                                                                                          -- OVERALL 81% FC, 2% Occ
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
@@ -325,7 +288,6 @@ function get_sets()
     -- Probably want Argute Stole +1 for 7% MB
     sets.midcast["Burst"] = {                                                                                           -- 31% MB, 15% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
-        --head="Ea Hat",                                                                                                -- 6% MB 6% MB II Can't use until I get job points
         head=jse.empyrean.head,
         body=jse.empyrean.body,
         --hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},                    -- 6% MB II
@@ -341,7 +303,7 @@ function get_sets()
         back=jse.capes.nuking_idle,
     }
 
-    sets.midcast["Occult Acumen"] = set_combine(sets.midcast["Free Nuke"], { -- I have no idea when it comes to Occult Acumen. Panic TP?
+    sets.midcast["Occult Acumen"] = set_combine(sets.midcast["Free Nuke"], {
         ammo="Seraphic Ampulla",
         head="Mallquis Chapeau +2",
         --body=
@@ -352,12 +314,31 @@ function get_sets()
         waist="Oneiros Rope",
         left_ear="Steelflash Earring",
         right_ear="Bladeborn Earring",
-        left_ring="Rajas Ring",
-        right_ring="Petrov Ring",
+        left_ring="Petrov Ring",
+        right_ring="Lehko's Ring",
         back=jse.capes.occult_acumen,
     })
 
-    sets.midcast.helix = {} -- Keep empty. This is probably ugly and bad. Think harder later.
+    -- Tweak as necessary. I'm not exactly sure what this set should look like yet.
+    sets.midcast["Vagary Burst"] = set_combine(sets.midcast["Free Nuke"], {
+        main=empty,
+        sub=empty,
+        --ammo=empty,
+        --head=empty,
+        --body=empty,
+        --hands=empty,
+        --legs=empty,
+        --feet=empty,
+        --neck=empty,
+        --waist=empty,
+        --left_ear=empty,
+        --right_ear=empty,
+        --left_ring=empty,
+        --right_ring=empty,
+        --back=empty,
+    })
+
+    sets.midcast.helix = {} -- Leave this empty.
 
     sets.midcast.helix["Free Nuke"] = set_combine(sets.midcast["Free Nuke"], {
         --ammo=,
@@ -395,7 +376,23 @@ function get_sets()
     -- ENFEEBLING MIDCAST
     ----------------------------------------------------------------
 
-    sets.midcast["Enfeebling Magic"] = {
+    sets.midcast.enfeebling_dark = {
+        ammo="Pemphredo Tathlum",
+        head=jse.AF.head,
+        body=jse.AF.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Incanter's Torque",
+        waist={ name="Acuity Belt +1", augments={'Path: A',}},
+        left_ear="Malignance Earring",
+        right_ear={ name="Arbatel Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+7',}},
+        left_ring="Kishar Ring",
+        right_ring="Stikini Ring",
+        back={ name="Aurist's Cape +1", augments={'Path: A',}},
+    }
+
+    sets.midcast.enfeebling_light = {
         ammo="Pemphredo Tathlum",
         head=empty,
         body={ name="Cohort Cloak +1", augments={'Path: A',}},
@@ -411,7 +408,6 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     }
 
-    -- I guess this counts for dark enfeebling :3
     sets.midcast["Dispelga"] = set_combine(sets.midcast["Enfeebling Magic"], {
         main="Daybreak",
         sub="Ammurapi Shield",
@@ -446,7 +442,8 @@ function get_sets()
     -- Increase enhancing skill to 500. Currently 479. Note that some spells are better at 500, so maybe accept 2% worse duration and just use relic body at +2.
 
     -- Probably accept slightly less duration for the relic body's higher enhancing skill
-    sets.midcast["Enhancing Magic"] = {                                                                                               -- +71% duration
+    -- Check my passive skill before doing anything here. Job mastery!
+    sets.midcast["Enhancing Magic"] = {                                                                                             -- +71% duration
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
@@ -458,7 +455,7 @@ function get_sets()
         feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
         neck="Incanter's Torque",
         waist="Embla Sash",                                                                                                         -- +10% duration
-        left_ear="Mendi. Earring",
+        left_ear="Mendi. Earring", -- Probably this one to replace with Andoaa
         right_ear="Gwati Earring",
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
@@ -468,7 +465,8 @@ function get_sets()
     -- Do not replace telchine body for duration. Unless ofc you're using Relic +3 I think. Regen duration +12!!
     -- Fill other slots with Conserve MP.
 
-    -- Technically the hands only need to be on for perpetuance, could use telchine hands otherwise
+    -- Technically the hands only need to be on for Perpetuance, could use telchine hands otherwise
+    -- TODO: check for perpetuance and set these hands back to telchine
     sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
         main="Bolelabunga",                                                                                                         -- +10% potency
         head=jse.empyrean.head,                                                                                                     -- +20% potency
@@ -497,13 +495,9 @@ function get_sets()
     -- CURING MIDCAST
     ----------------------------------------------------------------
 
-    -- Consider switching to Chatoyant Staff + Khonsu when I overcap
-    -- Consider DT pieces where possible to get to -50% DT
-    -- I don't need healing skill pieces, so start there
-    -- Empy chest + AF legs, figure out hands...
-    -- Potentially replace neck with loricate
-    -- Hybrid set suggests mephitas ring +1 but I think I can murky ring instead
-    --back="Fi Follet Cape +1", is a good conserve piece
+    -- TODO: Just turn this into a DT cure set. Swap out the healing magic skill for conserve mp and the like. See the set on the scholar wiki and see what I can do.
+    -- TODO: Full conserve toggle can come later with kaykaus etc...
+    -- AF legs might be good with 15% cure potency + skill
 
     sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50% Cure Potency, +33% Conserve MP, -10% PDT, 28% DT (38% PDT, 28% MDT)
         main="Daybreak",                                                                                                            -- 30% Cure Potency
@@ -528,11 +522,12 @@ function get_sets()
     ----------------------------------------------------------------
 
     -- TODO: Maybe go for Merly aspir/drain but also are you trying to wreck my wardrobes?
+    -- TODO: AF body is going to be better when in Dark Arts, make exception for this... or maybe just keep AF robe here anyway. I'm usually going to be in Dark Arts for Aspiring, I should imagine.
     sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
         main={ name="Rubicundity", augments={'Mag. Acc.+9','"Mag.Atk.Bns."+8','Dark magic skill +9','"Conserve MP"+5',}},
         sub="Ammurapi Shield",
         head="Pixie Hairpin +1",
-        body="Shango Robe", -- TODO: AF body is going to be better when in Dark Arts, make exception for this
+        body="Shango Robe", 
         --hands=
         legs=jse.relic.legs,
         --feet="",
@@ -556,10 +551,10 @@ function get_sets()
     -- Consider also a max DT+evasion set (ws cleaves?)
 
     -- TODO: Can use Homiliary when my DT is a bit higher, or maybe just rely on Shell to make up the difference in DT
-    sets.idle["PDT"] = {                                                                                                                                -- OVERALL -47% DT, -10% PDT, -3% MDT (-57% DT+PDT, -50% DT+MDT), +7-8 refresh
+    sets.idle["PDT"] = {                                                                                                                                -- OVERALL -48% DT, -10% PDT, -3% MDT (-58% DT+PDT, -51% DT+MDT), +7-8 refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 12% DT
+        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 13% DT
         hands="Nyame Gauntlets",                                                                                                                        -- 7% DT
         legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
         feet=jse.empyrean.feet,                                                                                                                         -- We're capped on DT so, shrug, some meva
@@ -600,7 +595,6 @@ function get_sets()
     
     -- This set is trying its best for accuracy but is suffering; it is a work in progress
     -- Nyame RP will help a lot, as will stuff like Chirich
-    -- Petrov ring for TP? But my DT is probably not great...
     sets.melee.TP = {
         ammo="Amar Cluster",
         head="Null Masque",
@@ -612,8 +606,8 @@ function get_sets()
         waist="Null Belt", -- Could instead be Grunfeld
         left_ear="Cessance Earring",
         right_ear="Odnowa Earring +1",
-        left_ring="Murky Ring",
-        right_ring="Petrov Ring",
+        left_ring="Petrov Ring",
+        right_ring="Lehko's Ring",
         back="Null Shawl",
     }
 
@@ -635,9 +629,7 @@ function get_sets()
     ----------------------------------------------------------------
     
     -- SIM THESE
-
-    -- Would it just be better to use Nyame anyway for much of these sets for the sake of the higher evasion? I do have decent DT in all of them anyway.
-
+    
     sets.ws.default = { -- Hybrid DT, generic for physical weaponskills (idk what else to put here)
         ammo="Amar Cluster",
         head="Jhakri Coronal +2",
@@ -655,7 +647,7 @@ function get_sets()
     }
 
     -- Fill with MAB gear
-    sets.ws["Aeolian Edge"] = { -- Hybrid DT, requires Malevolence/some other dagger + RDM sub
+    sets.ws["Aeolian Edge"] = { -- DEX/INT scaling, Hybrid DT, requires RDM sub
         ammo="Sroda Tathlum",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
@@ -671,23 +663,37 @@ function get_sets()
         back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
     }
 
-    sets.ws["Realmrazer"] = { -- Hybrid DT, requires club
+    sets.ws["Black Halo"] = { -- MND/STR scaling, re-sim this
         ammo="Amar Cluster",
-        head="Null Masque",
-        body="Nyame Mail",
-        hands="Nyame Gauntlets",
-        legs="Nyame Flanchard",
-        feet="Nyame Sollerets",
-        neck="Src. Stole +1",
-        waist="Grunfeld Rope",
-        left_ear="Malignance Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Rufescent Ring",
-        right_ring="Metamor. Ring +1",
-        back="Null Shawl",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
+        left_ear="Moonshade Earring",
+        right_ear={ name="Arbatel Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+7',}},
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
+        back="Alabaster Mantle",
     }
 
-    -- TODO: Whichever cape has the most MP lol
+    sets.ws["Realmrazer"] = { -- MND scaling, Hybrid DT, re-sim this
+        ammo="Amar Cluster",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
+        left_ear="Moonshade Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Metamor. Ring +1",
+        right_ring="Rufescent Ring",
+        back="Null Shawl",
+    }
 
     sets.ws["Myrkr"] = { -- No DT
         ammo="Strobilus",
@@ -708,14 +714,37 @@ function get_sets()
     --TODO: Black Halo when I unlock it
 
     ----------------------------------------------------------------
-    -- OVERLAY 
+    -- BUFF 
     ----------------------------------------------------------------
 
-    sets.overlay.sublimation = {
+    sets.buff.sublimation = {
         head=jse.AF.head,                                                                                                               -- Sublimation +4
         --body=jse.relic.body,                                                                                                            -- Sublimation +2
         waist="Embla Sash",                                                                                                             -- Sublimation +3
     }
+
+    -- TODO: Fill out with Subtle Blow gear as well
+    sets.buff.immanence = { -- 10% PDT, 37% DT (47% PDT, 37% MDT), 36% Haste (26 Cap), 40 FC (20% FC haste)
+        main=empty,
+        sub="Genmei Shield",            -- 10% PDT
+        range=empty,
+        ammo="Staunch Tathlum",         -- 2% DT
+        head="Null Masque",             -- 10% DT, 10% Haste
+        body="Shango Robe",             -- 3% FC, 3% Haste
+        hands="Acad. Bracers +3",       -- 9% FC, 3% Haste
+        legs="Acad. Pants +3",          -- 5% Haste
+        feet="Acad. Loafers +3",        -- 12% Grimoire FC
+        neck="Voltsurge Torque",        -- 4% FC
+        waist="Cornelia's Belt",        -- 10% Haste
+        left_ear="Alabaster Earring",   -- 5% DT, 5% Haste
+        right_ear="Loquac. Earring",    -- 2% FC
+        left_ring="Murky Ring",         -- 10% DT
+        right_ring="Defending Ring",    -- 10% DT
+        back="Fi Follet Cape +1",       -- 10% FC
+    }
+
+    -- TODO: Something for later probably
+    -- sets.buff.immanence_dt = {}
 end
 
 ----------------------------------------------------------------
@@ -740,7 +769,7 @@ function idle()
         equip_set_and_weapon(sets.idle[idle_mode.current])
 
         if buffactive["Sublimation: Activated"] then
-            equip(sets.overlay.sublimation)
+            equip(sets.buff.sublimation)
         end
     end
 
@@ -821,7 +850,7 @@ function precast(spell)
     end
 
     -- Unhandled Job Abilities
-    if spell.type == "JobAbility" then
+    if spell.type == "JobAbility" or spell.type == "Scholar" then
         -- Stay in idle.
         return
     end
@@ -836,6 +865,13 @@ end
 -- spell.action_type == "Magic" ensures that job ability gear survives into midcast, as otherwise they won't work.
 function midcast(spell)
     local matched = false
+
+    -- If Immanence is up and the spell is either a helix or elemental magic
+    -- No need to use "matched", as I don't want to overlay this at all
+    if buffactive["Immanence"] and spell.skill == "Elemental Magic" then
+        equip_set_and_weapon(sets.buff.immanence)
+        return
+    end
 
     -- If the spell matches one of the match_list spells.
     for match in match_list:it() do
@@ -858,7 +894,7 @@ function midcast(spell)
         matched = true
     end
 
-    -- If the spell is contained within helix_spells and isn't explicitly defined
+    -- If the spell is a helix
     if not matched and helix_spells:contains(spell.name) then
         equip_set_and_weapon(sets.midcast.helix[nuking_mode.current])
 
@@ -867,7 +903,7 @@ function midcast(spell)
         end
 
         if spell.name:match("Anemohelix") then
-            equip({main={ name="Marin Staff +1", augments={'Path: A',}}, sub="Enki Strap",}) -- Possibly amend later to match a nuking mode idk?
+            equip({main={ name="Marin Staff +1", augments={'Path: A',}}, sub="Enki Strap",}) -- Possibly amend later to match a weapon set idk?
         end
 
         if spell.name:match("Luminohelix") then
@@ -886,6 +922,18 @@ function midcast(spell)
     if not matched and spell.skill == "Elemental Magic" then
         equip_set_and_weapon(sets.midcast[nuking_mode.current])
         matched = true
+    end
+
+    if spell.skill == "Enfeebling Magic" then
+        if buffactive["Dark Arts"] or buffactive["Addendum: Black"] then
+            equip(sets.midcast.enfeebling_dark)
+            -- Specifically because AF body gives a buff if you're in Dark Arts
+            matched = true
+        else
+            equip(sets.midcast.enfeebling_light)
+            -- Also covering the instance that you're not in any art at all for some reason
+            matched = true
+        end
     end
 
     -- If the spell skill has a relevant set
@@ -983,8 +1031,9 @@ function file_unload(file_name)
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
-    send_command("unbind f8")
     
     send_command("unbind f9")
+
+    send_command("unbind f11")
     send_command("unbind f12")
 end
