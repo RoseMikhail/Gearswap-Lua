@@ -3,24 +3,7 @@ include("Modes.lua")
 ----------------------------------------------------------------
 -- Checks to add
 ----------------------------------------------------------------
---[[
-
-//// FUNCTIONALITY /////
--- Create JA sets and checks
-    - AF gear
-    - Relic gear (though I might need to comment it out to start with)
-        - head: maybe consider the focalization thing, but I'm not sure if I care
-    - Empyrean gear
-        - Ebullience/Rapture check
-            - If either buff is active, equip arbatel bonnet (empyrean head) when casting either Healing Magic or Black Magic
-        - Perpetuance check
-            - If perpetuance buff is active, equip empyrean hands when casting White Magic Enhancing Magic
-        - Technically there could be a check for the empyrean +3 legs for penury/parsimony, but I'm pretty sure I'm always going to be nuking in them anyway
-        - Same shit for the empyrean feet + klimaform, but yeah, I'll be wearing these anyway...
-    
-
--- for other jobs too but I think chatoyant doesn't work on both day and weather
-
+--[[    
 //// SETS + ASSOCIATED CHECKS /////
 UPDATE THESE SETS BUT MOSTLY JUST FOLLOW WIKI AND PAY ATTENTION TO THE AF/RELIC/EMPYREAN STATS AND SLOT APPROPRIATELY
 - Cursna set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Cursna
@@ -52,6 +35,10 @@ UPDATE THESE SETS BUT MOSTLY JUST FOLLOW WIKI AND PAY ATTENTION TO THE AF/RELIC/
 -- maybe modify "overlay" to be "buff" and change all gear check equips in midcast/etc to singleslot gearsets
 -- Multiple immanence modes? currently I have haste/fc/dt, but consider a subtle blow/haste/fc set and then a separate one for dt, maybe also consider using skilchain+ damage
 -- I could technically have dark and light versions of all of the healing stuff, due to the academic pants, but this seems not very worth it
+-- Consider setting up stun sets for the if and maybe that I might be asked to sub BLM for some reason
+-- Relic gear: set up focalization/altruism (accuracy) and maaaaybe enlightenment buff handling for gear swaps.
+-- When I have access to Agwu's, I likely want a separate magic burst set for Ebullience. Check SCH guide later. This will require adjustment to a check in midcast.
+
 ]]
 ----------------------------------------------------------------
 -- NOTES
@@ -236,11 +223,11 @@ function get_sets()
     ----------------------------------------------------------------
 
     -- When I can overcap FC considerably more, consider looking into setting up grimoire casting.
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 81% FC, 2% Occ
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 83% FC, 2% Occ
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
-        hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+8 "Mag.Atk.Bns."+8','"Fast Cast"+7','MND+5','Mag. Acc.+11',}},           -- 7% FC
+        hands=jse.AF.hands,                                                                                                             -- 9% FC
         legs="Orvail Pants +1",                                                                                                         -- 5% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
         neck="Voltsurge Torque",                                                                                                        -- 4% FC
@@ -285,6 +272,7 @@ function get_sets()
         back=jse.capes.nuking_idle
     }
 
+    -- reevaluate the actual magic burst stat here
     -- Probably want Argute Stole +1 for 7% MB
     sets.midcast["Burst"] = {                                                                                           -- 31% MB, 15% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
@@ -407,11 +395,6 @@ function get_sets()
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     }
-
-    sets.midcast["Dispelga"] = set_combine(sets.midcast["Enfeebling Magic"], {
-        main="Daybreak",
-        sub="Ammurapi Shield",
-    })
     
     -- Impact likes more elemental magic skill
     -- TODO: This wants Artifact hands
@@ -471,7 +454,7 @@ function get_sets()
         main="Bolelabunga",                                                                                                         -- +10% potency
         head=jse.empyrean.head,                                                                                                     -- +20% potency
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration, +12 duration
-        hands=jse.empyrean.hands,                                                                                                   -- Perpetuance +60% duration
+        --hands=jse.empyrean.hands,                                                                                                   -- Perpetuance +60% duration
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
 
@@ -494,40 +477,37 @@ function get_sets()
     ----------------------------------------------------------------
     -- CURING MIDCAST
     ----------------------------------------------------------------
+    
+    -- TODO: Full potency/conserve/etc. set
 
-    -- TODO: Just turn this into a DT cure set. Swap out the healing magic skill for conserve mp and the like. See the set on the scholar wiki and see what I can do.
-    -- TODO: Full conserve toggle can come later with kaykaus etc...
-    -- AF legs might be good with 15% cure potency + skill
-
-    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50% Cure Potency, +33% Conserve MP, -10% PDT, 28% DT (38% PDT, 28% MDT)
-        main="Daybreak",                                                                                                            -- 30% Cure Potency
-        sub="Genmei Shield",                                                                                                        -- -10% PDT
-        ammo="Staunch Tathlum",                                                                                                     -- -2% DT
-        head={ name="Vanya Hood", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},      -- +10% Cure Potency, +6% Conserve MP
-        body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +6% Conserve MP
-        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +5% Cure Potency, +6% Conserve MP
-        neck="Loricate Torque +1",                                                                                                  -- -6% DT
+    -- Attempt at a Cure DT set. Can consider switching Vanya to Path A for potency + enmity, then dropping Daybreak+Genmei for Chatoyant+Khonsu for more DT.
+    sets.midcast["Cure"] = { -- -49% DT, -10% PDT (-59% PDT, 49% MDT), 59% Cure Potency (50% cap), +27% Conserve MP, -54-58 Enmity, 18% SIRD 
+        main="Chatoyant Staff",                                                                                                     -- 10% Cure Potency
+        sub="Khonsu",                                                                                                               -- -6% DT, -5 Enmity
+        ammo="Staunch Tathlum",                                                                                                     -- -2% DT, 10% SIRD 
+        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                             -- +17% Cure Potency, +6% Conserve MP, -6 Enmity
+        body=jse.empyrean.body,                                                                                                     -- -13% DT, -28 Enmity
+        hands="Nyame Gauntlets",                                                                                                    -- 7% DT
+        legs=jse.AF.legs,                                                                                                           -- 15% Cure Potency, -6 Enmity
+        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                            -- +12% Cure Potency, +6% Conserve MP, -6 Enmity
+        neck="Loricate Torque +1",                                                                                                  -- -6% DT, 5% SIRD 
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                 -- +15% Conserve MP
         left_ear="Mendi. Earring",                                                                                                  -- +5% Cure Potency
-        right_ear="Meili Earring", -- Replace with DT/Conserve MP
-        left_ring="Murky Ring",                                                                                                     -- -10% DT
-        right_ring="Defending Ring",                                                                                                -- -10% DT
-        back={ name="Aurist's Cape +1", augments={'Path: A',}}, -- Fi Folet +1 has conserve mp of +5 ORRRRRRRRRR REPLACE WITH MND/EVA/PDT CAPE
-    })
+        right_ear="Alabaster Earring",                                                                                              -- -5% DT
+        left_ring="Murky Ring",                                                                                                     -- -10% DT, 3% SIRD
+        right_ring="Mephitas's Ring +1",                                                                                            -- -3-7 Enmity TODO: Needs augment
+        back=jse.capes.nuking_idle,
+    }
 
     ----------------------------------------------------------------
     -- OTHER MIDCAST
     ----------------------------------------------------------------
 
-    -- TODO: Maybe go for Merly aspir/drain but also are you trying to wreck my wardrobes?
-    -- TODO: AF body is going to be better when in Dark Arts, make exception for this... or maybe just keep AF robe here anyway. I'm usually going to be in Dark Arts for Aspiring, I should imagine.
     sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
         main={ name="Rubicundity", augments={'Mag. Acc.+9','"Mag.Atk.Bns."+8','Dark magic skill +9','"Conserve MP"+5',}},
         sub="Ammurapi Shield",
         head="Pixie Hairpin +1",
-        body="Shango Robe", 
+        body=jse.AF.body, 
         --hands=
         legs=jse.relic.legs,
         --feet="",
@@ -617,12 +597,9 @@ function get_sets()
     -- JOB ABILITIES 
     ----------------------------------------------------------------
 
-    --[[
-    sets.ja["???"] = {
-        body="",
+    sets.ja["Tabula Rasa"] = {
+        legs=jse.relic.legs,
     }
-    
-    ]]
 
     ----------------------------------------------------------------
     -- WEAPONSKILLS 
@@ -698,7 +675,7 @@ function get_sets()
     sets.ws["Myrkr"] = { -- No DT
         ammo="Strobilus",
         head={ name="Kaabnax Hat", augments={'HP+30','MP+30','MP+30',}},                                                                -- Want to replace with Amalric Coif +1 augmented
-        body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        body=jse.AF.body,
         hands="Otomi Gloves",
         legs=jse.empyrean.legs,                                                                                                         -- Want to replace with Amalric Slops +1 augmented
         feet={ name="Psycloth Boots", augments={'MP+50','INT+7','"Conserve MP"+6',}},
@@ -862,13 +839,21 @@ function precast(spell)
     end
 end
 
+local immanence = false
+
 -- spell.action_type == "Magic" ensures that job ability gear survives into midcast, as otherwise they won't work.
 function midcast(spell)
     local matched = false
 
+    -- To avoid any delay in knowing that Immanence is up (I am going to STRANGLE FFXI)
+    -- I could maybe move this to precast but it doesn't really matter.
+    if spell.name == "Immanence" then
+        immanence = true
+    end
+
     -- If Immanence is up and the spell is either a helix or elemental magic
     -- No need to use "matched", as I don't want to overlay this at all
-    if buffactive["Immanence"] and spell.skill == "Elemental Magic" then
+    if immanence and spell.skill == "Elemental Magic" then
         equip_set_and_weapon(sets.buff.immanence)
         return
     end
@@ -934,6 +919,10 @@ function midcast(spell)
             -- Also covering the instance that you're not in any art at all for some reason
             matched = true
         end
+
+        if spell.name == "Dispelga" then
+            equip({main="Daybreak", sub="Ammurapi Shield",})
+        end
     end
 
     -- If the spell skill has a relevant set
@@ -947,14 +936,27 @@ function midcast(spell)
         idle()
     end
 
-    -- Hachirin-no-Obi overlay
-    if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" then
-        -- This will still trigger on stuff like Klimaform but eeh
+    -- Weather and day overlays
+    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
+    local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
+    local element_matches_weather = world.weather_element == spell.element
+
+    if valid_obi_skill and element_matches_day_or_weather and spell.element ~= "None" then
         equip({waist="Hachirin-no-Obi"})
-        
-        if spell.skill == "Healing Magic" then
+
+        if spell.skill == "Healing Magic" and element_matches_weather then
             equip({main="Chatoyant Staff", sub="Khonsu",})
         end
+    end
+
+    -- Ebullience/Rapture overlay. Probably somewhat redundant for Dark atm.
+    if (buffactive["Ebullience"] or buffactive["Rapture"]) and (spell.type == "BlackMagic" or spell.type == "WhiteMagic") then
+        equip({head=jse.empyrean.head})
+    end
+
+    -- Perpetuance overlay
+    if (buffactive["Perpetuance"] and spell.type == "WhiteMagic" and spell.skill == "Enhancing Magic") then
+        equip({hands=jse.empyrean.hands})
     end
 end
 
@@ -966,6 +968,13 @@ function buff_change(name, gain, buff_details)
     if not midaction() then
         if name == "Sublimation: Activated" then
             idle() 
+        end
+    end
+
+    -- Part of the "why is ping like this" solution for minimal delays in checking for Immanence
+    if name == "Immanence" then
+        if gain == false then 
+            immanence = false
         end
     end
 end

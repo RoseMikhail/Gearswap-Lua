@@ -359,11 +359,11 @@ function get_sets()
         sub="Genmei Shield",
         range=empty,
         ammo="Kalboron Stone",
-        head={ name="Vanya Hood", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},      -- +10%
+        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                             -- +10%
         body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
         hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
         legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        feet={ name="Vanya Clogs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},     -- +5%
+        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                            -- +5%
         neck="Incanter's Torque",
         waist="Rumination Sash",
         left_ear="Mendi. Earring",                                                                                                  -- +5%
@@ -812,11 +812,15 @@ function midcast(spell)
         idle()
     end
 
-    -- Hachirin-no-Obi overlay
-    if S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill) and S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" then
+    -- Weather and day overlays
+    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
+    local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
+    local element_matches_weather = world.weather_element == spell.element
+
+    if valid_obi_skill and element_matches_day_or_weather and spell.element ~= "None" then
         equip({waist="Hachirin-no-Obi"})
 
-        if spell.skill == "Healing Magic" then
+        if spell.skill == "Healing Magic" and element_matches_weather then
             equip({main="Chatoyant Staff", sub="Khonsu",})
         end
     end
