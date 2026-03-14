@@ -11,7 +11,9 @@ Potential enhancements:
 - Allow dispelga and impact during mana wall and death
 - Save certain toggles and sets between reloads
 - Toggle for Mana Wall set
-- Steal helix logic from Scholar, though how often will this actually be relevant...?
+- Steal Aquaveil stuff from SCH
+- Doomed set
+- Notification in chat when I'm slept or doomed
 ]]
 
 ----------------------------------------------------------------
@@ -20,7 +22,7 @@ Potential enhancements:
 
 -- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
-idle_mode = M{"PDT", "MDT", "Refresh"}
+idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Staff", "Wizard", "Maxentius"}
 
 toggle_speed = "Off"
@@ -441,14 +443,14 @@ function get_sets()
     -- IDLE MODES
     ----------------------------------------------------------------
 
-    sets.idle["PDT"] = {                                                                                                                                -- OVERALL -50% DT, -10% PDT, -3% MDT (-60% DT+PDT, -53% DT+MDT), +8-9 Refresh
+    sets.idle["Normal"] = {                                                                                                                                -- OVERALL -44% DT, -10% PDT, -3% MDT (-54% DT+PDT, -47% DT+MDT), +8-9 Refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
         body=jse.empyrean.body,                                                                                                                         -- +4 Refresh
         hands=jse.empyrean.hands,                                                                                                                       -- -12% DT
         legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
         feet=jse.empyrean.feet,                                                                                                                         -- -10% DT
-        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
+        neck="Warder's Charm +1",
         waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
         left_ear="Nehalennia Earring",
         right_ear="Etiolation Earring",                                                                                                                 -- -3% MDT
@@ -456,12 +458,6 @@ function get_sets()
         right_ring="Defending Ring",                                                                                                                    -- -10% DT
         back=jse.capes.idle_fc,                                                                                                                         -- -10% PDT
     }
-
-    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                                  -- OVERALL -54% DT, -0% PDT, -3% MDT (-54% DT+PDT, -57% DT+MDT) +5-6 Refresh
-        head=jse.empyrean.head,                                                                                                                         -- -10% DT    
-        neck="Warder's Charm +1",                                                                                                                       -- Reduction of 6% DT from base set
-        back="Tuilha Cape",                                                                                                                             -- Reduction of 10% PDT from base set
-    })
 
     sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                                              -- OVERALL -33% DT, -10% PDT, -0% MDT (-43% DT+PDT, -33% DT+MDT), +9-10 refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT

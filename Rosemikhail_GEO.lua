@@ -9,7 +9,9 @@ include("Modes.lua")
 Potential enhancements:
 - Save certain toggles and sets between reloads
 - Potentially make an override to force the PDT idle set regardless of whether I have a bubble out.
-- Steal barspell logic from Scholar
+- Steal Aquaveil stuff from SCH
+- Doomed set
+- Notification in chat when I'm slept or doomed
 ]]
 
 ----------------------------------------------------------------
@@ -18,7 +20,7 @@ Potential enhancements:
 
 -- Modes
 nuking_mode = M{"Free Nuke", "Burst"}
-idle_mode = M{"PDT", "MDT", "Refresh"}
+idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Wizard", "Daybreak", "Idris", "Maxentius"}
 
 toggle_speed = "Off"
@@ -424,7 +426,7 @@ function get_sets()
     -- IDLE SETS
     ----------------------------------------------------------------
 
-    sets.idle["PDT"] = {                                                                                                                -- -68% DT, -10% PDT, -0% MDT (-78% DT+PDT, -68% DT+MDT), +6-7 Refresh
+    sets.idle["Normal"] = {                                                                                                                -- -62% DT, -10% PDT, -0% MDT (-72% DT+PDT, -62% DT+MDT), +6-7 Refresh
         --main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
         --sub="Genmei Shield",                                                                                                            -- -10% PDT
         range=empty,
@@ -434,7 +436,7 @@ function get_sets()
         hands=jse.empyrean.hands,                                                                                                       -- -11% DT
         legs="Assid. Pants +1",                                                                                                         -- +1-2 Refresh
         feet=jse.empyrean.feet,                                                                                                         -- -10% DT
-        neck="Loricate Torque +1",                                                                                                      -- -6% DT
+        neck="Warder's Charm +1",
         waist="Fucho-no-Obi",                                                                                                           -- +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
         left_ear="Alabaster Earring",                                                                                                   -- -5% DT
         right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
@@ -442,12 +444,6 @@ function get_sets()
         right_ring="Defending Ring",                                                                                                    -- -10% DT
         back=jse.capes.idle,                                                                                                            -- -10% PDT
     }
-
-    -- Potentially make this a toggle
-    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                  -- -62% DT, -10% PDT, -3% MDT (-72% DT+PDT, -65% DT+MDT), +5-6 Refresh
-        neck="Warder's Charm +1",
-        back="Tuilha Cape",
-    })
 
     sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                                              -- OVERALL -33% DT, -20% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
         main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                                    -- -0%

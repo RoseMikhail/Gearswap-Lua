@@ -1,59 +1,33 @@
 ---@diagnostic disable: lowercase-global, undefined-global
 include("Modes.lua")
-----------------------------------------------------------------
--- Checks to add
-----------------------------------------------------------------
---[[    
-//// SETS + ASSOCIATED CHECKS /////
-UPDATE THESE SETS BUT MOSTLY JUST FOLLOW WIKI AND PAY ATTENTION TO THE AF/RELIC/EMPYREAN STATS AND SLOT APPROPRIATELY
-- Cursna set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Cursna
-- Regen set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Regen 
-- Stoneskin set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Enhancing
-- Aquaveil set
-- Sublimation set
-- Kaustra
-- Update Myrkr
-- Combine the DT sets; there's no reason not to. Do this for the other jobs too.
--- Do cure DT set, kaykaus came come later
--- Do regen duration set, potency toggle can come later
--- Compare against any other sets in the wiki guide
 
-
-
-//// STRETCH GOALS /////
-- Chat message or something to say that Sublimation has finished charging - can extend to blm
-- Doomed set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Misc_Sets - extend to other jobs
-- Stun midcast recast (yeah maybe) + apply to other jobs
-- Regen potency vs regen toggle
-- Cure DT vs potency toggle
-- When more sources of fastcast have been obtained, consider creating a Grimoire fastcast set
-    - In other words, I need to be able to get 80% regular fastcast in all slots minus the head and feet for this to become viable as a set
-    - Only for when we're casting white or dark magic under the correct art/addendum
-    - Doesn't work when Accession, Alacrity, Celerity or Manifestation would affect the spell
-- Aspir/Drain magic burst set. Apply to BLM/GEO as well.
-- More idle modes- normal one, full DT/meva, etc.
--- maybe modify "overlay" to be "buff" and change all gear check equips in midcast/etc to singleslot gearsets
--- Multiple immanence modes? currently I have haste/fc/dt, but consider a subtle blow/haste/fc set and then a separate one for dt, maybe also consider using skilchain+ damage
--- I could technically have dark and light versions of all of the healing stuff, due to the academic pants, but this seems not very worth it
--- Consider setting up stun sets for the if and maybe that I might be asked to sub BLM for some reason
--- Relic gear: set up focalization/altruism (accuracy) and maaaaybe enlightenment buff handling for gear swaps.
--- When I have access to Agwu's, I likely want a separate magic burst set for Ebullience. Check SCH guide later. This will require adjustment to a check in midcast.
-
-]]
 ----------------------------------------------------------------
 -- NOTES
 ----------------------------------------------------------------
+
 --[[
+Kinda just do this as and when:
+- When the Relic set is updated, remember to update sets with it
+- Upgrade bookworm's cape for helix duration + damage! It also has damage stat on it so
+- Chat message or something to say that Sublimation has finished charging - can extend to blm
+- Doomed set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Misc_Sets - extend to other jobs
+
 Potential enhancements:
 - Save certain toggles and sets between reloads
+- Regen potency vs regen toggle
+- Cure DT vs potency toggle
+- Relic gear: set up focalization/altruism (accuracy) and maaaaybe enlightenment buff handling for gear swaps.
+- When I have access to Agwu's, I may want a separate magic burst set for Ebullience. Check SCH guide later. This will require adjustment to a check in midcast.
+- Notification in chat when I'm slept or doomed
 ]]
+
 ----------------------------------------------------------------
 -- VARIABLES
 ----------------------------------------------------------------
 
 -- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen", "Vagary Burst"}
-idle_mode = M{"PDT", "MDT", "Refresh"}
+idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Staff", "Wizard", "Maxentius"}
 
 toggle_speed = "Off"
@@ -274,14 +248,14 @@ function get_sets()
 
     -- reevaluate the actual magic burst stat here
     -- Probably want Argute Stole +1 for 7% MB
-    sets.midcast["Burst"] = {                                                                                           -- 31% MB, 15% MB II
+    sets.midcast["Burst"] = {                                                                                           -- 36% MB, 16% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=jse.empyrean.head,
         body=jse.empyrean.body,
         --hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},                    -- 6% MB II
-        hands=jse.empyrean.hands,                                                                                       -- 10% MB
+        hands=jse.empyrean.hands,                                                                                       -- 15% MB
         legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet,                                                                                         -- 4% MB II
+        feet=jse.empyrean.feet,                                                                                         -- 5% MB II
         neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
@@ -328,36 +302,63 @@ function get_sets()
 
     sets.midcast.helix = {} -- Leave this empty.
 
+    -- Give these another proper think when I actually have odyssey gear lol
+
     sets.midcast.helix["Free Nuke"] = set_combine(sets.midcast["Free Nuke"], {
-        --ammo=,
-        --head=,
-        --body=,
-        --hands=,
-        --legs=,
-        --feet=,
-        --neck=,
-        --waist=,
-        --left_ear=,
-        --right_ear=,
-        --left_ring=,
-        --right_ring=,
-        --back=,
+        main="Wizard's Rod",
+        sub="Ammurapi Shield",
+        range=empty,
+        ammo="Ghastly Tathlum +1",
+        head="Mall. Chapeau +2",
+        body="Mallquis Saio +2",
+        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        legs="Mallquis Trews +2",
+        feet="Mallquis Clogs +2",
+        neck="Mizu. Kubikazari",
+        waist="Acuity Belt +1",
+        left_ear="Barkaro. Earring", -- Regal Earring
+        right_ear="Malignance Earring",
+        left_ring="Freke Ring",
+        right_ring="Mallquis Ring",
+        back={ name="Lugh's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
     })
 
     sets.midcast.helix["Burst"] = set_combine(sets.midcast["Burst"], {
-        --ammo=,
-        --head=,
-        --body=,
-        --hands=,
-        --legs=,
-        --feet=,
-        --neck=,
-        --waist=,
-        --left_ear=,
-        --right_ear=,
-        --left_ring=,
-        --right_ring=,
-        --back=,
+        main="Wizard's Rod",
+        sub="Ammurapi Shield",
+        range=empty,
+        ammo="Ghastly Tathlum +1",
+        head="Mall. Chapeau +2", -- TODO: This wants to be the relic head
+        body="Mallquis Saio +2",
+        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        legs="Mallquis Trews +2",
+        feet=jse.empyrean.feet,
+        neck="Mizu. Kubikazari",
+        waist="Acuity Belt +1",
+        left_ear="Barkaro. Earring",
+        right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
+        left_ring="Mujin Band",
+        right_ring="Freke Ring",
+        back={ name="Lugh's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
+    })
+
+    sets.midcast["Kaustra"] = set_combine(sets.midcast["Enhancing Magic"], {
+        main="Wizard's Rod",
+        sub="Ammurapi Shield",
+        range=empty,
+        ammo="Pemphredo Tathlum",
+        head="Pixie Hairpin +1",
+        body="Mallquis Saio +2",
+        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        legs="Mallquis Trews +2",
+        feet="Mallquis Clogs +2",
+        neck="Mizu. Kubikazari",
+        waist="Acuity Belt +1",
+        left_ear="Barkaro. Earring", -- Regal Earring
+        right_ear="Malignance Earring",
+        left_ring="Archon Ring",
+        right_ring="Freke Ring",
+        back={ name="Lugh's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
     })
 
     ----------------------------------------------------------------
@@ -397,7 +398,7 @@ function get_sets()
     }
     
     -- Impact likes more elemental magic skill
-    -- TODO: This wants Artifact hands
+    -- TODO: This wants Artifact hands when I have the Regal Earring
     sets.midcast["Impact"] = {
         ammo="Pemphredo Tathlum",
         head=empty,
@@ -421,12 +422,10 @@ function get_sets()
     -- TODO: Improve Telchine to 10% if possible
     -- TODO: Relic body +2 (8%) then +3 (12%)
     -- TOOD: Musa someday for 20% BUT LMAO
-    -- TODO: Skill items: Mimir Earring, Fi Folet Cape +1, Andoaa Earring (+24 in total). Relic body will be better +3 for duration (+12%) and enhancing skill (+19). WORSE duration at +2. Stikini +1 x2...
-    -- Increase enhancing skill to 500. Currently 479. Note that some spells are better at 500, so maybe accept 2% worse duration and just use relic body at +2.
+    -- TODO: Relic body will be better +3 for duration (+12%) and enhancing skill (+19). WORSE duration at +2. Stikini +1 x2...
 
-    -- Probably accept slightly less duration for the relic body's higher enhancing skill
-    -- Check my passive skill before doing anything here. Job mastery!
-    sets.midcast["Enhancing Magic"] = {                                                                                             -- +71% duration
+    -- TODO: When I'm mastered, reevaluate the pieces here. Remove any unneeded skill and replace with conserve mp.
+    sets.midcast["Enhancing Magic"] = {                                                                                             -- +71% duration, -- 502 Enhancing Skill
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
@@ -436,16 +435,16 @@ function get_sets()
         hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +9',}},                                     -- +9% duratiom. This should be replaced by empy hands during Perpetuance
         legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
         feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
-        neck="Incanter's Torque",
+        neck="Incanter's Torque",                                                                                                   -- Skill
         waist="Embla Sash",                                                                                                         -- +10% duration
-        left_ear="Mendi. Earring", -- Probably this one to replace with Andoaa
-        right_ear="Gwati Earring",
-        left_ring="Stikini Ring",
-        right_ring="Stikini Ring",
-        back="Fi Follet Cape +1",
+        left_ear="Mendi. Earring",                                                                                                  -- Conserve MP
+        right_ear="Mimir Earring",                                                                                                  -- Skill
+        left_ring="Stikini Ring",                                                                                                   -- Skill
+        right_ring="Stikini Ring",                                                                                                  -- Skill
+        back="Fi Follet Cape +1",                                                                                                   -- Skill
     }
 
-    -- Do not replace telchine body for duration. Unless ofc you're using Relic +3 I think. Regen duration +12!!
+    -- Do not replace telchine body for duration. Unless ofc you're using Relic +3. Regen duration +12!!
     -- Fill other slots with Conserve MP.
 
     -- Technically the hands only need to be on for Perpetuance, could use telchine hands otherwise
@@ -454,16 +453,50 @@ function get_sets()
         main="Bolelabunga",                                                                                                         -- +10% potency
         head=jse.empyrean.head,                                                                                                     -- +20% potency
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration, +12 duration
-        --hands=jse.empyrean.hands,                                                                                                   -- Perpetuance +60% duration
+        --hands=jse.empyrean.hands,                                                                                                 -- Perpetuance +60% duration
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
 
+    -- TODO: When I can be bothered.
+    sets.midcast["Stoneskin"] = set_combine(sets.midcast["Enhancing Magic"], {
+        --ammo=,
+        --head=,
+        --body=,
+        --hands=,
+        legs="Shedir Seraweels",                                                                                                    -- +35 Stoneskin
+        --feet=,
+        --neck=,
+        --waist=,
+        --left_ear=,
+        --right_ear=,
+        --left_ring=,
+        --right_ring=,
+        --back="Fi Follet Cape +1",
+    })
+
+    sets.midcast["Aquaveil"] = set_combine(sets.midcast["Enhancing Magic"], {
+        --ammo=,
+        --head=,
+        --body=,
+        --hands=,
+        legs="Shedir Seraweels",                                                                                                    -- +1 Aquaveil
+        --feet=,
+        --neck=,
+        --waist=,
+        --left_ear=,
+        --right_ear=,
+        --left_ring=,
+        --right_ring=,
+       -- back="Fi Follet Cape +1",
+    })
+
+    -- TODO: When I'm mastered, reevaluate the pieces here. Remove any unneeded skill and replace with conserve mp.
     sets.midcast.barspell = set_combine(sets.midcast["Enhancing Magic"], {
         --ammo=,
         --head=,
         --body=,
         --hands=,
-        --legs=,
+        legs="Shedir Seraweels",
         --feet=,
         --neck=,
         --waist=,
@@ -475,13 +508,13 @@ function get_sets()
     })
 
     ----------------------------------------------------------------
-    -- CURING MIDCAST
+    -- HEALING
     ----------------------------------------------------------------
     
     -- TODO: Full potency/conserve/etc. set
 
     -- Attempt at a Cure DT set. Can consider switching Vanya to Path A for potency + enmity, then dropping Daybreak+Genmei for Chatoyant+Khonsu for more DT.
-    sets.midcast["Cure"] = { -- -49% DT, -10% PDT (-59% PDT, 49% MDT), 59% Cure Potency (50% cap), +27% Conserve MP, -54-58 Enmity, 18% SIRD 
+    sets.midcast["Cure"] = { -- -49% DT, 59% Cure Potency (50% cap), +34% Conserve MP, -54-58 Enmity, 23% SIRD 
         main="Chatoyant Staff",                                                                                                     -- 10% Cure Potency
         sub="Khonsu",                                                                                                               -- -6% DT, -5 Enmity
         ammo="Staunch Tathlum",                                                                                                     -- -2% DT, 10% SIRD 
@@ -492,12 +525,30 @@ function get_sets()
         feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                            -- +12% Cure Potency, +6% Conserve MP, -6 Enmity
         neck="Loricate Torque +1",                                                                                                  -- -6% DT, 5% SIRD 
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                 -- +15% Conserve MP
-        left_ear="Mendi. Earring",                                                                                                  -- +5% Cure Potency
+        left_ear="Mendi. Earring",                                                                                                  -- +2% Conserve MP, +5% Cure Potency
         right_ear="Alabaster Earring",                                                                                              -- -5% DT
         left_ring="Murky Ring",                                                                                                     -- -10% DT, 3% SIRD
         right_ring="Mephitas's Ring +1",                                                                                            -- -3-7 Enmity TODO: Needs augment
-        back=jse.capes.nuking_idle,
+        back="Fi Follet Cape +1",                                                                                                   -- +5% Conserve MP, 5% SIRD
     }
+
+    sets.midcast["Cursna"] = set_combine(sets.idle["PDT"], {
+        main={ name="Gada", augments={'Indi. eff. dur. +10','Mag. Acc.+13','"Mag.Atk.Bns."+13','DMG:+10',}},                        -- Healing skill
+        sub="Genmei Shield",
+        --ammo=,
+        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}}, -- Replace with healing skill
+        --body=, -- This wants to be the relic body
+        --hands=,
+        legs=jse.AF.legs,                                                                                                           -- Healing skill
+        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}}, -- Replace with healing skill              -- Cursna +5%
+        --neck=,
+        waist="Bishop's Sash",                                                                                                      -- Healing skill
+        --left_ear=,
+        right_ear="Meili Earring",
+        left_ring="Stikini Ring",
+        right_ring="Haoma's Ring",                                                                                                  -- Cursna +15%
+        --back=,
+    })
 
     ----------------------------------------------------------------
     -- OTHER MIDCAST
@@ -531,14 +582,14 @@ function get_sets()
     -- Consider also a max DT+evasion set (ws cleaves?)
 
     -- TODO: Can use Homiliary when my DT is a bit higher, or maybe just rely on Shell to make up the difference in DT
-    sets.idle["PDT"] = {                                                                                                                                -- OVERALL -48% DT, -10% PDT, -3% MDT (-58% DT+PDT, -51% DT+MDT), +7-8 refresh
-        ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
+    sets.idle["Normal"] = {                                                                                                                                -- OVERALL -40% DT, -10% PDT, -3% MDT (-50% DT+PDT, -43% DT+MDT), +8-9 refresh
+        ammo="Homiliary",                                                                                                                               -- +1 Refresh
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
         body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 13% DT
         hands="Nyame Gauntlets",                                                                                                                        -- 7% DT
         legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
         feet=jse.empyrean.feet,                                                                                                                         -- We're capped on DT so, shrug, some meva
-        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
+        neck="Warder's Charm +1",
         waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
         left_ear="Nehalennia Earring",
         right_ear="Etiolation Earring",                                                                                                                 -- -3% MDT
@@ -547,14 +598,8 @@ function get_sets()
         back=jse.capes.nuking_idle                                                                                                                      -- -10% PDT
     }
 
-    sets.idle["MDT"] = set_combine(sets.idle["PDT"], {                                                                                                  -- OVERALL -50% DT, -0% PDT, -3% MDT (-50% DT+PDT, -53% DT+MDT), + refresh
-        head=jse.empyrean.head,                                                                                                                         -- -9% DT
-        neck="Warder's Charm +1",                                                                                                                       -- Reduction of 6% DT from base set
-        back="Tuilha Cape",                                                                                                                             -- Reduction of 10% PDT from base set
-    })
-
     sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                                              -- OVERALL -43% DT, -10% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
-        ammo="Homiliary",                                                                                                                               -- +1 Refresh
+       ammo="Homiliary",                                                                                                                                -- +1 Refresh
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
         body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 12% DT
         hands="Serpentes Cuffs",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Sabots
