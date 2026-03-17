@@ -9,8 +9,6 @@ include("Modes.lua")
 Kinda just do this as and when:
 - When the Relic set is updated, remember to update sets with it
 - Upgrade bookworm's cape for helix duration + damage! It also has damage stat on it so
-- Chat message or something to say that Sublimation has finished charging - can extend to blm
-- Doomed set https://www.bg-wiki.com/ffxi/Community_Scholar_Guide#Misc_Sets - extend to other jobs
 
 Potential enhancements:
 - Save certain toggles and sets between reloads
@@ -28,7 +26,7 @@ Potential enhancements:
 -- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen", "Vagary Burst"}
 idle_mode = M{"Normal", "Refresh"}
-weapon_mode = M{"Staff", "Wizard", "Maxentius"}
+weapon_mode = M{"Staff", "Wizard", "Maxentius", "Malevolence"}
 
 toggle_speed = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
@@ -154,7 +152,7 @@ function get_sets()
         --enfeebling="", unnecessary?
         --tp="", Melee TP: DEX +20, Acc +30, Atk +20, Store TP +10 ... er another 10 dex i think
         --wsd="", Vidohunir/WS: INT +30, Macc/Mdmg +20, Weapon Skill Damage +10%
-        --curing="" MND+20, Mag. Evasion +10, Eva.+20/Mag.Eva+20, Enmity -10, Damage taken -5%
+        --curing="" MND+20, Mag. Evasion +10, Eva.+20/Mag.Eva+20, Enmity -10, Damage taken -5% (or PDT)
         -- Maybe high mp cape?
     }
 
@@ -175,9 +173,13 @@ function get_sets()
             main="Maxentius",
             sub="Ammurapi Shield",
         },
+        ["Malevolence"] = {
+            main="Malevolence",
+            sub="Ammurapi Shield",
+        },
     }
 
-    -- Consider Malignance pole/Malevolence for later.
+    -- Consider Malignance pole for later.
 
     ----------------------------------------------------------------
     -- GEAR SETS
@@ -283,11 +285,11 @@ function get_sets()
 
     -- Tweak as necessary. I'm not exactly sure what this set should look like yet.
     sets.midcast["Vagary Burst"] = set_combine(sets.midcast["Free Nuke"], {
-        main=empty,
-        sub=empty,
+        --main=empty,
+        --sub=empty,
         --ammo=empty,
-        --head=empty,
-        --body=empty,
+        head=empty,
+        body=empty,
         --hands=empty,
         --legs=empty,
         --feet=empty,
@@ -547,7 +549,7 @@ function get_sets()
         right_ear="Meili Earring",
         left_ring="Stikini Ring",
         right_ring="Haoma's Ring",                                                                                                  -- Cursna +15%
-        --back=,
+        back="Oretan. Cape +1",                                                                                                     -- Cursna +5%
     })
 
     ----------------------------------------------------------------
@@ -764,9 +766,6 @@ function get_sets()
         right_ring="Defending Ring",    -- 10% DT
         back="Fi Follet Cape +1",       -- 10% FC
     }
-
-    -- TODO: Something for later probably
-    -- sets.buff.immanence_dt = {}
 end
 
 ----------------------------------------------------------------
@@ -987,7 +986,10 @@ function midcast(spell)
     local element_matches_weather = world.weather_element == spell.element
 
     if valid_obi_skill and element_matches_day_or_weather and spell.element ~= "None" then
-        equip({waist="Hachirin-no-Obi"})
+        -- Helixes get weather bonuses 100% of the time.
+        if not helix_spells:contains(spell.name) then
+            equip({waist="Hachirin-no-Obi"})
+        end
 
         if spell.skill == "Healing Magic" and element_matches_weather then
             equip({main="Chatoyant Staff", sub="Khonsu",})
@@ -1010,16 +1012,20 @@ function aftercast(spell)
 end
 
 function buff_change(name, gain, buff_details)
-    if not midaction() then
-        if name == "Sublimation: Activated" then
-            idle() 
-        end
+    if not midaction() and name == "Sublimation: Activated" then
+        idle()
     end
 
     -- Part of the "why is ping like this" solution for minimal delays in checking for Immanence
-    if name == "Immanence" then
-        if gain == false then 
-            immanence = false
+    if name == "Immanence" and gain == false then
+        immanence = false
+    end
+
+    if name == "Sublimation: Complete" and gain == true then
+        add_to_chat(200, "Sublimation complete.")
+
+        if not midaction() then
+            idle()
         end
     end
 end

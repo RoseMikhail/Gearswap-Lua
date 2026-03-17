@@ -900,7 +900,10 @@ function midcast(spell)
     local element_matches_weather = world.weather_element == spell.element
 
     if valid_obi_skill and element_matches_day_or_weather and spell.element ~= "None" then
-        equip({waist="Hachirin-no-Obi"})
+        -- Helixes get weather bonuses 100% of the time.
+        if not helix_spells:contains(spell.name) then
+            equip({waist="Hachirin-no-Obi"})
+        end
 
         if spell.skill == "Healing Magic" and element_matches_weather then
             equip({main="Chatoyant Staff", sub="Khonsu",})
@@ -926,6 +929,14 @@ function buff_change(name, gain, buff_details)
 
         if name == "Sublimation: Activated" then
             idle() 
+        end
+    end
+
+    if name == "Sublimation: Complete" and gain == true then
+        add_to_chat(200, "Sublimation complete.")
+
+        if not midaction() then
+            idle()
         end
     end
 end
