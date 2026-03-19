@@ -7,16 +7,16 @@ include("Modes.lua")
 
 --[[
 Kinda just do this as and when:
-- When the Relic set is updated, remember to update sets with it
 - Upgrade bookworm's cape for helix duration + damage! It also has damage stat on it so
+- Notification in chat when I'm slept or doomed
 
 Potential enhancements:
 - Save certain toggles and sets between reloads
 - Regen potency vs regen toggle
-- Cure DT vs potency toggle
-- Relic gear: set up focalization/altruism (accuracy) and maaaaybe enlightenment buff handling for gear swaps.
+    - Need potency gear
+- Cure DT vs conserve toggle
+    - Kinda less less important but can make a conserve focused set, potentially with Cure II stat
 - When I have access to Agwu's, I may want a separate magic burst set for Ebullience. Check SCH guide later. This will require adjustment to a check in midcast.
-- Notification in chat when I'm slept or doomed
 ]]
 
 ----------------------------------------------------------------
@@ -131,11 +131,11 @@ function get_sets()
     }
 
     jse.relic = {
-        head="Argute M.board +2",
-        body="Argute Gown +2",
-        hands="Argute Bracers +2",
-        legs="Argute Pants +2",
-        feet="Argute Loafers +2",
+        head="Peda. M.Board +3", 
+        body="Peda. Gown +1",       -- Didn't make a check for the bonus to skill because I've barely invested into it Merit-wise (though it works on the JA, so I could just do it whenever)
+        hands="Peda. Bracers +3",   -- Didn't even merit Tranquility or Equanimity, so no bother checking for that
+        legs="Peda. Pants +3",
+        feet="Peda. Loafers +1",    -- Added a check into precast for the bonus, but I don't want it to affect my midcasts for the recast reduction. Maybe if I ever end up using Stun on this job.
     }
 
     jse.empyrean = {
@@ -149,11 +149,11 @@ function get_sets()
     jse.capes = {
         nuking_idle={ name="Lugh's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
         occult_acumen={ name="Lugh's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Store TP"+10',}},
-        --enfeebling="", unnecessary?
+        helix_duration={ name="Bookworm's Cape", augments={'INT+2','MND+4','Helix eff. dur. +20',}},
+        regen_potency={ name="Bookworm's Cape", augments={'INT+3','MND+1','Helix eff. dur. +18','"Regen" potency+10',}},
         --tp="", Melee TP: DEX +20, Acc +30, Atk +20, Store TP +10 ... er another 10 dex i think
         --wsd="", Vidohunir/WS: INT +30, Macc/Mdmg +20, Weapon Skill Damage +10%
         --curing="" MND+20, Mag. Evasion +10, Eva.+20/Mag.Eva+20, Enmity -10, Damage taken -5% (or PDT)
-        -- Maybe high mp cape?
     }
 
     ----------------------------------------------------------------
@@ -228,18 +228,15 @@ function get_sets()
     ----------------------------------------------------------------
     -- NUKE MIDCAST MODES
     ----------------------------------------------------------------
-    
-    -- TODO: SIM with what I have + recheck each individual piece
-    -- I suspect lots of Empyrean gear + Mujin Band
 
     sets.midcast["Free Nuke"] = {
-        ammo="Sroda Tathlum",
+        ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=jse.empyrean.head,
         body=jse.empyrean.body,
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Saevus Pendant +1",
+        neck="Mizukage-no-Kubikazari",  
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
@@ -250,11 +247,10 @@ function get_sets()
 
     -- reevaluate the actual magic burst stat here
     -- Probably want Argute Stole +1 for 7% MB
-    sets.midcast["Burst"] = {                                                                                           -- 36% MB, 16% MB II
+    sets.midcast["Burst"] = {                                                                                           -- 31% MB, 16% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=jse.empyrean.head,
         body=jse.empyrean.body,
-        --hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},                    -- 6% MB II
         hands=jse.empyrean.hands,                                                                                       -- 15% MB
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,                                                                                         -- 5% MB II
@@ -262,7 +258,7 @@ function get_sets()
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
-        left_ring="Locus Ring",                                                                                         -- 5% MB
+        left_ring="Freke Ring",
         right_ring="Mujin Band",                                                                                        -- 5% MB II
         back=jse.capes.nuking_idle,
     }
@@ -304,22 +300,22 @@ function get_sets()
 
     sets.midcast.helix = {} -- Leave this empty.
 
-    -- Give these another proper think when I actually have odyssey gear lol
+    -- Helix duration cape might be helpful maybe... but I do less damage with it.
 
     sets.midcast.helix["Free Nuke"] = set_combine(sets.midcast["Free Nuke"], {
         main="Wizard's Rod",
         sub="Ammurapi Shield",
         range=empty,
         ammo="Ghastly Tathlum +1",
-        head="Mall. Chapeau +2",
-        body="Mallquis Saio +2",
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
-        legs="Mallquis Trews +2",
-        feet="Mallquis Clogs +2",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
         neck="Mizu. Kubikazari",
-        waist="Acuity Belt +1",
-        left_ear="Barkaro. Earring", -- Regal Earring
-        right_ear="Malignance Earring",
+        waist="Eschan Stone",
+        left_ear="Barkaro. Earring",
+        right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
         left_ring="Freke Ring",
         right_ring="Mallquis Ring",
         back={ name="Lugh's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
@@ -330,17 +326,17 @@ function get_sets()
         sub="Ammurapi Shield",
         range=empty,
         ammo="Ghastly Tathlum +1",
-        head="Mall. Chapeau +2", -- TODO: This wants to be the relic head
-        body="Mallquis Saio +2",
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
-        legs="Mallquis Trews +2",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Mizu. Kubikazari",
-        waist="Acuity Belt +1",
+        waist="Eschan Stone",
         left_ear="Barkaro. Earring",
         right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
         left_ring="Mujin Band",
-        right_ring="Freke Ring",
+        right_ring="Mallquis Ring",
         back={ name="Lugh's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
     })
 
@@ -350,10 +346,10 @@ function get_sets()
         range=empty,
         ammo="Pemphredo Tathlum",
         head="Pixie Hairpin +1",
-        body="Mallquis Saio +2",
-        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
-        legs="Mallquis Trews +2",
-        feet="Mallquis Clogs +2",
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
         neck="Mizu. Kubikazari",
         waist="Acuity Belt +1",
         left_ear="Barkaro. Earring", -- Regal Earring
@@ -449,63 +445,26 @@ function get_sets()
     -- Do not replace telchine body for duration. Unless ofc you're using Relic +3. Regen duration +12!!
     -- Fill other slots with Conserve MP.
 
-    -- Technically the hands only need to be on for Perpetuance, could use telchine hands otherwise
-    -- TODO: check for perpetuance and set these hands back to telchine
+    -- TODO: Split into Max Duration and Potency sets
+    -- Do I still want to keep empy head on duration though?
+
     sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
         main="Bolelabunga",                                                                                                         -- +10% potency
-        head=jse.empyrean.head,                                                                                                     -- +20% potency
-        body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration, +12 duration
-        --hands=jse.empyrean.hands,                                                                                                 -- Perpetuance +60% duration
+        head=jse.empyrean.head,                                                                                                     -- +25% potency
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
 
     -- TODO: When I can be bothered.
     sets.midcast["Stoneskin"] = set_combine(sets.midcast["Enhancing Magic"], {
-        --ammo=,
-        --head=,
-        --body=,
-        --hands=,
         legs="Shedir Seraweels",                                                                                                    -- +35 Stoneskin
-        --feet=,
-        --neck=,
-        --waist=,
-        --left_ear=,
-        --right_ear=,
-        --left_ring=,
-        --right_ring=,
-        --back="Fi Follet Cape +1",
     })
 
     sets.midcast["Aquaveil"] = set_combine(sets.midcast["Enhancing Magic"], {
-        --ammo=,
-        --head=,
-        --body=,
-        --hands=,
         legs="Shedir Seraweels",                                                                                                    -- +1 Aquaveil
-        --feet=,
-        --neck=,
-        --waist=,
-        --left_ear=,
-        --right_ear=,
-        --left_ring=,
-        --right_ring=,
-       -- back="Fi Follet Cape +1",
     })
 
-    -- TODO: When I'm mastered, reevaluate the pieces here. Remove any unneeded skill and replace with conserve mp.
     sets.midcast.barspell = set_combine(sets.midcast["Enhancing Magic"], {
-        --ammo=,
-        --head=,
-        --body=,
-        --hands=,
         legs="Shedir Seraweels",
-        --feet=,
-        --neck=,
-        --waist=,
-        --left_ear=,
-        --right_ear=,
-        --left_ring=,
-        --right_ring=,
         back="Fi Follet Cape +1",
     })
 
@@ -515,7 +474,7 @@ function get_sets()
     
     -- TODO: Full potency/conserve/etc. set
 
-    -- Attempt at a Cure DT set. Can consider switching Vanya to Path A for potency + enmity, then dropping Daybreak+Genmei for Chatoyant+Khonsu for more DT.
+    -- Attempt at a Cure DT set.
     sets.midcast["Cure"] = { -- -49% DT, 59% Cure Potency (50% cap), +34% Conserve MP, -54-58 Enmity, 23% SIRD 
         main="Chatoyant Staff",                                                                                                     -- 10% Cure Potency
         sub="Khonsu",                                                                                                               -- -6% DT, -5 Enmity
@@ -543,7 +502,7 @@ function get_sets()
         --hands=,
         legs=jse.AF.legs,                                                                                                           -- Healing skill
         feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}}, -- Replace with healing skill              -- Cursna +5%
-        --neck=,
+        neck="Debilis Medallion",                                                                                                   -- Cursna +15%
         waist="Bishop's Sash",                                                                                                      -- Healing skill
         --left_ear=,
         right_ear="Meili Earring",
@@ -575,21 +534,37 @@ function get_sets()
 
     sets.midcast["Drain"] = sets.midcast["Aspir"]
 
+    -- TODO: Fill out with Subtle Blow gear as well
+    -- TODO: I could just put this into the nuking area
+    sets.midcast.immanence = { -- 10% PDT, 37% DT (47% PDT, 37% MDT), 36% Haste (26 Cap), 40 FC (20% FC haste)
+        main=empty,
+        sub="Genmei Shield",            -- 10% PDT
+        range=empty,
+        ammo="Staunch Tathlum",         -- 2% DT
+        head="Null Masque",             -- 10% DT, 10% Haste
+        body="Shango Robe",             -- 3% FC, 3% Haste
+        hands="Acad. Bracers +3",       -- 9% FC, 3% Haste
+        legs="Acad. Pants +3",          -- 5% Haste
+        feet="Acad. Loafers +3",        -- 12% Grimoire FC
+        neck="Voltsurge Torque",        -- 4% FC
+        waist="Cornelia's Belt",        -- 10% Haste
+        left_ear="Alabaster Earring",   -- 5% DT, 5% Haste
+        right_ear="Loquac. Earring",    -- 2% FC
+        left_ring="Murky Ring",         -- 10% DT
+        right_ring="Defending Ring",    -- 10% DT
+        back="Fi Follet Cape +1",       -- 10% FC
+    }
+
     ----------------------------------------------------------------
     -- IDLE MODES
     ----------------------------------------------------------------
 
-    -- TODO: At some stage, I would like to replace the Loricate Torque with the Warder's Charm and hopefully have capped PDT and MDT in the same set
-    -- Could replace one of the earrings with the Hearty Earring too
-    -- Consider also a max DT+evasion set (ws cleaves?)
-
-    -- TODO: Can use Homiliary when my DT is a bit higher, or maybe just rely on Shell to make up the difference in DT
-    sets.idle["Normal"] = {                                                                                                                                -- OVERALL -40% DT, -10% PDT, -3% MDT (-50% DT+PDT, -43% DT+MDT), +8-9 refresh
+    sets.idle["Normal"] = {                                                                                                                             -- OVERALL -51% DT, -10% PDT, -3% MDT (-61% DT+PDT, -54% DT+MDT), +7 refresh
         ammo="Homiliary",                                                                                                                               -- +1 Refresh
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
         body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 13% DT
         hands="Nyame Gauntlets",                                                                                                                        -- 7% DT
-        legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
+        legs=jse.empyrean.legs,                                                                                                                         -- 11% DT
         feet=jse.empyrean.feet,                                                                                                                         -- We're capped on DT so, shrug, some meva
         neck="Warder's Charm +1",
         waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
@@ -735,36 +710,14 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     }
 
-    --TODO: Black Halo when I unlock it
-
     ----------------------------------------------------------------
     -- BUFF 
     ----------------------------------------------------------------
 
     sets.buff.sublimation = {
         head=jse.AF.head,                                                                                                               -- Sublimation +4
-        --body=jse.relic.body,                                                                                                            -- Sublimation +2
+        body=jse.relic.body,                                                                                                            -- Sublimation +3
         waist="Embla Sash",                                                                                                             -- Sublimation +3
-    }
-
-    -- TODO: Fill out with Subtle Blow gear as well
-    sets.buff.immanence = { -- 10% PDT, 37% DT (47% PDT, 37% MDT), 36% Haste (26 Cap), 40 FC (20% FC haste)
-        main=empty,
-        sub="Genmei Shield",            -- 10% PDT
-        range=empty,
-        ammo="Staunch Tathlum",         -- 2% DT
-        head="Null Masque",             -- 10% DT, 10% Haste
-        body="Shango Robe",             -- 3% FC, 3% Haste
-        hands="Acad. Bracers +3",       -- 9% FC, 3% Haste
-        legs="Acad. Pants +3",          -- 5% Haste
-        feet="Acad. Loafers +3",        -- 12% Grimoire FC
-        neck="Voltsurge Torque",        -- 4% FC
-        waist="Cornelia's Belt",        -- 10% Haste
-        left_ear="Alabaster Earring",   -- 5% DT, 5% Haste
-        right_ear="Loquac. Earring",    -- 2% FC
-        left_ring="Murky Ring",         -- 10% DT
-        right_ring="Defending Ring",    -- 10% DT
-        back="Fi Follet Cape +1",       -- 10% FC
     }
 end
 
@@ -867,6 +820,12 @@ function precast(spell)
             -- General purpose
             equip_set_and_weapon(sets.precast.fast_cast)
         end
+
+        -- Celerity/Alacrity overlay
+        if (buffactive["Celerity"] or buffactive["Alacrity"]) and world.weather_element == spell.element then
+            equip({feet=jse.relic.feet})
+        end
+
         return
     end
 
@@ -898,7 +857,7 @@ function midcast(spell)
     -- If Immanence is up and the spell is either a helix or elemental magic
     -- No need to use "matched", as I don't want to overlay this at all
     if immanence and spell.skill == "Elemental Magic" then
-        equip_set_and_weapon(sets.buff.immanence)
+        equip_set_and_weapon(sets.midcast.immanence)
         return
     end
 
@@ -932,7 +891,7 @@ function midcast(spell)
         end
 
         if spell.name:match("Anemohelix") then
-            equip({main={ name="Marin Staff +1", augments={'Path: A',}}, sub="Enki Strap",}) -- Possibly amend later to match a weapon set idk?
+            equip({main={ name="Marin Staff +1", augments={'Path: A',}}, sub="Enki Strap",})
         end
 
         if spell.name:match("Luminohelix") then
@@ -940,6 +899,7 @@ function midcast(spell)
         end
 
         -- If I happen to get the item.
+        -- Argute Stole +2 may be better.
         --if spell.name:match("Geohelix") then
         --    equip({neck="Quanpur Necklace"})
         --end
@@ -981,7 +941,7 @@ function midcast(spell)
     end
 
     -- Weather and day overlays
-    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
+    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic", "Enfeebling Magic"}:contains(spell.skill)
     local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
     local element_matches_weather = world.weather_element == spell.element
 
@@ -1004,6 +964,13 @@ function midcast(spell)
     -- Perpetuance overlay
     if (buffactive["Perpetuance"] and spell.type == "WhiteMagic" and spell.skill == "Enhancing Magic") then
         equip({hands=jse.empyrean.hands})
+    end
+
+    -- Focalization/Altruism overlay
+    -- Note that the bonus from this head does not stack with the Obi, so we swap in an accuracy belt.
+    -- This, therefore, HAS to be after the Hachirin-no-Obi overlay.
+    if (buffactive["Focalization"] or buffactive["Altruism"]) then
+        equip({head=jse.relic.head, waist="Null Belt"})
     end
 end
 

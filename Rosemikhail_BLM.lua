@@ -14,6 +14,7 @@ Potential enhancements:
 - Steal Aquaveil stuff from SCH
 - Doomed set
 - Notification in chat when I'm slept or doomed
+- Potentially build a straight up DT/meva set. Probably have Normal as a hybrid, a DT/meva set, and a refresh set.
 ]]
 
 ----------------------------------------------------------------
@@ -258,7 +259,8 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,                                                                                         -- 15% MB
         feet=jse.empyrean.feet,
-        neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB Sorcerer's Stole +1 is comparable if no weather/hachirin-no-obi. Why? idk. Use instead after capping MB for the other stats
+        neck={ name="Src. Stole +1", augments={'Path: A',}}, -- Now this is less MB again but apparently it does do a little more damage - i also cant cry about the extra INT/macc
+        --neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB Sorcerer's Stole +1 is comparable if no weather/hachirin-no-obi. Why? idk. Use instead after capping MB for the other stats
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
@@ -895,7 +897,7 @@ function midcast(spell)
     end
 
     -- Weather and day overlays
-    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
+    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic", "Enfeebling Magic"}:contains(spell.skill)
     local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
     local element_matches_weather = world.weather_element == spell.element
 
