@@ -15,6 +15,7 @@ Potential enhancements:
 - Doomed set
 - Notification in chat when I'm slept or doomed
 - Potentially build a straight up DT/meva set. Probably have Normal as a hybrid, a DT/meva set, and a refresh set.
+- Fix helix weather logic
 ]]
 
 ----------------------------------------------------------------
@@ -31,22 +32,14 @@ toggle_af_body = "Off"
 toggle_death = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
 
--- Command helpers
-nuking_mode_pairs = {
-    freenuke = "Free Nuke",
-    burst = "Burst",
-    occultacumen = "Occult Acumen",
-}
-
 -- Midcast helpers
 match_list = S{"Cure", "Aspir", "Drain", "Regen"}
 elemental_debuffs = S{'Burn','Frost','Choke','Rasp','Shock','Drown'}
 cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja', 'Comet'}
+helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix"}
 
 -- Bindings
-send_command("bind f1 gs c nukemode freenuke")
-send_command("bind f2 gs c nukemode burst")
-send_command("bind f3 gs c nukemode occultacumen")
+send_command("bind f1 gs c nukemode")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
@@ -58,7 +51,7 @@ send_command("bind f11 gs c toggledeath")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1-F3: Switch nuking mode")
+add_to_chat(123, "F1: Cycle nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
 add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear, F10: Toggle AF body")
@@ -84,7 +77,7 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s | AF Body: %s | Death: %s",
+        "Nuking Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s | AF Body: %s | Death: %s",
         nuking_mode.current,
         weapon_mode.current,
         idle_mode.current,
@@ -154,9 +147,9 @@ function get_sets()
         idle_fc={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10','Phys. dmg. taken-10%',}},
         occult_acumen={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Store TP"+10',}},
         death ={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Mag.Atk.Bns."+10','Phys. dmg. taken-10%',}},
+        wsd={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','Weapon skill damage +10%','Phys. dmg. taken-10%',}},
+        tp={ name="Taranus's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+6','"Store TP"+10','Phys. dmg. taken-10%',}}, -- Need 4 more pots of dye for accuracy. Not sure if worth over Null Shawl.
         --enmity ="", Stun/Enmity: Macc +30, Mdmg +20, Enmity +10
-        --tp="", Melee TP: DEX +20, Acc +30, Atk +20, Store TP +10 ... er another 10 dex i think
-        --wsd="", Vidohunir/WS: INT +30, Macc/Mdmg +20, Weapon Skill Damage +10%
     }
 
     ----------------------------------------------------------------
@@ -198,12 +191,13 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 81% FC, 2% Occ
+    -- Could drop the Prolix Ring and replace it with the Lebeche Ring
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 83% FC, 2% Occ
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
         hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+8 "Mag.Atk.Bns."+8','"Fast Cast"+7','MND+5','Mag. Acc.+11',}},           -- 7% FC
-        legs="Orvail Pants +1",                                                                                                         -- 5% FC
+        legs="Agwu's Slops",                                                                                                            -- 7% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
         neck="Voltsurge Torque",                                                                                                        -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
@@ -220,6 +214,7 @@ function get_sets()
     })
 
     sets.precast["Death"] = set_combine(sets.precast.fast_cast, {
+        hands="Agwu's Gages",
         legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
         left_ring="Mephitas's Ring",
         right_ring="Mephitas's Ring +1",
@@ -403,11 +398,11 @@ function get_sets()
     })
 
     -- Could add Gada and Ammurapi if I felt special and cool and didn't mind losing TP
-    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +55% duration
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +58% duration
         ammo="Pemphredo Tathlum",
-        head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +8',}},                                                          -- +8% duration
+        head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +10',}},                                                         -- +10% duration
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
-        hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +9',}},                                     -- +9% duration
+        hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                    -- +10% duratiom.
         legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
         feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
         neck="Incanter's Torque",
@@ -425,7 +420,7 @@ function get_sets()
         body="Shango Robe",
         hands=jse.relic.hands,
         legs=jse.AF.legs,
-        --feet="",
+        feet="Agwu's Pigaches",
         neck="Erra Pendant",
         waist="Fucho-no-Obi",
         --left_ear=,
@@ -553,28 +548,27 @@ function get_sets()
     })
 
     ----------------------------------------------------------------
-    -- WEAPONSKILLS 
+    -- WEAPONSKILLS - STAFF
     ----------------------------------------------------------------
 
-    sets.ws.default = { -- Hybrid DT, generic for physical weaponskills (idk what else to put here)
+    sets.ws.default = { -- Generic physical
         ammo="Amar Cluster",
         head=jse.empyrean.head,
         body=jse.AF.body,
-        hands=jse.AF.hands,
+        hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
         left_ear="Moonshade Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Rufescent Ring",
-        right_ring="Petrov Ring",
+        right_ear="Cessance Earring",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
         back="Null Shawl",
     }
 
-
-    sets.ws["Aeolian Edge"] = { -- DEX/INT scaling, Hybrid DT, requires RDM sub
-        ammo="Sroda Tathlum",
+    sets.ws["Rock Crusher"] = {
+        ammo="Ghastly Tathlum +1",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
         hands=jse.empyrean.hands,
@@ -583,59 +577,28 @@ function get_sets()
         neck="Saevus Pendant +1",
         waist="Eschan Stone",
         left_ear="Malignance Earring",
-        right_ear="Moonshade Earring",
-        left_ring="Murky Ring",
-        right_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},
-        back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
+        right_ear="Friomisi Earring",
+        left_ring="Freke Ring",
+        right_ring="Defending Ring",
+        back=jse.capes.wsd,
     }
 
-    sets.ws["Black Halo"] = { -- MND/STR scaling, Hybrid DT, re-sim this
-        ammo="Amar Cluster",
-        head=jse.empyrean.head,
-        body=jse.empyrean.body,
-        hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet,
-        neck="Null Loop",
-        waist="Null Belt",
-        left_ear="Moonshade Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Murky Ring",
-        right_ring="Rufescent Ring",
-        back="Alabaster Mantle",
-    }
+    sets.ws["Starburst"] = sets.ws["Rock Crusher"]
 
-    sets.ws["Realmrazer"] = { -- MND scaling, Hybrid DT
-        ammo="Amar Cluster",
-        head="Null Masque",
-        body=jse.AF.body,
-        hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet,
-        neck="Null Loop",
-        waist="Null Belt",
-        left_ear="Moonshade Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Rufescent Ring",
-        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},
-        back="Null Shawl",
-    }
-
-    -- This kinda targets Triboulex
-    sets.ws["Vidohunir"] = { -- Hybrid DT, requires staff
+    sets.ws["Vidohunir"] = {
         ammo="Ghastly Tathlum +1",
         head="Pixie Hairpin +1",
         body=jse.empyrean.body,
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck={ name="Src. Stole +1", augments={'Path: A',}},
+        neck="Loricate Torque +1",
         waist="Acuity Belt +1",
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
         left_ring="Murky Ring",
-        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},
-        back=jse.capes.nuking,
+        right_ring="Archon Ring",
+        back=jse.capes.wsd,
     }
 
     sets.ws["Myrkr"] = { -- No DT
@@ -652,6 +615,77 @@ function get_sets()
         left_ring="Mephitas's Ring",
         right_ring="Mephitas's Ring +1",
         back=jse.capes.idle_fc,
+    }
+
+    ----------------------------------------------------------------
+    -- WEAPONSKILLS - CLUB
+    ----------------------------------------------------------------
+
+    sets.ws["Shining Strike"] = {
+        ammo="Ghastly Tathlum +1",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands="Jhakri Cuffs +2",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Eschan Stone",
+        left_ear="Malignance Earring",
+        right_ear="Friomisi Earring",
+        left_ring="Murky Ring",
+        right_ring="Defending Ring",
+        back=jse.capes.wsd,
+    }
+    
+    sets.ws["Black Halo"] = {
+        ammo="Amar Cluster",
+        head=jse.empyrean.head,
+        body=jse.AF.body,
+        hands=jse.empyrean.hands,
+        legs=jse.AF.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
+        left_ear="Malignance Earring",
+        right_ear="Cessance Earring",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
+        back="Null Shawl",
+    }
+
+    sets.ws["Realmrazer"] = {
+        ammo="Amar Cluster",
+        head=jse.empyrean.head,
+        body=jse.AF.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
+        left_ear="Moonshade Earring",
+        right_ear="Cessance Earring",
+        left_ring="Murky Ring",
+        right_ring="Rufescent Ring",
+        back="Null Shawl",
+    }
+    ----------------------------------------------------------------
+    -- WEAPONSKILLS - OTHER
+    ----------------------------------------------------------------
+
+    sets.ws["Aeolian Edge"] = {
+        ammo="Ghastly Tathlum +1",
+        head=jse.empyrean.head,
+        body=jse.empyrean.body,
+        hands="Jhakri Cuffs +2",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Saevus Pendant +1",
+        waist="Acuity Belt +1",
+        left_ear="Malignance Earring",
+        right_ear="Friomisi Earring",
+        left_ring="Murky Ring",
+        right_ring="Defending Ring",
+        back=jse.capes.wsd,
     }
 
     ----------------------------------------------------------------
@@ -703,23 +737,6 @@ function idle()
     -- Speed overlay
     if toggle_speed == "On" then
         equip({left_ring="Shneddick Ring",})
-    end
-end
-
--- This is for modes that are bound separately via subcommand.
--- It requires a mode pair table (so freenuke = "Free Nuke") that corresponds to the mode variable that you also pass in and a label for the output.
-function handle_submode_switch(sub_command, mode_table, mode_var, label)
-    if not sub_command then
-        add_to_chat(123, "Missing argument.")
-        return
-    end
-
-    local mode = mode_table[sub_command]
-    if mode then
-        add_to_chat(123, string.format("%s mode set to %s", label, mode))
-        mode_var:set(mode)
-    else
-        add_to_chat(123, string.format("Invalid %s mode.", label))
     end
 end
 
@@ -838,6 +855,7 @@ function midcast(spell)
     local matched = false
 
     -- If the spell matches one of the match_list spells.
+    -- If I ever have to break up these spells into separate sets, it would be worth breaking this up.
     for match in match_list:it() do
         if spell.name:match(match) then
             equip_set_and_weapon(sets.midcast[match])
@@ -897,7 +915,7 @@ function midcast(spell)
     end
 
     -- Weather and day overlays
-    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic", "Enfeebling Magic"}:contains(spell.skill)
+    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
     local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
     local element_matches_weather = world.weather_element == spell.element
 
@@ -958,7 +976,8 @@ function self_command(command)
     local sub_command = commandArgs[2]
 
     if main_command == "nukemode" then
-        handle_submode_switch(sub_command, nuking_mode_pairs, nuking_mode, "Nuking")
+        nuking_mode:cycle()
+        add_to_chat(123, string.format("Nuking mode set to %s", nuking_mode.current))
 
     elseif main_command == "weaponmode" then
         weapon_mode:cycle()
@@ -1006,15 +1025,12 @@ end
 
 function file_unload(file_name)
     send_command("unbind f1")
-    send_command("unbind f2")
-    send_command("unbind f3")
     
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
-    
+
     send_command("unbind f9")
-    send_command("unbind f10")
-    send_command("unbind f11")
+
     send_command("unbind f12")
 end

@@ -27,18 +27,11 @@ weapon_mode = M{"Wizard", "Daybreak", "Idris", "Maxentius"}
 toggle_speed = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
 
--- Command helpers
-nuking_mode_pairs = {
-    freenuke = "Free Nuke",
-    burst = "Burst",
-}
-
 -- Midcast helpers
 match_list  = S{"Cure", "Aspir", "Drain", "Regen"}
 
 -- Bindings
-send_command("bind f1 gs c nukemode freenuke")
-send_command("bind f2 gs c nukemode burst")
+send_command("bind f1 gs c nukemode")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
@@ -48,7 +41,7 @@ send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1-F2: Switch nuking mode")
+add_to_chat(123, "F1: Switch nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
 add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear")
@@ -74,7 +67,7 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s",
+        "Nuking Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s",
         nuking_mode.current,
         weapon_mode.current,
         idle_mode.current,
@@ -185,14 +178,14 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    -- Parity with BLM set; also no longer need to equip a weapon or ranged in this set.
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 81% FC, 2% Occ
+    -- Could drop the Prolix Ring and replace it with the Lebeche Ring
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 83% FC, 2% Occ
         range=empty,
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
         hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+8 "Mag.Atk.Bns."+8','"Fast Cast"+7','MND+5','Mag. Acc.+11',}},           -- 7% FC
-        legs="Orvail Pants +1",                                                                                                         -- 5% FC
+        legs="Agwu's Slops",                                                                                                            -- 7% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
         neck="Voltsurge Torque",                                                                                                        -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
@@ -376,14 +369,14 @@ function get_sets()
         back=jse.capes.enfeebling_healing_fc,
     })
 
-    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +71% duration
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +74% duration
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
         ammo="Pemphredo Tathlum",
-        head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +8',}},                                                          -- +8% duration
+        head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +10',}},                                                         -- +10% duration
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
-        hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +9',}},                                     -- +9% duration
+        hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                    -- +10% duratiom.
         legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
         feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
         neck="Incanter's Torque",
@@ -403,7 +396,7 @@ function get_sets()
         body=jse.AF.body,
         --hands="",
         legs=jse.empyrean.legs,
-        --feet="",
+        feet="Agwu's Pigaches",
         neck="Erra Pendant",
         waist="Fucho-no-Obi",
         left_ear="Barkaro. Earring",
@@ -465,12 +458,12 @@ function get_sets()
         back=jse.capes.idle,                                                                                                                            -- -10% PDT
     })
 
-    sets.idle.luopan = {                                                                                                                -- -50% Pet DT (Capped at -37.5%), +28 Regen (need 24+), -42% DT, -10% PDT, -0% MDT (-52% DT+PDT, -42% DT+MDT), +4 Refresh
+    sets.idle.luopan = {                                                                                                                -- -50% Pet DT (Capped at -37.5%), +29 Regen (need 24+), -42% DT, -10% PDT, -0% MDT (-52% DT+PDT, -42% DT+MDT), +4 Refresh
         main="Idris",                                                                                                                   -- -25% Pet DT
         sub="Genmei Shield",                                                                                                            -- -10% PDT
         range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- -5% Pet DT
         ammo=empty,
-        head=jse.empyrean.head,                                                                                                         -- +4 Regen, -11% DT
+        head=jse.empyrean.head,                                                                                                         -- +5 Regen, -11% DT
         body=jse.empyrean.body,                                                                                                         -- +4 Refresh -- Replace with Shamash when possible for DT
         hands=jse.AF.hands,                                                                                                             -- -3% DT, -13% Pet DT
         legs={ name="Telchine Braconi", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                          -- -4% Pet DT, +3 Regen Apparently replace with Agwu's slops for DT and stuff
@@ -674,23 +667,6 @@ function idle()
     end
 end
 
--- This is for modes that are bound separately via subcommand.
--- It requires a mode pair table (so freenuke = "Free Nuke") that corresponds to the mode variable that you also pass in and a label for the output.
-function handle_submode_switch(sub_command, mode_table, mode_var, label)
-    if not sub_command then
-        add_to_chat(123, "Missing argument.")
-        return
-    end
-
-    local mode = mode_table[sub_command]
-    if mode then
-        add_to_chat(123, string.format("%s mode set to %s", label, mode))
-        mode_var:set(mode)
-    else
-        add_to_chat(123, string.format("Invalid %s mode.", label))
-    end
-end
-
 function handle_toggle(toggle, label)
     local result = (toggle == "On") and "Off" or "On"
     add_to_chat(123, string.format("%s toggle: %s", label, result))
@@ -776,6 +752,7 @@ function midcast(spell)
 
     -- If the spell matches one of the match_list spells.
     -- Note: This HAS to be after the Geo/Indi spells otherwise it'll match those too
+    -- If I ever have to break up these spells into separate sets, it would be worth breaking this up.
     if not matched then
         for match in match_list:it() do
             if spell.name:match(match) then
@@ -854,7 +831,8 @@ function self_command(command)
     local sub_command = commandArgs[2]
 
     if main_command == "nukemode" then
-        handle_submode_switch(sub_command, nuking_mode_pairs, nuking_mode, "Nuking")
+        nuking_mode:cycle()
+        add_to_chat(123, string.format("Nuking mode set to %s", nuking_mode.current))
 
     elseif main_command == "weaponmode" then
         weapon_mode:cycle()
@@ -894,12 +872,12 @@ end
 
 function file_unload(file_name)
     send_command("unbind f1")
-    send_command("unbind f2")
-
+    
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
 
     send_command("unbind f9")
+
     send_command("unbind f12")
 end

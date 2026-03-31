@@ -7,16 +7,14 @@ include("Modes.lua")
 
 --[[
 Kinda just do this as and when:
-- Upgrade bookworm's cape for helix duration + damage! It also has damage stat on it so
 - Notification in chat when I'm slept or doomed
 
 Potential enhancements:
 - Save certain toggles and sets between reloads
-- Regen potency vs regen toggle
-    - Need potency gear
 - Cure DT vs conserve toggle
     - Kinda less less important but can make a conserve focused set, potentially with Cure II stat
-- When I have access to Agwu's, I may want a separate magic burst set for Ebullience. Check SCH guide later. This will require adjustment to a check in midcast.
+- When Agwu's is upgraded, I may want a separate magic burst set for Ebullience. Check SCH guide later. This will require adjustment to a check in midcast.
+- I don't know how much I care about the Grimoire thing. Right now, it seems to cast faster? But I'm not using the logic as I don't trust it.
 ]]
 
 ----------------------------------------------------------------
@@ -27,27 +25,18 @@ Potential enhancements:
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen", "Vagary Burst"}
 idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Staff", "Wizard", "Maxentius", "Malevolence"}
+regen_mode = M{"Balanced", "Potency", "Duration"}
 
 toggle_speed = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
 
--- Command helpers
-nuking_mode_pairs = {
-    freenuke = "Free Nuke",
-    burst = "Burst",
-    occultacumen = "Occult Acumen",
-    vagaryburst = "Vagary Burst"
-}
-
 -- Midcast helpers
-match_list = S{"Cure", "Aspir", "Drain", "Regen"}
+match_list = S{"Cure", "Aspir", "Drain"}
 helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix", "Geohelix II", "Hydrohelix II", "Anemohelix II", "Pyrohelix II", "Cryohelix II", "Ionohelix II", "Noctohelix II", "Luminohelix II",}
 
 -- Bindings
-send_command("bind f1 gs c nukemode freenuke")
-send_command("bind f2 gs c nukemode burst")
-send_command("bind f3 gs c nukemode occultacumen")
-send_command("bind f4 gs c nukemode vagaryburst")
+send_command("bind f1 gs c nukemode")
+send_command("bind f2 gs c regenmode")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
@@ -57,7 +46,7 @@ send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1-F4: Switch nuking mode")
+add_to_chat(123, "F1: Switch nuking mode, F2: Switch regen mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
 add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear")
@@ -83,8 +72,9 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s",
+        "Nuking Mode: %s | Regen Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s",
         nuking_mode.current,
+        regen_mode.current,
         weapon_mode.current,
         idle_mode.current,
         format_toggle(toggle_tp),
@@ -132,18 +122,18 @@ function get_sets()
 
     jse.relic = {
         head="Peda. M.Board +3", 
-        body="Peda. Gown +1",       -- Didn't make a check for the bonus to skill because I've barely invested into it Merit-wise (though it works on the JA, so I could just do it whenever)
-        hands="Peda. Bracers +3",   -- Didn't even merit Tranquility or Equanimity, so no bother checking for that
+        body="Peda. Gown +3",       -- Didn't make a check for the bonus to skill because I've barely invested into it Merit-wise (though it works on the JA, so I could just do it whenever)
+        hands="Peda. Bracers +3",   -- Didn't merit Tranquility or Equanimity, so didn't bother checking for that
         legs="Peda. Pants +3",
-        feet="Peda. Loafers +1",    -- Added a check into precast for the bonus, but I don't want it to affect my midcasts for the recast reduction. Maybe if I ever end up using Stun on this job.
+        feet="Peda. Loafers +3",    -- Added a check into precast for the bonus, but I don't want it to affect my midcasts for the recast reduction. Maybe if I ever end up using Stun on this job.
     }
 
     jse.empyrean = {
         head="Arbatel Bonnet +3",
         body="Arbatel Gown +3",
         hands="Arbatel Bracers +3",
-        legs="Arbatel Pants +2",
-        feet="Arbatel Loafers +3",
+        legs="Arbatel Pants +3",
+        feet="Arbatel Loafers +3", -- If for some reason my feet ever AREN'T these for nuking, then maybe add a check for the Klima feature. Though I should always have that.
     }
 
     jse.capes = {
@@ -152,7 +142,7 @@ function get_sets()
         helix_duration={ name="Bookworm's Cape", augments={'INT+2','MND+4','Helix eff. dur. +20',}},
         regen_potency={ name="Bookworm's Cape", augments={'INT+3','MND+1','Helix eff. dur. +18','"Regen" potency+10',}},
         --tp="", Melee TP: DEX +20, Acc +30, Atk +20, Store TP +10 ... er another 10 dex i think
-        --wsd="", Vidohunir/WS: INT +30, Macc/Mdmg +20, Weapon Skill Damage +10%
+        --wsd="", WS: INT +30, Macc/Mdmg +20, Weapon Skill Damage +10%
         --curing="" MND+20, Mag. Evasion +10, Eva.+20/Mag.Eva+20, Enmity -10, Damage taken -5% (or PDT)
     }
 
@@ -199,12 +189,12 @@ function get_sets()
     ----------------------------------------------------------------
 
     -- When I can overcap FC considerably more, consider looking into setting up grimoire casting.
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 83% FC, 2% Occ
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 85% FC, 2% Occ
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head={ name="Merlinic Hood", augments={'"Fast Cast"+6','"Mag.Atk.Bns."+8',}},                                                   -- 14% FC
         body={ name="Merlinic Jubbah", augments={'Mag. Acc.+2','"Fast Cast"+7','INT+9','"Mag.Atk.Bns."+7',}},                           -- 13% FC
         hands=jse.AF.hands,                                                                                                             -- 9% FC
-        legs="Orvail Pants +1",                                                                                                         -- 5% FC
+        legs="Agwu's Slops",                                                                                                            -- 7% FC
         feet={ name="Merlinic Crackows", augments={'"Fast Cast"+6','CHR+2','Mag. Acc.+8','"Mag.Atk.Bns."+11',}},                        -- 11% FC
         neck="Voltsurge Torque",                                                                                                        -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
@@ -246,7 +236,6 @@ function get_sets()
     }
 
     -- reevaluate the actual magic burst stat here
-    -- Probably want Argute Stole +1 for 7% MB
     sets.midcast["Burst"] = {                                                                                           -- 31% MB, 16% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=jse.empyrean.head,
@@ -279,7 +268,7 @@ function get_sets()
         back=jse.capes.occult_acumen,
     })
 
-    -- Tweak as necessary. I'm not exactly sure what this set should look like yet.
+    -- Tweak as necessary.
     sets.midcast["Vagary Burst"] = set_combine(sets.midcast["Free Nuke"], {
         --main=empty,
         --sub=empty,
@@ -304,7 +293,7 @@ function get_sets()
 
     sets.midcast.helix["Free Nuke"] = set_combine(sets.midcast["Free Nuke"], {
         main="Wizard's Rod",
-        sub="Ammurapi Shield",
+        sub="Culminus",
         range=empty,
         ammo="Ghastly Tathlum +1",
         head=jse.empyrean.head,
@@ -323,7 +312,7 @@ function get_sets()
 
     sets.midcast.helix["Burst"] = set_combine(sets.midcast["Burst"], {
         main="Wizard's Rod",
-        sub="Ammurapi Shield",
+        sub="Culminus",
         range=empty,
         ammo="Ghastly Tathlum +1",
         head=jse.empyrean.head,
@@ -362,7 +351,7 @@ function get_sets()
     ----------------------------------------------------------------
     -- ENFEEBLING MIDCAST
     ----------------------------------------------------------------
-
+ 
     sets.midcast.enfeebling_dark = {
         ammo="Pemphredo Tathlum",
         head=jse.AF.head,
@@ -418,19 +407,17 @@ function get_sets()
     ----------------------------------------------------------------
 
     -- TODO: Improve Telchine to 10% if possible
-    -- TODO: Relic body +2 (8%) then +3 (12%)
     -- TOOD: Musa someday for 20% BUT LMAO
-    -- TODO: Relic body will be better +3 for duration (+12%) and enhancing skill (+19). WORSE duration at +2. Stikini +1 x2...
 
-    -- TODO: When I'm mastered, reevaluate the pieces here. Remove any unneeded skill and replace with conserve mp.
-    sets.midcast["Enhancing Magic"] = {                                                                                             -- +71% duration, -- 502 Enhancing Skill
+    -- TODO: When I'm mastered, reevaluate the pieces here.
+    sets.midcast["Enhancing Magic"] = {                                                                                             -- +76% duration, -- 502 Enhancing Skill
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
         ammo="Pemphredo Tathlum",
-        head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +8',}},                                                          -- +8% duration
-        body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
-        hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +9',}},                                     -- +9% duratiom. This should be replaced by empy hands during Perpetuance
+        head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +10',}},                                                         -- +10% duration
+        body=jse.relic.body                                                                  ,                                      -- +12% duration
+        hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                    -- +10% duratiom. This should be replaced by empy hands during Perpetuance
         legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
         feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
         neck="Incanter's Torque",                                                                                                   -- Skill
@@ -442,19 +429,28 @@ function get_sets()
         back="Fi Follet Cape +1",                                                                                                   -- Skill
     }
 
-    -- Do not replace telchine body for duration. Unless ofc you're using Relic +3. Regen duration +12!!
-    -- Fill other slots with Conserve MP.
+    sets.midcast.regen = {}
 
-    -- TODO: Split into Max Duration and Potency sets
-    -- Do I still want to keep empy head on duration though?
-
-    sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
+    sets.midcast.regen["Balanced"] = set_combine(sets.midcast["Enhancing Magic"], {
         main="Bolelabunga",                                                                                                         -- +10% potency
         head=jse.empyrean.head,                                                                                                     -- +25% potency
+        body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration AND +12 Regen effect duration
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
 
-    -- TODO: When I can be bothered.
+    sets.midcast.regen["Potency"] = set_combine(sets.midcast["Enhancing Magic"], {
+        main="Bolelabunga",                                                                                                         -- +10% potency
+        head=jse.empyrean.head,                                                                                                     -- +25% potency
+        body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration AND +12 Regen effect duration
+        back=jse.capes.regen_potency,                                                                                               -- +10 base value
+    })
+
+    sets.midcast.regen["Duration"] = set_combine(sets.midcast["Enhancing Magic"], {
+        main="Bolelabunga",                                                                                                         -- +10% potency
+        body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration AND +12 Regen effect duration
+        back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
+    })
+
     sets.midcast["Stoneskin"] = set_combine(sets.midcast["Enhancing Magic"], {
         legs="Shedir Seraweels",                                                                                                    -- +35 Stoneskin
     })
@@ -472,7 +468,7 @@ function get_sets()
     -- HEALING
     ----------------------------------------------------------------
     
-    -- TODO: Full potency/conserve/etc. set
+    -- TODO: Full potency/conserve/cure II/etc. set
 
     -- Attempt at a Cure DT set.
     sets.midcast["Cure"] = { -- -49% DT, 59% Cure Potency (50% cap), +34% Conserve MP, -54-58 Enmity, 23% SIRD 
@@ -498,7 +494,7 @@ function get_sets()
         sub="Genmei Shield",
         --ammo=,
         head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}}, -- Replace with healing skill
-        --body=, -- This wants to be the relic body
+        body=jse.relic.body,
         --hands=,
         legs=jse.AF.legs,                                                                                                           -- Healing skill
         feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}}, -- Replace with healing skill              -- Cursna +5%
@@ -522,7 +518,7 @@ function get_sets()
         body=jse.AF.body, 
         --hands=
         legs=jse.relic.legs,
-        --feet="",
+        feet="Agwu's Pigaches",
         neck="Erra Pendant",
         waist="Fucho-no-Obi",
         left_ear="Barkaro. Earring",
@@ -534,8 +530,7 @@ function get_sets()
 
     sets.midcast["Drain"] = sets.midcast["Aspir"]
 
-    -- TODO: Fill out with Subtle Blow gear as well
-    -- TODO: I could just put this into the nuking area
+    -- TODO: Subtle Blow and WSD variants
     sets.midcast.immanence = { -- 10% PDT, 37% DT (47% PDT, 37% MDT), 36% Haste (26 Cap), 40 FC (20% FC haste)
         main=empty,
         sub="Genmei Shield",            -- 10% PDT
@@ -579,11 +574,11 @@ function get_sets()
        ammo="Homiliary",                                                                                                                                -- +1 Refresh
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
         body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 12% DT
-        hands="Serpentes Cuffs",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Sabots
-        legs="Assid. Pants +1",                                                                                                                         --          1-2 Refresh (realistically 1)
-        feet="Serpentes Sabots",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Cuffs
+        hands="Serpentes Cuffs",                                                                                                                        -- +1 Refresh (with Serpentes Sabots)
+        legs="Assid. Pants +1",                                                                                                                         -- 1-2 Refresh
+        feet="Serpentes Sabots",                                                                                                                        -- Refresh
         neck="Loricate Torque +1",                                                                                                                      -- -6% DT
-        waist="Fucho-no-Obi",                                                                                                                           -- -0%      +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
+        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
         left_ear="Nehalennia Earring",
         right_ear="Alabaster Earring",                                                                                                                  -- -5% DT
         left_ring="Murky Ring",                                                                                                                         -- -10% DT
@@ -595,7 +590,6 @@ function get_sets()
     -- MELEE "IDLE"
     ----------------------------------------------------------------
     
-    -- This set is trying its best for accuracy but is suffering; it is a work in progress
     -- Nyame RP will help a lot, as will stuff like Chirich
     sets.melee.TP = {
         ammo="Amar Cluster",
@@ -612,9 +606,6 @@ function get_sets()
         right_ring="Lehko's Ring",
         back="Null Shawl",
     }
-
-    -- The above set is simmed to work with club/staff, but any dagger TP seems to vastly prefer Haste and Store TP stats + also begs for accuracy
-
     ----------------------------------------------------------------
     -- JOB ABILITIES 
     ----------------------------------------------------------------
@@ -629,7 +620,7 @@ function get_sets()
     
     -- SIM THESE
     
-    sets.ws.default = { -- Hybrid DT, generic for physical weaponskills (idk what else to put here)
+    sets.ws.default = {
         ammo="Amar Cluster",
         head="Jhakri Coronal +2",
         body="Nyame Mail",
@@ -645,8 +636,7 @@ function get_sets()
         back="Alabaster Mantle",
     }
 
-    -- Fill with MAB gear
-    sets.ws["Aeolian Edge"] = { -- DEX/INT scaling, Hybrid DT, requires RDM sub
+    sets.ws["Aeolian Edge"] = {
         ammo="Sroda Tathlum",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
@@ -659,10 +649,10 @@ function get_sets()
         right_ear={ name="Arbatel Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+7',}},
         left_ring="Murky Ring",
         right_ring="Defending Ring",
-        back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
+        back="Alabaster Mantle",
     }
 
-    sets.ws["Black Halo"] = { -- MND/STR scaling, re-sim this
+    sets.ws["Black Halo"] = {
         ammo="Amar Cluster",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
@@ -678,7 +668,7 @@ function get_sets()
         back="Alabaster Mantle",
     }
 
-    sets.ws["Realmrazer"] = { -- MND scaling, Hybrid DT, re-sim this
+    sets.ws["Realmrazer"] = {
         ammo="Amar Cluster",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
@@ -716,7 +706,7 @@ function get_sets()
 
     sets.buff.sublimation = {
         head=jse.AF.head,                                                                                                               -- Sublimation +4
-        body=jse.relic.body,                                                                                                            -- Sublimation +3
+        body=jse.relic.body,                                                                                                            -- Sublimation +5
         waist="Embla Sash",                                                                                                             -- Sublimation +3
     }
 end
@@ -753,23 +743,6 @@ function idle()
     end
 end
 
--- This is for modes that are bound separately via subcommand.
--- It requires a mode pair table (so freenuke = "Free Nuke") that corresponds to the mode variable that you also pass in and a label for the output.
-function handle_submode_switch(sub_command, mode_table, mode_var, label)
-    if not sub_command then
-        add_to_chat(123, "Missing argument.")
-        return
-    end
-
-    local mode = mode_table[sub_command]
-    if mode then
-        add_to_chat(123, string.format("%s mode set to %s", label, mode))
-        mode_var:set(mode)
-    else
-        add_to_chat(123, string.format("Invalid %s mode.", label))
-    end
-end
-
 function handle_toggle(toggle, label)
     local result = (toggle == "On") and "Off" or "On"
     add_to_chat(123, string.format("%s toggle: %s", label, result))
@@ -779,8 +752,8 @@ end
 ----------------------------------------------------------------
 -- GEARSWAP FUNCTIONS
 ----------------------------------------------------------------
-
 function precast(spell)
+
     if toggle_speed == "On" then
         add_to_chat(123, "Consider disabling the speed toggle!")
     end
@@ -870,6 +843,12 @@ function midcast(spell)
         end
     end
 
+    -- If the spell is any Regen spell (not including it in the above due to it being reliant on mode)
+    if not matched and spell.name:match("Regen") then
+        equip_set_and_weapon(sets.midcast.regen[regen_mode.current])
+        matched = true
+    end
+
     -- If the spell name EXACTLY matches
     if not matched and sets.midcast[spell.name] then
         equip_set_and_weapon(sets.midcast[spell.name])
@@ -941,7 +920,7 @@ function midcast(spell)
     end
 
     -- Weather and day overlays
-    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic", "Enfeebling Magic"}:contains(spell.skill)
+    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
     local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
     local element_matches_weather = world.weather_element == spell.element
 
@@ -962,19 +941,24 @@ function midcast(spell)
     end
 
     -- Perpetuance overlay
-    if (buffactive["Perpetuance"] and spell.type == "WhiteMagic" and spell.skill == "Enhancing Magic") then
+    if buffactive["Perpetuance"] and spell.type == "WhiteMagic" and spell.skill == "Enhancing Magic" then
         equip({hands=jse.empyrean.hands})
     end
 
     -- Focalization/Altruism overlay
-    -- Note that the bonus from this head does not stack with the Obi, so we swap in an accuracy belt.
-    -- This, therefore, HAS to be after the Hachirin-no-Obi overlay.
-    if (buffactive["Focalization"] or buffactive["Altruism"]) then
+    if buffactive["Focalization"] or buffactive["Altruism"] then
         equip({head=jse.relic.head, waist="Null Belt"})
     end
 end
 
 function aftercast(spell)
+    -- If Immanence ever fails to activate somehow, the buff_change check to turn it off will never occur because the buff will never be gained in the first place.
+    -- Thus, we check here if it was interrupted and immediately toggle the Immanence variable off again.
+    if spell.interrupted and spell.name == "Immanence" then
+        immanence = false
+        add_to_chat(200, "Immanence failed to apply. Disabling Immanence swap.")
+    end
+
     idle()
 end
 
@@ -1012,7 +996,12 @@ function self_command(command)
     local sub_command = commandArgs[2]
 
     if main_command == "nukemode" then
-        handle_submode_switch(sub_command, nuking_mode_pairs, nuking_mode, "Nuking")
+        nuking_mode:cycle()
+        add_to_chat(123, string.format("Nuking mode set to %s", nuking_mode.current))
+
+    elseif main_command == "regenmode" then
+        regen_mode:cycle()
+        add_to_chat(123, string.format("Regen mode set to %s", regen_mode.current))
 
     elseif main_command == "weaponmode" then
         weapon_mode:cycle()
@@ -1053,14 +1042,12 @@ end
 function file_unload(file_name)
     send_command("unbind f1")
     send_command("unbind f2")
-    send_command("unbind f3")
     
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
-    
+
     send_command("unbind f9")
 
-    send_command("unbind f11")
     send_command("unbind f12")
 end
