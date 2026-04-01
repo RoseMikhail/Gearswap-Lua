@@ -538,9 +538,9 @@ function get_sets()
         ammo="Staunch Tathlum",         -- 2% DT
         head="Null Masque",             -- 10% DT, 10% Haste
         body="Shango Robe",             -- 3% FC, 3% Haste
-        hands="Acad. Bracers +3",       -- 9% FC, 3% Haste
-        legs="Acad. Pants +3",          -- 5% Haste
-        feet="Acad. Loafers +3",        -- 12% Grimoire FC
+        hands=jse.AF.hands,             -- 9% FC, 3% Haste
+        legs=jse.AF.legs,               -- 5% Haste
+        feet=jse.AF.feet,               -- 12% Grimoire FC
         neck="Voltsurge Torque",        -- 4% FC
         waist="Cornelia's Belt",        -- 10% Haste
         left_ear="Alabaster Earring",   -- 5% DT, 5% Haste
@@ -821,10 +821,11 @@ local immanence = false
 function midcast(spell)
     local matched = false
 
-    -- To avoid any delay in knowing that Immanence is up (I am going to STRANGLE FFXI)
+    -- To avoid any delay in knowing that Immanence is up (I am going to STRANGLE FFXI - it won't immediately register that the buff is active, so I can't check that)
     -- I could maybe move this to precast but it doesn't really matter.
     if spell.name == "Immanence" then
         immanence = true
+        return
     end
 
     -- If Immanence is up and the spell is either a helix or elemental magic
@@ -892,7 +893,7 @@ function midcast(spell)
         matched = true
     end
 
-    if spell.skill == "Enfeebling Magic" then
+    if not matched and spell.skill == "Enfeebling Magic" then
         if buffactive["Dark Arts"] or buffactive["Addendum: Black"] then
             equip(sets.midcast.enfeebling_dark)
             -- Specifically because AF body gives a buff if you're in Dark Arts
@@ -952,9 +953,9 @@ function midcast(spell)
 end
 
 function aftercast(spell)
-    -- If Immanence ever fails to activate somehow, the buff_change check to turn it off will never occur because the buff will never be gained in the first place.
-    -- Thus, we check here if it was interrupted and immediately toggle the Immanence variable off again.
-    if spell.interrupted and spell.name == "Immanence" then
+    -- If Immanence ever fails to activate somehow, the buff_change check to turn the variable off will never occur because the buff will never be gained in the first place.
+    -- Thus, we check here if it was interrupted and immediately toggle the Immanence variable off again (as long as we don't already have Immanence active!).
+    if spell.interrupted and spell.name == "Immanence" and not buffactive["Immanence"] then
         immanence = false
         add_to_chat(200, "Immanence failed to apply. Disabling Immanence swap.")
     end
@@ -968,6 +969,7 @@ function buff_change(name, gain, buff_details)
     end
 
     -- Part of the "why is ping like this" solution for minimal delays in checking for Immanence
+    -- I'm happy to leave this in buff_change, as Immanence wearing is less time sensitive than it being gained + this accounts for any interrupted nukes/helixes
     if name == "Immanence" and gain == false then
         immanence = false
     end
