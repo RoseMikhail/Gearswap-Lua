@@ -15,7 +15,6 @@ Potential enhancements:
 - Doomed set
 - Notification in chat when I'm slept or doomed
 - Potentially build a straight up DT/meva set. Probably have Normal as a hybrid, a DT/meva set, and a refresh set.
-- Fix helix weather logic
 ]]
 
 ----------------------------------------------------------------
