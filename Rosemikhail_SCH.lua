@@ -473,7 +473,7 @@ function get_sets()
     -- TOOD: Musa someday for 20% BUT LMAO
 
     -- TODO: When I'm mastered, reevaluate the pieces here.
-    -- Erase uses this set, despite being a status removal set.
+    -- Consider DT pieces instead of skill
     sets.midcast["Enhancing Magic"] = {                                                                                             -- +76% duration, -- 532 Enhancing Skill +13 with gift
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration

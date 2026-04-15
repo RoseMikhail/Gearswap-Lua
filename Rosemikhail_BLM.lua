@@ -923,7 +923,6 @@ function midcast(spell)
 
     -- If the spell name EXACTLY matches.
     if not matched and sets.midcast[spell.name] then
-        add_to_chat(200, "Exact match found.")
         equip_set_and_weapon(sets.midcast[spell.name])
         matched = true
     end

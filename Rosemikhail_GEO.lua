@@ -229,7 +229,6 @@ function get_sets()
         hands=jse.AF.hands,                                                                                                             -- -3% DT, -13% Pet DT
         legs={ name="Telchine Braconi", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                          -- -4% Pet DT, +3 Regen Apparently replace with Agwu's slops for DT and stuff
         feet=jse.relic.feet,                                                                                                            -- +5 Regen
-        --neck="Loricate Torque +1",                                                                                                      -- -6% DT THIS WANTS TO BE BAGUA CHARM WHEN AUGMENTED
         neck={ name="Bagua Charm +1", augments={'Path: A',}},
         left_ring="Murky Ring",                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                    -- -10% DT
@@ -477,7 +476,7 @@ function get_sets()
     -- HEALING MIDCAST
     ----------------------------------------------------------------
 
-    sets.midcast["Cure"]{                                                                                                           -- Overall +50%
+    sets.midcast["Cure"] = {                                                                                                        -- Overall +50%
         main="Daybreak",                                                                                                            -- 30%
         sub="Genmei Shield",
         range=empty,
