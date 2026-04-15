@@ -31,7 +31,7 @@ toggle_speed = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
 
 -- Midcast helpers
-match_list = S{"Cure", "Aspir", "Drain"}
+match_list = S{"Cure", "Curaga", "Aspir", "Drain"}
 helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix", "Geohelix II", "Hydrohelix II", "Anemohelix II", "Pyrohelix II", "Cryohelix II", "Ionohelix II", "Noctohelix II", "Luminohelix II",}
 
 -- Bindings
@@ -91,13 +91,19 @@ build_info_box()
 ----------------------------------------------------------------
 
 -- Lockstyle
-send_command("wait 3;input /lockstyleset 9") -- SCH Empy
-
-function update_macro_book()
-    -- SCH/WHM macro book
-    send_command("input /macro book 3;input /macro set 1")
+function update_lockstyle()
+    send_command("wait 5;input /lockstyleset 9") -- SCH Empy
 end
 
+function update_macro_book()
+    if player.sub_job == "RDM" then
+        send_command("input /macro book 3;input /macro set 1")
+    elseif player.sub_job == "WHM" then
+        send_command("input /macro book 4;input /macro set 1")
+    end
+end
+
+update_lockstyle()
 update_macro_book()
 
 -- Individual spells should be added in the following way: sets.precast["Impact"]. This goes for precast and midcast.
@@ -183,6 +189,63 @@ function get_sets()
     sets.ws = {}                    -- Leave this empty
     sets.melee = {}                 -- Leave this empty
     sets.buff = {}                  -- Leave this empty
+
+    ----------------------------------------------------------------
+    -- IDLE MODES
+    ----------------------------------------------------------------
+
+    sets.idle["Normal"] = {                                                                                                                             -- OVERALL -51% DT, -10% PDT, -3% MDT (-61% DT+PDT, -54% DT+MDT), +7 refresh
+        ammo="Homiliary",                                                                                                                               -- +1 Refresh
+        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
+        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 13% DT
+        hands="Nyame Gauntlets",                                                                                                                        -- 7% DT
+        legs=jse.empyrean.legs,                                                                                                                         -- 11% DT
+        feet=jse.empyrean.feet,                                                                                                                         -- We're capped on DT so, shrug, some meva
+        neck="Warder's Charm +1",
+        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
+        left_ear="Nehalennia Earring",
+        right_ear="Etiolation Earring",                                                                                                                 -- -3% MDT
+        left_ring="Murky Ring",                                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                                    -- -10% DT
+        back=jse.capes.nuking_idle                                                                                                                      -- -10% PDT
+    }
+
+    sets.idle["Refresh"] = set_combine(sets.idle["Normal"], {                                                                                              -- OVERALL -43% DT, -10% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
+       ammo="Homiliary",                                                                                                                                -- +1 Refresh
+        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
+        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 12% DT
+        hands="Serpentes Cuffs",                                                                                                                        -- +1 Refresh (with Serpentes Sabots)
+        legs="Assid. Pants +1",                                                                                                                         -- 1-2 Refresh
+        feet="Serpentes Sabots",                                                                                                                        -- Refresh
+        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
+        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
+        left_ear="Nehalennia Earring",
+        right_ear="Alabaster Earring",                                                                                                                  -- -5% DT
+        left_ring="Murky Ring",                                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                                    -- -10% DT
+        back=jse.capes.nuking_idle                                                                                                                      -- -10% PDT
+    })
+
+    ----------------------------------------------------------------
+    -- MELEE "IDLE"
+    ----------------------------------------------------------------
+    
+    -- Nyame RP will help a lot, as will stuff like Chirich
+    sets.melee.TP = {
+        ammo="Amar Cluster",
+        head="Null Masque",
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet, -- Could instead be Battlecast Gaiters
+        neck="Null Loop",
+        waist="Null Belt", -- Could instead be Grunfeld
+        left_ear="Cessance Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Petrov Ring",
+        right_ring="Lehko's Ring",
+        back="Null Shawl",
+    }
 
     ----------------------------------------------------------------
     -- PRECAST
@@ -410,7 +473,8 @@ function get_sets()
     -- TOOD: Musa someday for 20% BUT LMAO
 
     -- TODO: When I'm mastered, reevaluate the pieces here.
-    sets.midcast["Enhancing Magic"] = {                                                                                             -- +76% duration, -- 502 Enhancing Skill
+    -- Erase uses this set, despite being a status removal set.
+    sets.midcast["Enhancing Magic"] = {                                                                                             -- +76% duration, -- 532 Enhancing Skill +13 with gift
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
@@ -432,21 +496,24 @@ function get_sets()
     sets.midcast.regen = {}
 
     sets.midcast.regen["Balanced"] = set_combine(sets.midcast["Enhancing Magic"], {
-        main="Bolelabunga",                                                                                                         -- +10% potency
+        main={ name="Pedagogy Staff", augments={'Path: C',}},                                                                       -- +20 regen, +15% duration
+        sub="Khonsu",
         head=jse.empyrean.head,                                                                                                     -- +25% potency
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration AND +12 Regen effect duration
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
 
     sets.midcast.regen["Potency"] = set_combine(sets.midcast["Enhancing Magic"], {
-        main="Bolelabunga",                                                                                                         -- +10% potency
+        main={ name="Pedagogy Staff", augments={'Path: C',}},                                                                       -- +20 regen, +15% duration
+        sub="Khonsu",
         head=jse.empyrean.head,                                                                                                     -- +25% potency
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration AND +12 Regen effect duration
         back=jse.capes.regen_potency,                                                                                               -- +10 base value
     })
 
     sets.midcast.regen["Duration"] = set_combine(sets.midcast["Enhancing Magic"], {
-        main="Bolelabunga",                                                                                                         -- +10% potency
+        main={ name="Pedagogy Staff", augments={'Path: C',}},                                                                       -- +20 regen, +15% duration
+        sub="Khonsu",
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration AND +12 Regen effect duration
         back=jse.capes.nuking_idle,                                                                                                 -- +15 duration
     })
@@ -461,11 +528,10 @@ function get_sets()
 
     sets.midcast.barspell = set_combine(sets.midcast["Enhancing Magic"], {
         legs="Shedir Seraweels",
-        back="Fi Follet Cape +1",
     })
 
     ----------------------------------------------------------------
-    -- HEALING
+    -- HEALING MIDCAST
     ----------------------------------------------------------------
     
     -- TODO: Full potency/conserve/cure II/etc. set
@@ -485,11 +551,36 @@ function get_sets()
         left_ear="Mendi. Earring",                                                                                                  -- +2% Conserve MP, +5% Cure Potency
         right_ear="Alabaster Earring",                                                                                              -- -5% DT
         left_ring="Murky Ring",                                                                                                     -- -10% DT, 3% SIRD
-        right_ring="Mephitas's Ring +1",                                                                                            -- -3-7 Enmity TODO: Needs augment
+        right_ring="Mephitas's Ring +1",                                                                                            -- -3-7 Enmity TODO: Needs augment for conserve MP
         back="Fi Follet Cape +1",                                                                                                   -- +5% Conserve MP, 5% SIRD
     }
 
-    sets.midcast["Cursna"] = set_combine(sets.idle["PDT"], {
+    sets.midcast["Curaga"] = sets.midcast["Cure"]
+
+    -- This will apply to any non-cure healing magic, like debuff cleanses, unless they have their own set
+    sets.midcast["Healing Magic"] = { -- -59% DT, +34% Conserve MP, 33% SIRD, Haste +6%, FC +8%
+        main="Daybreak",                                                                                                            -- Filler
+        sub="Culminus",                                                                                                             -- 10% SIRD 
+        ammo="Staunch Tathlum",                                                                                                     -- -2% DT, 10% SIRD 
+        head=jse.empyrean.head,                                                                                                     -- -10% DT, Haste +6%
+        body=jse.empyrean.body,                                                                                                     -- -13% DT, -28 Enmity
+        hands="Nyame Gauntlets",                                                                                                    -- 7% DT
+        legs=jse.empyrean.legs,                                                                                                     -- 11% DT
+        feet=jse.empyrean.feet,                                                                                                     -- MEVA I guess
+        neck="Loricate Torque +1",                                                                                                  -- -6% DT, 5% SIRD 
+        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                 -- +15% Conserve MP
+        left_ear="Mendi. Earring",                                                                                                  -- +2% Conserve MP, +5% Cure Potency
+        right_ear="Etiolation Earring",                                                                                             -- Resist silence
+        left_ring="Murky Ring",                                                                                                     -- -10% DT, 3% SIRD
+        right_ring="Mephitas's Ring +1",                                                                                            -- -3-7 Enmity TODO: Needs augment for conserve MP
+        back="Fi Follet Cape +1",                                                                                                   -- +5% Conserve MP, 5% SIRD
+    }
+
+    -- Technically this is "enhancing magic", for some godforsaken reason
+    sets.midcast["Erase"] = sets.midcast["Healing Magic"]
+
+    -- TODO: More healing skill - can get more Vanya
+    sets.midcast["Cursna"] = set_combine(sets.idle["Normal"], {
         main={ name="Gada", augments={'Indi. eff. dur. +10','Mag. Acc.+13','"Mag.Atk.Bns."+13','DMG:+10',}},                        -- Healing skill
         sub="Genmei Shield",
         --ammo=,
@@ -550,63 +641,7 @@ function get_sets()
         back="Fi Follet Cape +1",       -- 10% FC
     }
 
-    ----------------------------------------------------------------
-    -- IDLE MODES
-    ----------------------------------------------------------------
-
-    sets.idle["Normal"] = {                                                                                                                             -- OVERALL -51% DT, -10% PDT, -3% MDT (-61% DT+PDT, -54% DT+MDT), +7 refresh
-        ammo="Homiliary",                                                                                                                               -- +1 Refresh
-        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 13% DT
-        hands="Nyame Gauntlets",                                                                                                                        -- 7% DT
-        legs=jse.empyrean.legs,                                                                                                                         -- 11% DT
-        feet=jse.empyrean.feet,                                                                                                                         -- We're capped on DT so, shrug, some meva
-        neck="Warder's Charm +1",
-        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
-        left_ear="Nehalennia Earring",
-        right_ear="Etiolation Earring",                                                                                                                 -- -3% MDT
-        left_ring="Murky Ring",                                                                                                                         -- -10% DT
-        right_ring="Defending Ring",                                                                                                                    -- -10% DT
-        back=jse.capes.nuking_idle                                                                                                                      -- -10% PDT
-    }
-
-    sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                                              -- OVERALL -43% DT, -10% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
-       ammo="Homiliary",                                                                                                                                -- +1 Refresh
-        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body=jse.empyrean.body,                                                                                                                         -- +3 Refresh, 12% DT
-        hands="Serpentes Cuffs",                                                                                                                        -- +1 Refresh (with Serpentes Sabots)
-        legs="Assid. Pants +1",                                                                                                                         -- 1-2 Refresh
-        feet="Serpentes Sabots",                                                                                                                        -- Refresh
-        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
-        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
-        left_ear="Nehalennia Earring",
-        right_ear="Alabaster Earring",                                                                                                                  -- -5% DT
-        left_ring="Murky Ring",                                                                                                                         -- -10% DT
-        right_ring="Defending Ring",                                                                                                                    -- -10% DT
-        back=jse.capes.nuking_idle                                                                                                                      -- -10% PDT
-    })
-
-    ----------------------------------------------------------------
-    -- MELEE "IDLE"
-    ----------------------------------------------------------------
-    
-    -- Nyame RP will help a lot, as will stuff like Chirich
-    sets.melee.TP = {
-        ammo="Amar Cluster",
-        head="Null Masque",
-        body=jse.empyrean.body,
-        hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet, -- Could instead be Battlecast Gaiters
-        neck="Null Loop",
-        waist="Null Belt", -- Could instead be Grunfeld
-        left_ear="Cessance Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Petrov Ring",
-        right_ring="Lehko's Ring",
-        back="Null Shawl",
-    }
-    ----------------------------------------------------------------
+    -----------------------------------------------------------
     -- JOB ABILITIES 
     ----------------------------------------------------------------
 
@@ -921,19 +956,21 @@ function midcast(spell)
     end
 
     -- Weather and day overlays
-    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
+    -- Technically I could also do Divine for Banish but also lmao
+    local valid_obi_skill = S{"Elemental Magic", "Dark Magic"}:contains(spell.skill)
+    local is_cure = spell.name:match("Cure") or spell.name:match("Curaga")
     local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
     local element_matches_weather = world.weather_element == spell.element
 
-    if valid_obi_skill and element_matches_day_or_weather and spell.element ~= "None" then
+    if (valid_obi_skill or is_cure) and element_matches_day_or_weather and spell.element ~= "None" then
         -- Helixes get weather bonuses 100% of the time.
         if not helix_spells:contains(spell.name) then
             equip({waist="Hachirin-no-Obi"})
         end
+    end
 
-        if spell.skill == "Healing Magic" and element_matches_weather then
-            equip({main="Chatoyant Staff", sub="Khonsu",})
-        end
+    if is_cure and element_matches_weather then
+        equip({main="Chatoyant Staff", sub="Khonsu",})
     end
 
     -- Ebullience/Rapture overlay. Probably somewhat redundant for Dark atm.
@@ -988,6 +1025,7 @@ function status_change(new, old)
 end
 
 function sub_job_change(new,old)
+    update_lockstyle()
     update_macro_book()
 end
 

@@ -85,13 +85,16 @@ build_info_box()
 ----------------------------------------------------------------
 
 -- Lockstyle
-send_command("wait 3;input /lockstyleset 5") -- Geomancer Relic
+function update_lockstyle()
+    send_command("wait 5;input /lockstyleset 5") -- Geomancer Relic
+end
 
 function update_macro_book()
     -- GEO/RDM macro book
     send_command("input /macro book 2;input /macro set 1")
 end
 
+update_lockstyle()
 update_macro_book()
 
 -- Individual spells should be added in the following way: sets.precast["Impact"]. This goes for precast and midcast.
@@ -173,6 +176,91 @@ function get_sets()
     sets.ws = {}                    -- Leave this empty
     sets.melee = {}                 -- Leave this empty
     sets.buff = {}                  -- Leave this empty
+
+    ----------------------------------------------------------------
+    -- IDLE SETS
+    ----------------------------------------------------------------
+
+    sets.idle["Normal"] = {                                                                                                                -- -62% DT, -10% PDT, -0% MDT (-72% DT+PDT, -62% DT+MDT), +6-7 Refresh
+        --main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
+        --sub="Genmei Shield",                                                                                                            -- -10% PDT
+        range=empty,
+        ammo="Staunch Tathlum",                                                                                                         -- -2% DT
+        head=jse.empyrean.head,                                                                                                         -- -11% DT
+        body=jse.empyrean.body,                                                                                                         -- +4 Refresh -- Replace with Shamash when possible for DT
+        hands=jse.empyrean.hands,                                                                                                       -- -11% DT
+        legs="Assid. Pants +1",                                                                                                         -- +1-2 Refresh
+        feet=jse.empyrean.feet,                                                                                                         -- -10% DT
+        neck="Warder's Charm +1",
+        waist="Fucho-no-Obi",                                                                                                           -- +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
+        left_ear="Alabaster Earring",                                                                                                   -- -5% DT
+        right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
+        left_ring="Murky Ring",                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                    -- -10% DT
+        back=jse.capes.idle,                                                                                                            -- -10% PDT
+    }
+
+    sets.idle["Refresh"] = set_combine(sets.idle["Normal"], {                                                                                              -- OVERALL -33% DT, -20% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
+        main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                                    -- -0%
+        sub="Genmei Shield",                                                                                                                            -- -10% PDT
+        range=empty,
+        ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
+        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
+        body=jse.empyrean.body,                                                                                                                         -- +4 Refresh -- Replace with Shamash when possible for DT
+        hands="Serpentes Cuffs",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Sabots
+        legs="Assid. Pants +1",                                                                                                                         --          1-2 Refresh (realistically 1)
+        feet="Serpentes Sabots",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Cuffs
+        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
+        waist="Fucho-no-Obi",                                                                                                                           -- -0%      +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
+        left_ear="Alabaster Earring",                                                                                                                   -- -5% DT
+        right_ear="Nehalennia Earring",
+        left_ring="Murky Ring",                                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                                    -- -10% DT
+        back=jse.capes.idle,                                                                                                                            -- -10% PDT
+    })
+
+    sets.idle.luopan = {                                                                                                                -- -50% Pet DT (Capped at -37.5%), +29 Regen (need 24+), -42% DT, -10% PDT, -0% MDT (-52% DT+PDT, -42% DT+MDT), +4 Refresh
+        main="Idris",                                                                                                                   -- -25% Pet DT
+        sub="Genmei Shield",                                                                                                            -- -10% PDT
+        range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- -5% Pet DT
+        ammo=empty,
+        head=jse.empyrean.head,                                                                                                         -- +5 Regen, -11% DT
+        body=jse.empyrean.body,                                                                                                         -- +4 Refresh -- Replace with Shamash when possible for DT
+        hands=jse.AF.hands,                                                                                                             -- -3% DT, -13% Pet DT
+        legs={ name="Telchine Braconi", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                          -- -4% Pet DT, +3 Regen Apparently replace with Agwu's slops for DT and stuff
+        feet=jse.relic.feet,                                                                                                            -- +5 Regen
+        --neck="Loricate Torque +1",                                                                                                      -- -6% DT THIS WANTS TO BE BAGUA CHARM WHEN AUGMENTED
+        neck={ name="Bagua Charm +1", augments={'Path: A',}},
+        left_ring="Murky Ring",                                                                                                         -- -10% DT
+        right_ring="Defending Ring",                                                                                                    -- -10% DT
+        waist="Isa Belt",                                                                                                               -- -3% Pet DT, +1 Regen
+        left_ear="Alabaster Earring",                                                                                                   -- -5% DT ETIOLATION EARRING WHEN DT ACHEIVED
+        right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
+        back=jse.capes.luopan,                                                                                                          -- +15 regen
+    }
+
+    ----------------------------------------------------------------
+    -- MELEE "IDLE"
+    ----------------------------------------------------------------
+    
+    -- This set is trying its best for accuracy but is suffering; it is a work in progress
+    -- Nyame RP will help a lot, as will stuff like Chirich
+    sets.melee.TP = {
+        range=empty,
+        ammo="Amar Cluster",
+        head="Null Masque",
+        body=jse.empyrean.body,
+        hands=jse.empyrean.hands,
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet, -- Could instead be Battlecast Gaiters
+        neck="Null Loop",
+        waist="Null Belt", -- Could instead be Grunfeld
+        left_ear="Cessance Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Petrov Ring",
+        right_ring="Lehko's Ring",
+        back="Null Shawl",
+    }
 
     ----------------------------------------------------------------
     -- PRECAST
@@ -347,27 +435,8 @@ function get_sets()
     }
 
     ----------------------------------------------------------------
-    -- OTHER MIDCAST
+    -- ENHANCING MIDCAST
     ----------------------------------------------------------------
-
-    sets.midcast["Cure"] = set_combine(sets.midcast["Free Nuke"], {                                                                 -- Overall +50%
-        main="Daybreak",                                                                                                            -- 30%
-        sub="Genmei Shield",
-        range=empty,
-        ammo="Kalboron Stone",
-        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                             -- +10%
-        body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
-        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                            -- +5%
-        neck="Incanter's Torque",
-        waist="Rumination Sash",
-        left_ear="Mendi. Earring",                                                                                                  -- +5%
-        right_ear="Meili Earring",
-        left_ring="Stikini Ring",
-        right_ring="Stikini Ring",
-        back=jse.capes.enfeebling_healing_fc,
-    })
 
     sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +74% duration
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
@@ -388,6 +457,49 @@ function get_sets()
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
     })
 
+    sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
+        main="Bolelabunga",                                                                                                         -- 10% potency
+    })
+
+    sets.midcast["Stoneskin"] = set_combine(sets.midcast["Enhancing Magic"], {
+        legs="Shedir Seraweels",                                                                                                    -- +35 Stoneskin
+    })
+
+    sets.midcast["Aquaveil"] = set_combine(sets.midcast["Enhancing Magic"], {
+        legs="Shedir Seraweels",                                                                                                    -- +1 Aquaveil
+    })
+
+    sets.midcast.barspell = set_combine(sets.midcast["Enhancing Magic"], {
+        legs="Shedir Seraweels",
+    })
+
+    ----------------------------------------------------------------
+    -- HEALING MIDCAST
+    ----------------------------------------------------------------
+
+    sets.midcast["Cure"]{                                                                                                           -- Overall +50%
+        main="Daybreak",                                                                                                            -- 30%
+        sub="Genmei Shield",
+        range=empty,
+        ammo="Kalboron Stone",
+        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                             -- +10%
+        body={ name="Vanya Robe", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        legs={ name="Vanya Slops", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},
+        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                            -- +5%
+        neck="Incanter's Torque",
+        waist="Rumination Sash",
+        left_ear="Mendi. Earring",                                                                                                  -- +5%
+        right_ear="Meili Earring",
+        left_ring="Stikini Ring",
+        right_ring="Stikini Ring",
+        back=jse.capes.enfeebling_healing_fc,
+    }
+
+    ----------------------------------------------------------------
+    -- OTHER MIDCAST
+    ----------------------------------------------------------------
+
     sets.midcast["Aspir"] = set_combine(sets.midcast["Free Nuke"], {
         main={ name="Rubicundity", augments={'Mag. Acc.+9','"Mag.Atk.Bns."+8','Dark magic skill +9','"Conserve MP"+5',}},
         sub="Ammurapi Shield",
@@ -407,99 +519,6 @@ function get_sets()
     })
 
     sets.midcast["Drain"] = sets.midcast["Aspir"]
-
-    sets.midcast["Regen"] = set_combine(sets.midcast["Enhancing Magic"], {
-        main="Bolelabunga",                                                                                                         -- 10% potency
-    })
-
-    sets.midcast["Refresh"] = set_combine(sets.midcast["Enhancing Magic"], {
-        main="Bolelabunga",
-    })
-
-    ----------------------------------------------------------------
-    -- IDLE SETS
-    ----------------------------------------------------------------
-
-    sets.idle["Normal"] = {                                                                                                                -- -62% DT, -10% PDT, -0% MDT (-72% DT+PDT, -62% DT+MDT), +6-7 Refresh
-        --main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
-        --sub="Genmei Shield",                                                                                                            -- -10% PDT
-        range=empty,
-        ammo="Staunch Tathlum",                                                                                                         -- -2% DT
-        head=jse.empyrean.head,                                                                                                         -- -11% DT
-        body=jse.empyrean.body,                                                                                                         -- +4 Refresh -- Replace with Shamash when possible for DT
-        hands=jse.empyrean.hands,                                                                                                       -- -11% DT
-        legs="Assid. Pants +1",                                                                                                         -- +1-2 Refresh
-        feet=jse.empyrean.feet,                                                                                                         -- -10% DT
-        neck="Warder's Charm +1",
-        waist="Fucho-no-Obi",                                                                                                           -- +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
-        left_ear="Alabaster Earring",                                                                                                   -- -5% DT
-        right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
-        left_ring="Murky Ring",                                                                                                         -- -10% DT
-        right_ring="Defending Ring",                                                                                                    -- -10% DT
-        back=jse.capes.idle,                                                                                                            -- -10% PDT
-    }
-
-    sets.idle["Refresh"] = set_combine(sets.idle["PDT"], {                                                                                              -- OVERALL -33% DT, -20% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
-        main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                                    -- -0%
-        sub="Genmei Shield",                                                                                                                            -- -10% PDT
-        range=empty,
-        ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
-        head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
-        body=jse.empyrean.body,                                                                                                                         -- +4 Refresh -- Replace with Shamash when possible for DT
-        hands="Serpentes Cuffs",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Sabots
-        legs="Assid. Pants +1",                                                                                                                         --          1-2 Refresh (realistically 1)
-        feet="Serpentes Sabots",                                                                                                                        -- -0%      +0.5 Refresh with Serpentes Cuffs
-        neck="Loricate Torque +1",                                                                                                                      -- -6% DT
-        waist="Fucho-no-Obi",                                                                                                                           -- -0%      +1 Refresh -- Maybe replace with Shinjutsu-no-Obi someday according to guide
-        left_ear="Alabaster Earring",                                                                                                                   -- -5% DT
-        right_ear="Nehalennia Earring",
-        left_ring="Murky Ring",                                                                                                                         -- -10% DT
-        right_ring="Defending Ring",                                                                                                                    -- -10% DT
-        back=jse.capes.idle,                                                                                                                            -- -10% PDT
-    })
-
-    sets.idle.luopan = {                                                                                                                -- -50% Pet DT (Capped at -37.5%), +29 Regen (need 24+), -42% DT, -10% PDT, -0% MDT (-52% DT+PDT, -42% DT+MDT), +4 Refresh
-        main="Idris",                                                                                                                   -- -25% Pet DT
-        sub="Genmei Shield",                                                                                                            -- -10% PDT
-        range={ name="Dunna", augments={'MP+20','Mag. Acc.+10','"Fast Cast"+3',}},                                                      -- -5% Pet DT
-        ammo=empty,
-        head=jse.empyrean.head,                                                                                                         -- +5 Regen, -11% DT
-        body=jse.empyrean.body,                                                                                                         -- +4 Refresh -- Replace with Shamash when possible for DT
-        hands=jse.AF.hands,                                                                                                             -- -3% DT, -13% Pet DT
-        legs={ name="Telchine Braconi", augments={'Pet: "Regen"+3','Pet: Damage taken -4%',}},                                          -- -4% Pet DT, +3 Regen Apparently replace with Agwu's slops for DT and stuff
-        feet=jse.relic.feet,                                                                                                            -- +5 Regen
-        --neck="Loricate Torque +1",                                                                                                      -- -6% DT THIS WANTS TO BE BAGUA CHARM WHEN AUGMENTED
-        neck={ name="Bagua Charm +1", augments={'Path: A',}},
-        left_ring="Murky Ring",                                                                                                         -- -10% DT
-        right_ring="Defending Ring",                                                                                                    -- -10% DT
-        waist="Isa Belt",                                                                                                               -- -3% Pet DT, +1 Regen
-        left_ear="Alabaster Earring",                                                                                                   -- -5% DT ETIOLATION EARRING WHEN DT ACHEIVED
-        right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
-        back=jse.capes.luopan,                                                                                                          -- +15 regen
-    }
-
-    ----------------------------------------------------------------
-    -- MELEE "IDLE"
-    ----------------------------------------------------------------
-    
-    -- This set is trying its best for accuracy but is suffering; it is a work in progress
-    -- Nyame RP will help a lot, as will stuff like Chirich
-    sets.melee.TP = {
-        range=empty,
-        ammo="Amar Cluster",
-        head="Null Masque",
-        body=jse.empyrean.body,
-        hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet, -- Could instead be Battlecast Gaiters
-        neck="Null Loop",
-        waist="Null Belt", -- Could instead be Grunfeld
-        left_ear="Cessance Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Petrov Ring",
-        right_ring="Lehko's Ring",
-        back="Null Shawl",
-    }
 
     ----------------------------------------------------------------
     -- JOB ABILITIES
@@ -787,16 +806,18 @@ function midcast(spell)
     end
 
     -- Weather and day overlays
-    local valid_obi_skill = S{"Elemental Magic","Healing Magic", "Dark Magic"}:contains(spell.skill)
+    -- Technically I could also do Divine for Banish but also lmao
+    local valid_obi_skill = S{"Elemental Magic", "Dark Magic"}:contains(spell.skill)
+    local is_cure = spell.name:match("Cure") or spell.name:match("Curaga")
     local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
     local element_matches_weather = world.weather_element == spell.element
 
-    if valid_obi_skill and element_matches_day_or_weather and spell.element ~= "None" then
+    if (valid_obi_skill or is_cure) and element_matches_day_or_weather and spell.element ~= "None" then
         equip({waist="Hachirin-no-Obi"})
+    end
 
-        if spell.skill == "Healing Magic" and element_matches_weather then
-            equip({main="Chatoyant Staff", sub="Khonsu",})
-        end
+    if is_cure and element_matches_weather then
+        equip({main="Chatoyant Staff", sub="Khonsu",})
     end
 end
 
@@ -821,6 +842,7 @@ function status_change(new, old)
 end
 
 function sub_job_change(new,old)
+    update_lockstyle()
     update_macro_book()
 end
 
