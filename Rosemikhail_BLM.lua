@@ -6,6 +6,8 @@ include("Modes.lua")
 ----------------------------------------------------------------
 
 --[[
+Todo: Become a citizen of Windurst for Sibyl Scarf
+
 Potential enhancements:
 - Add stun set, as apparently that's not an enfeebling magic spell
 - Allow dispelga and impact during mana wall and death
@@ -24,7 +26,7 @@ Potential enhancements:
 -- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"Normal", "Refresh"}
-weapon_mode = M{"Staff", "Wizard", "Maxentius"}
+weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius"}
 
 toggle_speed = "Off"
 toggle_af_body = "Off"
@@ -159,11 +161,11 @@ function get_sets()
     ----------------------------------------------------------------
     
     weapon_sets = {
-        ["Staff"] = {
+        ["Marin Staff"] = {
             main={ name="Marin Staff +1", augments={'Path: A',}},
             sub="Enki Strap",
         },
-        ["Wizard"] = {
+        ["Wizard's Rod"] = {
             main="Wizard's Rod",
             sub="Ammurapi Shield",
         },
@@ -309,14 +311,16 @@ function get_sets()
     -- NUKE MIDCAST MODES
     ----------------------------------------------------------------
 
+    -- Assumptions are in general that I will have SCH weather + COR rolls. For bursting, I assume I have GEO bubbles.
+
     sets.midcast["Free Nuke"] = {
-        ammo="Sroda Tathlum",
+        ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head=jse.empyrean.head,
         body=jse.AF.body,
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck={ name="Src. Stole +1", augments={'Path: A',}},
+        neck="Sibyl Scarf", -- I was using Sorc Stole+1 here
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring", -- Regal Earring
@@ -325,21 +329,21 @@ function get_sets()
         back=jse.capes.nuking
     }
 
+    -- I can come up with a set that uses Awgu's hands and feet for almost identical damage at R15. It's not really worth until R20/R25.
+
     sets.midcast["Burst"] = {                                                                                           -- 37% MB, 12% MB II
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Ea Hat +1",                                                                                               -- 7% MB 7% MB II
         body=jse.empyrean.body,                                                                                         -- 5% MB II
-        --hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}}, -- 6% MB II
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,                                                                                         -- 15% MB
         feet=jse.empyrean.feet,
         neck={ name="Src. Stole +1", augments={'Path: A',}}, -- Now this is less MB again but apparently it does do a little more damage - i also cant cry about the extra INT/macc
-        --neck="Mizukage-no-Kubikazari",                                                                                  -- 10% MB Sorcerer's Stole +1 is comparable if no weather/hachirin-no-obi. Why? idk. Use instead after capping MB for the other stats
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
         left_ring="Freke Ring",
-        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},                                                   -- Mujin Band is better if no weather/hachirin-no-obi. Why? idk.
+        right_ring={ name="Metamor. Ring +1", augments={'Path: A',}},
         back=jse.capes.nuking                                                                                           -- 5% MB
     }
 
@@ -515,6 +519,7 @@ function get_sets()
     }
 
     -- TODO: Steal whatever SCH has but otherwise idle is enough for now
+    -- This will apply to any non-cure healing magic, like debuff cleanses, unless they have their own set
     sets.midcast["Healing Magic"] = sets.idle["Normal"]
 
     -- Technically this is "enhancing magic", for some godforsaken reason
@@ -782,7 +787,7 @@ function idle()
 
     -- Speed overlay
     if toggle_speed == "On" then
-        equip({left_ring="Shneddick Ring",})
+        equip({right_ring="Shneddick Ring",})
     end
 end
 
@@ -809,12 +814,16 @@ function precast(spell)
         return false
     end
 
+    -- Do I actually need this in precast?
+
+    --[[
     -- Mana Wall
     if buffactive["Mana Wall"] then
         equip_set_and_weapon(sets.ja["Mana Wall"])
         equip_if_ja_match(spell.name)
         return
     end
+    ]]
 
     -- Death
     if toggle_death == "On" then

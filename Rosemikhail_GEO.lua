@@ -22,7 +22,7 @@ Potential enhancements:
 -- Modes
 nuking_mode = M{"Free Nuke", "Burst"}
 idle_mode = M{"Normal", "Refresh"}
-weapon_mode = M{"Wizard", "Daybreak", "Idris", "Maxentius"}
+weapon_mode = M{"Wizard's Rod", "Daybreak", "Idris", "Maxentius"}
 
 toggle_speed = "Off"
 toggle_tp = "Off" -- This will disable weapon swapping as well
@@ -145,7 +145,7 @@ function get_sets()
     ----------------------------------------------------------------
     
     weapon_sets = {
-        ["Wizard"] = {
+        ["Wizard's Rod"] = {
             main="Wizard's Rod",
             sub="Ammurapi Shield",
         },
@@ -155,8 +155,8 @@ function get_sets()
         },
         ["Idris"] = {
             main="Idris",
-            sub="Genmei Shield",
-            range=empty,
+            sub="Ammurapi Shield",
+            --range=empty,
         },
         ["Maxentius"] = {
             main="Maxentius",
@@ -183,7 +183,7 @@ function get_sets()
 
     sets.idle["Normal"] = {                                                                                                                -- -62% DT, -10% PDT, -0% MDT (-72% DT+PDT, -62% DT+MDT), +6-7 Refresh
         --main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
-        --sub="Genmei Shield",                                                                                                            -- -10% PDT
+        sub="Genmei Shield",                                                                                                            -- -10% PDT
         range=empty,
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=jse.empyrean.head,                                                                                                         -- -11% DT
@@ -554,104 +554,108 @@ function get_sets()
     sets.ws.default = { -- Hybrid DT, generic for physical weaponskills (idk what else to put here)
         range=empty,
         ammo="Amar Cluster",
-        head=jse.empyrean.head,
-        body=jse.empyrean.body,
+        head="Null Masque",
+        body="Jhakri Robe +2",
         hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
+        legs="Jhakri Slops +2",
         feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
-        left_ear="Moonshade Earring",
+        left_ear="Malignance Earring",
         right_ear="Odnowa Earring +1",
         left_ring="Murky Ring",
         right_ring="Rufescent Ring",
         back="Null Shawl",
     }
 
-    sets.ws["Realmrazer"] = { -- MND scaling, Hybrid DT
+    sets.ws["Realmrazer"] = {
         range=empty,
         ammo="Amar Cluster",
-        head=jse.empyrean.head,
-        body=jse.empyrean.body,
+        head="Null Masque",
+        body="Jhakri Robe +2",
         hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
+        legs="Jhakri Slops +2",
         feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
-        left_ear="Moonshade Earring",
+        left_ear="Malignance Earring",
         right_ear="Odnowa Earring +1",
-        left_ring="Metamor. Ring +1",
+        left_ring="Murky Ring",
         right_ring="Rufescent Ring",
         back="Null Shawl",
     }
 
-    sets.ws["Exudation"] = { -- INT/MND scaling
+    sets.ws["Exudation"] = {
         range=empty,
-        ammo="Amar Cluster",
+        ammo="Ghastly Tathlum +1",
         head=jse.empyrean.head,
-        body=jse.empyrean.body,
-        hands=jse.empyrean.hands,
+        body="Nyame Mail",
+        hands="Jhakri Cuffs +2",
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Null Loop",
         waist="Null Belt",
-        left_ear="Moonshade Earring",
+        left_ear="Malignance Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Murky Ring",
+        right_ring="Metamor. Ring +1",
+        back="Alabaster Mantle",
+    }
+
+    sets.ws["Aeolian Edge"] = {
+        range=empty,
+        ammo="Ghastly Tathlum +1",
+        head=jse.empyrean.head,
+        body="Nyame Mail",
+        hands="Jhakri Cuffs +2",
+        legs=jse.empyrean.legs,
+        feet=jse.empyrean.feet,
+        neck="Null Loop",
+        waist="Null Belt",
+        left_ear="Malignance Earring",
+        right_ear="Odnowa Earring +1",
+        left_ring="Murky Ring",
+        right_ring="Metamor. Ring +1",
+        back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
+    }
+
+    sets.ws["Black Halo"] = {
+        range=empty,
+        ammo="Amar Cluster",
+        head="Null Masque",
+        body="Jhakri Robe +2",
+        hands="Jhakri Cuffs +2",
+        legs="Nyame Flanchard",
+        feet="Nyame Sollerets",
+        neck="Null Loop",
+        waist="Grunfeld Rope",
+        left_ear="Malignance Earring",
         right_ear="Odnowa Earring +1",
         left_ring="Murky Ring",
         right_ring="Rufescent Ring",
         back="Alabaster Mantle",
     }
 
-    sets.ws["Aeolian Edge"] = { -- DEX/INT scaling, re-sim this
+    sets.ws["Judgment"] = sets.ws["Black Halo"]
+
+    sets.ws["Seraph Strike"] = { -- 1000+ Prefer Daybreak for this
         range=empty,
         ammo="Sroda Tathlum",
         head=jse.empyrean.head,
         body=jse.empyrean.body,
-        hands=jse.empyrean.hands,
+        hands="Jhakri Cuffs +2",
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
         neck="Saevus Pendant +1",
         waist="Eschan Stone",
         left_ear="Malignance Earring",
-        right_ear="Moonshade Earring",
+        right_ear="Friomisi Earring",
         left_ring="Murky Ring",
-        right_ring={ name="Gelatinous Ring +1", augments={'Path: A',}},
-        back="Alabaster Mantle", -- WSD + PDT Ambu cape will be better.
-    }
-
-    sets.ws["Black Halo"] = { -- MND+/STR scaling
-        range=empty,
-        ammo="Amar Cluster",
-        head=jse.empyrean.head,
-        body=jse.empyrean.body,
-        hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet,
-        neck="Null Loop",
-        waist="Null Belt",
-        left_ear="Moonshade Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Murky Ring",
-        right_ring="Rufescent Ring",
+        right_ring="Defending Ring",
         back="Alabaster Mantle",
     }
 
-    sets.ws["Judgment"] = { -- STR/MND scaling
-        range=empty,
-        ammo="Amar Cluster",
-        head=jse.empyrean.head,
-        body=jse.empyrean.body,
-        hands=jse.empyrean.hands,
-        legs=jse.empyrean.legs,
-        feet=jse.empyrean.feet,
-        neck="Null Loop",
-        waist="Null Belt",
-        left_ear="Moonshade Earring",
-        right_ear="Odnowa Earring +1",
-        left_ring="Murky Ring",
-        right_ring="Rufescent Ring",
-        back="Alabaster Mantle",
-    }
+    sets.ws["Flash Nova"] = sets.ws["Seraph Strike"] -- 1000
 end
 
 ----------------------------------------------------------------

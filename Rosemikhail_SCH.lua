@@ -24,7 +24,7 @@ Potential enhancements:
 -- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen", "Vagary Burst"}
 idle_mode = M{"Normal", "Refresh"}
-weapon_mode = M{"Staff", "Wizard", "Maxentius", "Malevolence"}
+weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius", "Malevolence", "Opashoro"}
 regen_mode = M{"Balanced", "Potency", "Duration"}
 
 toggle_speed = "Off"
@@ -157,11 +157,11 @@ function get_sets()
     ----------------------------------------------------------------
     
     weapon_sets = {
-        ["Staff"] = {
+        ["Marin Staff"] = {
             main={ name="Marin Staff +1", augments={'Path: A',}},
             sub="Enki Strap",
         },
-        ["Wizard"] = {
+        ["Wizard's Rod"] = {
             main="Wizard's Rod",
             sub="Ammurapi Shield",
         },
@@ -172,6 +172,10 @@ function get_sets()
         ["Malevolence"] = {
             main="Malevolence",
             sub="Ammurapi Shield",
+        },
+        ["Opashoro"] = {
+            main="Opashoro",
+             sub="Enki Strap",
         },
     }
 
@@ -774,7 +778,7 @@ function idle()
 
     -- Speed overlay
     if toggle_speed == "On" then
-        equip({left_ring="Shneddick Ring",})
+        equip({right_ring="Shneddick Ring",})
     end
 end
 
@@ -899,7 +903,14 @@ function midcast(spell)
 
     -- If the spell is a helix
     if not matched and helix_spells:contains(spell.name) then
-        equip_set_and_weapon(sets.midcast.helix[nuking_mode.current])
+
+        --if nuking_mode.current == "Free Nuke" or nuking_mode.current == "Burst" then
+        if sets.midcast.helix[nuking_mode.current] then
+            equip_set_and_weapon(sets.midcast.helix[nuking_mode.current])
+        else
+            -- Fallback in case we don't have a set for a helix in the given mode
+            equip_set_and_weapon(sets.midcast.helix["Free Nuke"])
+        end
 
         if spell.name:match("Noctohelix") then
             equip({head="Pixie Hairpin +1", left_ring="Archon Ring",})
