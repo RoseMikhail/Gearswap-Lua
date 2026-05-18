@@ -22,7 +22,7 @@ Potential enhancements:
 ----------------------------------------------------------------
 
 -- Modes and toggles
-nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen", "Vagary Burst"}
+nuking_mode = M{"Burst", "Free Nuke", "Occult Acumen", "Vagary Burst"}
 idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius", "Malevolence", "Opashoro"}
 regen_mode = M{"Balanced", "Potency", "Duration"}
@@ -35,20 +35,23 @@ match_list = S{"Cure", "Curaga", "Aspir", "Drain"}
 helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix", "Geohelix II", "Hydrohelix II", "Anemohelix II", "Pyrohelix II", "Cryohelix II", "Ionohelix II", "Noctohelix II", "Luminohelix II",}
 
 -- Bindings
-send_command("bind f1 gs c nukemode")
-send_command("bind f2 gs c regenmode")
+send_command("bind f1 gs c nukemode burst")
+send_command("bind f2 gs c nukemode freenuke")
+send_command("bind f3 gs c nukemode occultacumen")
+send_command("bind f4 gs c nukemode vagaryburst")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
 send_command("bind f7 gs c toggletp")
+send_command("bind f8 gs c regenmode")
 
 send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1: Switch nuking mode, F2: Switch regen mode")
+add_to_chat(123, "F1-F4: Switch nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
-add_to_chat(123, "F7: Toggle TP lock")
+add_to_chat(123, "F7: Toggle TP lock, F8: Switch regen mode")
 add_to_chat(123, "F9: Toggle speed gear")
 add_to_chat(123, "F12: Hide information text box")
 
@@ -72,12 +75,12 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Nuking Mode: %s | Regen Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s",
+        "[F1-F4] Nuking Mode: %s [F5] Wep: %s [F6] Idle: %s [F7] TP Lock: %s [F8] Regen Mode: %s [F9] Speed: %s",
         nuking_mode.current,
-        regen_mode.current,
         weapon_mode.current,
         idle_mode.current,
         format_toggle(toggle_tp),
+        regen_mode.current,
         format_toggle(toggle_speed)
     )
 
@@ -138,8 +141,8 @@ function get_sets()
         head="Arbatel Bonnet +3",
         body="Arbatel Gown +3",
         hands="Arbatel Bracers +3",
-        legs="Arbatel Pants +3",
-        feet="Arbatel Loafers +3", -- If for some reason my feet ever AREN'T these for nuking, then maybe add a check for the Klima feature. Though I should always have that.
+        legs="Arbatel Pants +3",    -- Suppose I could have a Penury/Parsimony check, but eh.
+        feet="Arbatel Loafers +3",  -- If for some reason my feet ever AREN'T these for nuking, then maybe add a check for the Klima feature. Though I should always have that.
     }
 
     jse.capes = {
@@ -1047,7 +1050,17 @@ function self_command(command)
     local sub_command = commandArgs[2]
 
     if main_command == "nukemode" then
-        nuking_mode:cycle()
+        if sub_command == "burst" then
+            nuking_mode:set("Burst")
+        elseif sub_command == "freenuke" then
+            nuking_mode:set("Free Nuke")
+        elseif sub_command == "occultacumen" then
+            nuking_mode:set("Occult Acumen")
+        elseif sub_command == "vagaryburst" then
+            nuking_mode:set("Vagary Burst")
+        else
+            nuking_mode:cycle()
+        end
         add_to_chat(123, string.format("Nuking mode set to %s", nuking_mode.current))
 
     elseif main_command == "regenmode" then
@@ -1093,10 +1106,13 @@ end
 function file_unload(file_name)
     send_command("unbind f1")
     send_command("unbind f2")
+    send_command("unbind f3")
+    send_command("unbind f4")
     
     send_command("unbind f5")
     send_command("unbind f6")
     send_command("unbind f7")
+    send_command("unbind f8")
 
     send_command("unbind f9")
 

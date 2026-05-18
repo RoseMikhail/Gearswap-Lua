@@ -9,14 +9,16 @@ include("Modes.lua")
 Todo: Become a citizen of Windurst for Sibyl Scarf
 
 Potential enhancements:
-- Add stun set, as apparently that's not an enfeebling magic spell
+- Add stun set loaded with recast/macc/DT
 - Allow dispelga and impact during mana wall and death
-- Save certain toggles and sets between reloads
 - Toggle for Mana Wall set
-- Steal Aquaveil stuff from SCH
 - Doomed set
 - Notification in chat when I'm slept or doomed
 - Potentially build a straight up DT/meva set. Probably have Normal as a hybrid, a DT/meva set, and a refresh set.
+- Add a max accuracy+TP TP set for use for mercurial pole (funny)
+- If I want to use the occult acumen stick, I might need to have a variable that remembers my last weapon set
+    - I assume the process would be to switch nuking mode to occ acumen, which would switch my weapon mode to the occac stick, then upon selecting a different mode, my weapon set would be restored
+- Maybe make it that switching to the Occult Acumen mode also switches to the Occult Staff weapon set, or have a check in equip_set_and_weapon that overrides whatever my current weapon mode is
 ]]
 
 ----------------------------------------------------------------
@@ -24,9 +26,9 @@ Potential enhancements:
 ----------------------------------------------------------------
 
 -- Modes and toggles
-nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
+nuking_mode = M{"Burst", "Free Nuke", "Occult Acumen"}
 idle_mode = M{"Normal", "Refresh"}
-weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius"}
+weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius", "Opashoro"}
 
 toggle_speed = "Off"
 toggle_af_body = "Off"
@@ -40,7 +42,9 @@ cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja
 helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix"}
 
 -- Bindings
-send_command("bind f1 gs c nukemode")
+send_command("bind f1 gs c nukemode burst")
+send_command("bind f2 gs c nukemode freenuke")
+send_command("bind f3 gs c nukemode occultacumen")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
@@ -52,7 +56,7 @@ send_command("bind f11 gs c toggledeath")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1: Cycle nuking mode")
+add_to_chat(123, "F1-F3: Cycle nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
 add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear, F10: Toggle AF body")
@@ -78,7 +82,7 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Nuking Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s | AF Body: %s | Death: %s",
+        "[F1-F3] Nuking Mode: %s [F5] Wep: %s [F6] Idle: %s [F7] TP Lock: %s [F9] Speed: %s [F10] AF Body: %s [F11] Death: %s",
         nuking_mode.current,
         weapon_mode.current,
         idle_mode.current,
@@ -172,6 +176,10 @@ function get_sets()
         ["Maxentius"] = {
             main="Maxentius",
             sub="Ammurapi Shield",
+        },
+        ["Opashoro"] = {
+            main="Opashoro",
+             sub="Enki Strap",
         },
         -- Soon Malevolence and Ammurapi Shield
     }
@@ -320,7 +328,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Sibyl Scarf", -- I was using Sorc Stole+1 here
+        neck={ name="Src. Stole +1", augments={'Path: A',}}, --"Sibyl Scarf",=
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring", -- Regal Earring
@@ -814,17 +822,6 @@ function precast(spell)
         return false
     end
 
-    -- Do I actually need this in precast?
-
-    --[[
-    -- Mana Wall
-    if buffactive["Mana Wall"] then
-        equip_set_and_weapon(sets.ja["Mana Wall"])
-        equip_if_ja_match(spell.name)
-        return
-    end
-    ]]
-
     -- Death
     if toggle_death == "On" then
         if spell.type == "JobAbility" then
@@ -1034,7 +1031,15 @@ function self_command(command)
     local sub_command = commandArgs[2]
 
     if main_command == "nukemode" then
-        nuking_mode:cycle()
+        if sub_command == "burst" then
+            nuking_mode:set("Burst")
+        elseif sub_command == "freenuke" then
+            nuking_mode:set("Free Nuke")
+        elseif sub_command == "occultacumen" then
+            nuking_mode:set("Occult Acumen")
+        else
+            nuking_mode:cycle()
+        end
         add_to_chat(123, string.format("Nuking mode set to %s", nuking_mode.current))
 
     elseif main_command == "weaponmode" then
@@ -1083,6 +1088,8 @@ end
 
 function file_unload(file_name)
     send_command("unbind f1")
+    send_command("unbind f2")
+    send_command("unbind f3")
     
     send_command("unbind f5")
     send_command("unbind f6")

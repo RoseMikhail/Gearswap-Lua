@@ -20,7 +20,7 @@ Potential enhancements:
 ----------------------------------------------------------------
 
 -- Modes
-nuking_mode = M{"Free Nuke", "Burst"}
+nuking_mode = M{"Burst", "Free Nuke"}
 idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Wizard's Rod", "Daybreak", "Idris", "Maxentius"}
 
@@ -31,7 +31,8 @@ toggle_tp = "Off" -- This will disable weapon swapping as well
 match_list  = S{"Cure", "Aspir", "Drain", "Regen"}
 
 -- Bindings
-send_command("bind f1 gs c nukemode")
+send_command("bind f1 gs c nukemode burst")
+send_command("bind f2 gs c nukemode freenuke")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")
@@ -41,7 +42,7 @@ send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1: Switch nuking mode")
+add_to_chat(123, "F1-F2: Switch nuking mode")
 add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
 add_to_chat(123, "F7: Toggle TP lock")
 add_to_chat(123, "F9: Toggle speed gear")
@@ -67,7 +68,7 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Nuking Mode: %s | Wep: %s | Idle: %s | TP Lock: %s | Speed: %s",
+        "[F1-2] Nuking Mode: %s [F5] Wep: %s [F6] Idle: %s [F7] TP Lock: %s [F9] Speed: %s",
         nuking_mode.current,
         weapon_mode.current,
         idle_mode.current,
@@ -183,7 +184,7 @@ function get_sets()
 
     sets.idle["Normal"] = {                                                                                                                -- -62% DT, -10% PDT, -0% MDT (-72% DT+PDT, -62% DT+MDT), +6-7 Refresh
         --main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                    -- -0%
-        sub="Genmei Shield",                                                                                                            -- -10% PDT
+        --sub="Genmei Shield",                                                                                                            -- -10% PDT
         range=empty,
         ammo="Staunch Tathlum",                                                                                                         -- -2% DT
         head=jse.empyrean.head,                                                                                                         -- -11% DT
@@ -201,8 +202,8 @@ function get_sets()
     }
 
     sets.idle["Refresh"] = set_combine(sets.idle["Normal"], {                                                                                              -- OVERALL -33% DT, -20% PDT, -0% MDT (-53% DT+PDT, -43% DT+MDT), +9-10 refresh
-        main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                                    -- -0%
-        sub="Genmei Shield",                                                                                                                            -- -10% PDT
+        --main={ name="Solstice", augments={'Mag. Acc.+20','Pet: Damage taken -4%','"Fast Cast"+5',}},                                                    -- -0%
+        --sub="Genmei Shield",                                                                                                                            -- -10% PDT
         range=empty,
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
@@ -849,6 +850,9 @@ function sub_job_change(new,old)
     update_macro_book()
 end
 
+send_command("bind f1 gs c nukemode burst")
+send_command("bind f2 gs c nukemode freenuke")
+
 function self_command(command)
     -- Lowercase and split
     local commandArgs = T(command:lower():split(" "))
@@ -856,7 +860,13 @@ function self_command(command)
     local sub_command = commandArgs[2]
 
     if main_command == "nukemode" then
-        nuking_mode:cycle()
+        if sub_command == "burst" then
+            nuking_mode:set("Burst")
+        elseif sub_command == "freenuke" then
+            nuking_mode:set("Free Nuke")
+        else
+            nuking_mode:cycle()
+        end
         add_to_chat(123, string.format("Nuking mode set to %s", nuking_mode.current))
 
     elseif main_command == "weaponmode" then
@@ -897,6 +907,7 @@ end
 
 function file_unload(file_name)
     send_command("unbind f1")
+    send_command("unbind f2")
     
     send_command("unbind f5")
     send_command("unbind f6")
