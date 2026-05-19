@@ -22,7 +22,7 @@ Potential enhancements:
 ----------------------------------------------------------------
 
 -- Modes and toggles
-nuking_mode = M{"Burst", "Free Nuke", "Occult Acumen", "Vagary Burst"}
+nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen", "Vagary Burst"}
 idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius", "Malevolence", "Opashoro"}
 regen_mode = M{"Balanced", "Potency", "Duration"}

@@ -13,6 +13,8 @@ Potential enhancements:
 - Doomed set
 - Notification in chat when I'm slept or doomed
 - Potentially build a straight up DT/meva set. Probably have Normal as a hybrid, a DT/meva set, and a refresh set.
+- Something that checks the direction of the player in relation to the enemy to tell them what buff they'd have against it
+- Might be worth having a Gishdubar check on Refresh as it can give bonus refresh on self
 ]]
 
 ----------------------------------------------------------------
@@ -20,7 +22,7 @@ Potential enhancements:
 ----------------------------------------------------------------
 
 -- Modes
-nuking_mode = M{"Burst", "Free Nuke"}
+nuking_mode = M{"Free Nuke", "Burst"}
 idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Wizard's Rod", "Daybreak", "Idris", "Maxentius"}
 

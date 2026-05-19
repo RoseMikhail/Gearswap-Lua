@@ -26,7 +26,7 @@ Potential enhancements:
 ----------------------------------------------------------------
 
 -- Modes and toggles
-nuking_mode = M{"Burst", "Free Nuke", "Occult Acumen"}
+nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"Normal", "Refresh"}
 weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius", "Opashoro"}
 

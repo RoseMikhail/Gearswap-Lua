@@ -13,6 +13,21 @@ Tanking mode could be made generic as a melee mode for when I set up actual mele
 
 If I want to extend "melee mode" TP etc into my caster jobs, maybe I'd need a general "do I go into melee mode when engaged" toggle.
 This might then help me with setting up Mercurial pole funnies on BLM
+
+I may yet still want to be able to disable my weaponswapping even when I'm not specifically in my TP set
+
+SWIPE AND LUNGE DAMAGE JA Hachirin-no-obi check specific to RUN:
+There are 3 terms taken into account for the Obi.
+    First Weather, Second Weather, Matching Day.
+    If 2/3 terms match the element of your Rune(s), Hachirin-no-Obi will be better.
+
+May need a cry for help if I'm paralysed/sleeping/doomed.
+
+Force SIRD set toggle would be handy - right now it's just the fallback casting set for any spells that fall through the cracks instead of switching to "idle" like I do on other luas.
+- Certain abilities will want "enmity SIRD" sets - this includes Flash, Foil, Stun (/DRK) and /BLU enmity spells
+- If SIRD toggle on, then check enmity spell list - if contains spell.name, equip enmity sird, otherwise, regular sird
+
+DOOMED SET
 ]]
 
 ----------------------------------------------------------------
@@ -21,13 +36,13 @@ This might then help me with setting up Mercurial pole funnies on BLM
 
 -- Modes and toggles
 melee_mode = M{"Physical", "Parrying", "Magical", "TP"}
-idle_mode = M{"Normal"} -- TODO: Not sure if I'll even need different idle modes!
+idle_mode = M{"Normal", "Phalanx"}
 weapon_mode = M{"Aettir", "Epeolatry"}
 
 toggle_speed = "Off"
 
 -- Midcast helpers
--- Nothing as of yet
+match_list = S{"Cure", "Regen"}
 
 -- Bindings
 send_command("bind f1 gs c meleemode")
@@ -196,7 +211,26 @@ function get_sets()
     -- IDLE MODES
     ----------------------------------------------------------------
     
+    -- May be worth keeping a RUN +1 earring for Regen received
+
     sets.idle["Normal"] = {
+        range="",
+        ammo="",
+        head="",
+        body="",
+        hands="",
+        legs="",
+        feet="",
+        neck="",
+        waist="",
+        left_ear="",
+        right_ear="",
+        left_ring="",
+        right_ring="",
+        back="",
+    }
+
+    sets.idle["Phalanx"] = {
         range="",
         ammo="",
         head="",
@@ -216,6 +250,8 @@ function get_sets()
     ----------------------------------------------------------------
     -- MELEE "IDLE"
     ----------------------------------------------------------------
+
+    -- May be worth keeping a RUN +1 earring for Regen received
 
     sets.melee["Physical"] = {
         range="",
@@ -284,6 +320,8 @@ function get_sets()
         back="",
     }
 
+    -- Not sure if I'll bother having separate max DPS and hybrid TP sets. Maybe just do hybrid?
+
     ----------------------------------------------------------------
     -- PRECAST
     ----------------------------------------------------------------
@@ -348,7 +386,7 @@ function get_sets()
     -- MAGIC
     ----------------------------------------------------------------
     
-    sets.midcast["Enhancing Magic"] = {
+    sets.midcast["Enhancing Magic"] = { -- I assume I can just make this an enhancing duration set, which will be necessary for things like Protect, Shell and spikes
         range="",
         ammo="",
         head="",
@@ -364,6 +402,29 @@ function get_sets()
         right_ring="",
         back="",
     }
+
+    sets.midcast["Enfeebling Magic"] = {}
+
+    sets.midcast["Phalanx"] = {} -- This is for self-casting
+
+    sets.midcast["Regen"] = {}
+
+    -- Could potentially have a check to see if it's me or someone else I'm casting this on.
+    sets.midcast["Refresh"] = {}
+
+    sets.midcast["Aquaveil"] = {} -- We want 500 enhancing magic skill.
+
+    sets.midcast.barspell = {} -- We want 500 enhancing magic skill.
+
+    sets.midcast["Temper"] = {} -- We want 500 enhancing magic skill.
+
+    sets.midcast["Stoneskin"] = {} -- Not sure how close we can get to 500 but there are specific pieces I want here.
+
+    sets.midcast["Cure"] = {}
+
+    sets.midcast.SIRD = {} -- General SIRD set for when I'm struggling to cast spells
+
+    sets.midcast.SIRD_enmity = {} -- For my enmity spells when I'm struggling to cast them
 
     ----------------------------------------------------------------
     -- JOB ABILITIES 
@@ -401,6 +462,16 @@ function get_sets()
         -- I unno
     }
 
+    sets.ja["Vivacious Pulse"] = {
+        -- I unno
+    }
+
+    sets.ja["Swipe"] = {
+        -- I unno
+    }
+
+    sets.ja["Lunge"] = sets.ja["Swipe"]
+
     ----------------------------------------------------------------
     -- WEAPONSKILLS 
     ----------------------------------------------------------------
@@ -421,6 +492,76 @@ function get_sets()
         right_ring="",
         back="",
     }
+
+    sets.ws["Dimidiation"] = {
+        range="",
+        ammo="",
+        head="",
+        body="",
+        hands="",
+        legs="",
+        feet="",
+        neck="",
+        waist="",
+        left_ear="",
+        right_ear="",
+        left_ring="",
+        right_ring="",
+        back="",
+    }
+
+    sets.ws["Resolution"] = {
+        range="",
+        ammo="",
+        head="",
+        body="",
+        hands="",
+        legs="",
+        feet="",
+        neck="",
+        waist="",
+        left_ear="",
+        right_ear="",
+        left_ring="",
+        right_ring="",
+        back="",
+    }
+
+    sets.ws["Fimbulvetre"] = {
+        range="",
+        ammo="",
+        head="",
+        body="",
+        hands="",
+        legs="",
+        feet="",
+        neck="",
+        waist="",
+        left_ear="",
+        right_ear="",
+        left_ring="",
+        right_ring="",
+        back="",
+    }
+
+    sets.ws["Savage Blade"] = {
+        range="",
+        ammo="",
+        head="",
+        body="",
+        hands="",
+        legs="",
+        feet="",
+        neck="",
+        waist="",
+        left_ear="",
+        right_ear="",
+        left_ring="",
+        right_ring="",
+        back="",
+    }
+
+    
 end
 
 ----------------------------------------------------------------
@@ -492,7 +633,7 @@ function precast(spell)
     if sets.ws[spell.name] then
         equip_set_and_weapon(sets.ws[spell.name])
 
-        -- Hachirin-no-Obi overlay. Do not apply this to Myrkr.
+        -- Hachirin-no-Obi overlay.
         if S{world.weather_element, world.day_element}:contains(spell.element) and spell.element ~= "None" and spell.name ~= "Myrkr" then
             equip({waist="Hachirin-no-Obi"})
         end
@@ -531,11 +672,37 @@ function midcast(spell)
     -- If we ever use spells on PUP, steal stuff from other jobs.
     local matched = false
 
+    -- If the spell matches one of the match_list spells.
+    for match in match_list:it() do
+        if spell.name:match(match) then
+            equip_set_and_weapon(sets.midcast[match])
+            matched = true
+            break
+        end
+    end
+
+    -- If the spell is any Regen spell - More essential if we had regen modes, but we don't.
+    -- Regen is now within the match list
+    -- if not matched and spell.name:match("Regen") then
+    --     equip_set_and_weapon(sets.midcast["Regen"])
+    --     matched = true
+    -- end
+
     -- If the spell name EXACTLY matches.
     if not matched and sets.midcast[spell.name] then
         equip_set_and_weapon(sets.midcast[spell.name])
         matched = true
     end
+
+    -- If the spell is a barspell
+    if not matched and spell.name:match("^Bar") then
+        equip_set_and_weapon(sets.midcast.barspell)
+        matched = true
+    end
+
+    -- Missing elemental
+
+    -- Missing enfeebling
 
     -- If the spell skill has a relevant set
     if not matched and sets.midcast[spell.skill] then
@@ -544,7 +711,7 @@ function midcast(spell)
     end
 
     if not matched and spell.action_type == "Magic" then
-        idle()
+        equip_set_and_weapon(sets.midcast.SIRD)
     end
 
     -- Missing weather and day overlays (unsure if necessary)
