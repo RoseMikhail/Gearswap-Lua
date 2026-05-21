@@ -35,8 +35,8 @@ match_list = S{"Cure", "Curaga", "Aspir", "Drain"}
 helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix", "Geohelix II", "Hydrohelix II", "Anemohelix II", "Pyrohelix II", "Cryohelix II", "Ionohelix II", "Noctohelix II", "Luminohelix II",}
 
 -- Bindings
-send_command("bind f1 gs c nukemode burst")
-send_command("bind f2 gs c nukemode freenuke")
+send_command("bind f1 gs c nukemode freenuke")
+send_command("bind f2 gs c nukemode burst")
 send_command("bind f3 gs c nukemode occultacumen")
 send_command("bind f4 gs c nukemode vagaryburst")
 

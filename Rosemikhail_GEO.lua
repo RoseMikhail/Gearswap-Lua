@@ -33,8 +33,8 @@ toggle_tp = "Off" -- This will disable weapon swapping as well
 match_list  = S{"Cure", "Aspir", "Drain", "Regen"}
 
 -- Bindings
-send_command("bind f1 gs c nukemode burst")
-send_command("bind f2 gs c nukemode freenuke")
+send_command("bind f1 gs c nukemode freenuke")
+send_command("bind f2 gs c nukemode burst")
 
 send_command("bind f5 gs c weaponmode")
 send_command("bind f6 gs c idlemode")

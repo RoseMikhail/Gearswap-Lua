@@ -42,8 +42,8 @@ cumulative_spells = S{'Stoneja','Waterja','Aeroja','Firaja','Blizzaja','Thundaja
 helix_spells = S{"Geohelix", "Hydrohelix", "Anemohelix", "Pyrohelix", "Cryohelix", "Ionohelix", "Noctohelix", "Luminohelix"}
 
 -- Bindings
-send_command("bind f1 gs c nukemode burst")
-send_command("bind f2 gs c nukemode freenuke")
+send_command("bind f1 gs c nukemode freenuke")
+send_command("bind f2 gs c nukemode burst")
 send_command("bind f3 gs c nukemode occultacumen")
 
 send_command("bind f5 gs c weaponmode")
@@ -591,8 +591,8 @@ function get_sets()
         feet=jse.empyrean.feet,                                                                                                         -- -10% DT
         neck="Unmoving Collar +1",
         waist="Plat. Mog. Belt",                                                                                                        -- -3% DT
-        left_ear="Ethereal Earring",                                                                                                    -- Damage to MP
-        right_ear="Malignance Earring",                                                                                                 -- Soon replaced but I won't say no to more damage during mana wall
+        left_ear="Malignance Earring",                                                                                                  -- Soon replaced but I won't say no to more damage during mana wall
+        right_ear="Ethereal Earring",                                                                                                   -- Damage to MP
         left_ring="Murky Ring",                                                                                                         -- -10% DT
         right_ring="Defending Ring",                                                                                                    -- -10% DT
         back=jse.capes.idle_fc,                                                                                                         -- -10% PDT

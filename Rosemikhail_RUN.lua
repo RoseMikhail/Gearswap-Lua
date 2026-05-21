@@ -28,6 +28,19 @@ Force SIRD set toggle would be handy - right now it's just the fallback casting 
 - If SIRD toggle on, then check enmity spell list - if contains spell.name, equip enmity sird, otherwise, regular sird
 
 DOOMED SET
+
+Need to check for enmity spells and apply an enmity set
+- do enmity JAs need this?
+
+I need to figure out a better way to handle weapon sets (these contain weapons and grips/shields) vs gear sets (these contain every other bit of body gear)
+- Sometimes you might want to use a weapon set that suits your engaged gear set (i.e. tanking)
+- Sometimes you might want to use a engaged gear set that suits your weapon set (i.e. accommodating for a specific weapon - accuracy, damage, etc.)
+- For runefencer tanking, I do the former. For a melee DPS, I might want the latter. For casters, I select weapon sets and gear sets independently, although there's the potential for bad combinations if I did that with a melee.
+
+I think the best way to handle this it to potentially have the weapon set drive a "preferred" set that is then equipped
+But how does that reflect on other jobs?
+I kinda want to choose a weapon and then select from a variety of engaged modes
+Could dynamically change which melee modes are available based on the weapon, but that feels like a sin
 ]]
 
 ----------------------------------------------------------------
@@ -37,7 +50,7 @@ DOOMED SET
 -- Modes and toggles
 melee_mode = M{"Physical", "Parrying", "Magical", "TP"}
 idle_mode = M{"Normal", "Phalanx"}
-weapon_mode = M{"Aettir", "Epeolatry"}
+weapon_mode = M{"Aettir", "Epeolatry"} -- Update these
 
 toggle_speed = "Off"
 
@@ -151,47 +164,31 @@ function get_sets()
     -- WEAPON SETS
     ----------------------------------------------------------------
     
-    -- Weapon Mode -> Tanking Mode 
     weapon_sets = {
-        ["Aettir"] = { -- Higher accuracy option, better for tanking purely magical fights
-            ["Physical"] = {
-                main="Aettir",
-                sub="Refined Grip +1",
-            },
-            ["Parrying"] = {
-                main="Aettir",
-                sub="Refined Grip +1",
-            },
-            ["Magical"] = {
-                main="Aettir",
-                sub="Irenic Strap +1",
-            },
-            ["TP"] = {
-                main="Aettir",
-                sub="Utu Grip",
-            },
+        ["Aettir Physical"] = {
+            main="Aettir",
+            sub="Refined Grip +1",
         },
-        ["Epeolatry"] = { -- Better enmity, Liement aoe, PDT2
-            ["Physical"] = {
-                main="Epeolatry",
-                sub="Refined Grip +1",
-            },
-            ["Parrying"] = {
-                main="Epeolatry",
-                sub="Refined Grip +1",
-            },
-            ["Magical"] = {
-                main="Epeolatry",
-                sub="Irenic Strap +1",
-            },
-            ["TP"] = {
-                main="Epeolatry",
-                sub="Utu Grip",
-            },
+        ["Aettir Magical"] = {
+            main="Aettir",
+            sub="Irenic Strap +1",
         },
-        -- Naegling
-        -- Dolichenus
-        -- Lycurgos
+        ["Aettir TP"] = {
+            main="Epeolatry",
+            sub="Utu Grip",
+        },
+        ["Epeolatry Physical"] = {
+            main="Epeolatry",
+            sub="Refined Grip +1",
+        },
+        ["Epeolatry Magical"] = {
+            main="Epeolatry",
+            sub="Irenic Strap +1",
+        },
+        ["Epeolatry TP"] = {
+            main="Epeolatry",
+            sub="Utu Grip",
+        },
     }
 
     ----------------------------------------------------------------
@@ -560,8 +557,6 @@ function get_sets()
         right_ring="",
         back="",
     }
-
-    
 end
 
 ----------------------------------------------------------------
@@ -573,8 +568,7 @@ function equip_set_and_weapon(set)
 
     -- This will only add the current weapon set to sets that have neither a main weapon or a sub (like a shield)
     if not set.main and not set.sub then
-        equip(weapon_sets[weapon_mode.current][melee_mode.current])
-        add_to_chat(123, string.format("Weapon mode: %s Tanking mode: %s", weapon_mode.current, melee_mode.current))
+        equip(weapon_sets[weapon_mode.current])
         return
     end
 end
