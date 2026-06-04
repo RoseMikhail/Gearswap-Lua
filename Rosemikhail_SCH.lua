@@ -8,6 +8,9 @@ include("Modes.lua")
 --[[
 Kinda just do this as and when:
 - Notification in chat when I'm slept or doomed
+- Update barspell logic to care about the fact that elemental and status barspells have different resistance calculations
+    - i.e. status ones have a base potency, so I could just cast in conserve or idle
+    - Steal from WHM
 
 Potential enhancements:
 - Save certain toggles and sets between reloads
@@ -296,7 +299,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Mizukage-no-Kubikazari",  
+        neck={ name="Argute Stole +1", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
@@ -371,7 +374,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Mizu. Kubikazari",
+        neck={ name="Argute Stole +1", augments={'Path: A',}},
         waist="Eschan Stone",
         left_ear="Barkaro. Earring",
         right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
@@ -403,7 +406,7 @@ function get_sets()
         main="Wizard's Rod",
         sub="Ammurapi Shield",
         range=empty,
-        ammo="Pemphredo Tathlum",
+        ammo="Ghastly Tathlum +1",
         head="Pixie Hairpin +1",
         body=jse.empyrean.body,
         hands=jse.empyrean.hands,
@@ -432,7 +435,7 @@ function get_sets()
         neck="Incanter's Torque",
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Arbatel Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+7',}},
+        right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
         left_ring="Kishar Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -448,7 +451,7 @@ function get_sets()
         neck="Incanter's Torque",
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Arbatel Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+7',}},
+        right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
         left_ring="Kishar Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -479,9 +482,11 @@ function get_sets()
     -- TODO: Improve Telchine to 10% if possible
     -- TOOD: Musa someday for 20% BUT LMAO
 
+    -- TODO: Swap out skill for conserve MP perhaps
+
     -- TODO: When I'm mastered, reevaluate the pieces here.
     -- Consider DT pieces instead of skill
-    sets.midcast["Enhancing Magic"] = {                                                                                             -- +76% duration, -- 532 Enhancing Skill +13 with gift
+    sets.midcast["Enhancing Magic"] = {                                                                                             -- +77% duration, -- 532 Enhancing Skill +13 with gift
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
@@ -490,7 +495,7 @@ function get_sets()
         body=jse.relic.body                                                                  ,                                      -- +12% duration
         hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                    -- +10% duratiom. This should be replaced by empy hands during Perpetuance
         legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
-        feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
+        feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +10',}},                                                    -- +10% duration
         neck="Incanter's Torque",                                                                                                   -- Skill
         waist="Embla Sash",                                                                                                         -- +10% duration
         left_ear="Mendi. Earring",                                                                                                  -- Conserve MP
@@ -500,7 +505,7 @@ function get_sets()
         back="Fi Follet Cape +1",                                                                                                   -- Skill
     }
 
-    sets.midcast.regen = {}
+    sets.midcast.regen = {} -- Leave this empty.
 
     sets.midcast.regen["Balanced"] = set_combine(sets.midcast["Enhancing Magic"], {
         main={ name="Pedagogy Staff", augments={'Path: C',}},                                                                       -- +20 regen, +15% duration
@@ -527,6 +532,7 @@ function get_sets()
 
     sets.midcast["Stoneskin"] = set_combine(sets.midcast["Enhancing Magic"], {
         legs="Shedir Seraweels",                                                                                                    -- +35 Stoneskin
+        neck="Nodens Gorget",                                                                                                       -- +30 Stoneskin
     })
 
     sets.midcast["Aquaveil"] = set_combine(sets.midcast["Enhancing Magic"], {
@@ -583,7 +589,7 @@ function get_sets()
         back="Fi Follet Cape +1",                                                                                                   -- +5% Conserve MP, 5% SIRD
     }
 
-    -- Technically this is "enhancing magic", for some godforsaken reason
+    -- Technically this is "enhancing magic", for some godforsaken reason, so we'll just copy Healing Magic for Erase
     sets.midcast["Erase"] = sets.midcast["Healing Magic"]
 
     -- TODO: More healing skill - can get more Vanya
@@ -688,7 +694,7 @@ function get_sets()
         neck="Saevus Pendant +1",
         waist="Eschan Stone",
         left_ear="Moonshade Earring",
-        right_ear={ name="Arbatel Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+7',}},
+        right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
         left_ring="Murky Ring",
         right_ring="Defending Ring",
         back="Alabaster Mantle",
@@ -704,7 +710,7 @@ function get_sets()
         neck="Null Loop",
         waist="Null Belt",
         left_ear="Moonshade Earring",
-        right_ear={ name="Arbatel Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+7',}},
+        right_ear={ name="Arbatel Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+11','Enmity-1',}},
         left_ring="Murky Ring",
         right_ring="Rufescent Ring",
         back="Alabaster Mantle",

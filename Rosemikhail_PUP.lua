@@ -157,7 +157,7 @@ function get_sets()
     
     -- TODO: Upgrade my animatior to an ilvl119 one.
     sets.idle["Normal"] = {                 -- OVERALL -72% DT, -5% PDT(-77% DT+PDT), -7% Pet PDT
-        range="Em. Animator",
+        range="Divinator",
         ammo="Automat. Oil +2",             -- Up in Arms lol
         head="Null Masque",                 -- -10% DT Could swap out to Nyame if I need the pet stats
         body="Nyame Mail",                  -- -9% DT
@@ -179,7 +179,7 @@ function get_sets()
     
     -- TODO: Upgrade my animatior to an ilvl119 one.
     sets.melee.TP = {
-        range="Em. Animator",
+        range="Divinator",
         ammo="Automat. Oil +2",             -- Up in Arms lol
         head="Malignance Chapeau",
         body="Nyame Mail",

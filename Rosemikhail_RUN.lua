@@ -41,6 +41,8 @@ I think the best way to handle this it to potentially have the weapon set drive 
 But how does that reflect on other jobs?
 I kinda want to choose a weapon and then select from a variety of engaged modes
 Could dynamically change which melee modes are available based on the weapon, but that feels like a sin
+
+-- Maybe consider resist death set?
 ]]
 
 ----------------------------------------------------------------
@@ -50,7 +52,7 @@ Could dynamically change which melee modes are available based on the weapon, bu
 -- Modes and toggles
 melee_mode = M{"Physical", "Parrying", "Magical", "TP"}
 idle_mode = M{"Normal", "Phalanx"}
-weapon_mode = M{"Aettir", "Epeolatry"} -- Update these
+weapon_mode = M{"Aettir", "Epeolatry", "Naegling"} -- Update these
 
 toggle_speed = "Off"
 
@@ -164,30 +166,75 @@ function get_sets()
     -- WEAPON SETS
     ----------------------------------------------------------------
     
+    -- weapon_sets = {
+    --     ["Aettir Physical"] = {
+    --         main="Aettir",
+    --         sub="Refined Grip +1",
+    --     },
+    --     ["Aettir Magical"] = {
+    --         main="Aettir",
+    --         sub="Irenic Strap +1",
+    --     },
+    --     ["Aettir TP"] = {
+    --         main="Epeolatry",
+    --         sub="Utu Grip",
+    --     },
+    --     ["Epeolatry Physical"] = {
+    --         main="Epeolatry",
+    --         sub="Refined Grip +1",
+    --     },
+    --     ["Epeolatry Magical"] = {
+    --         main="Epeolatry",
+    --         sub="Irenic Strap +1",
+    --     },
+    --     ["Epeolatry TP"] = {
+    --         main="Epeolatry",
+    --         sub="Utu Grip",
+    --     },
+    -- }
+
     weapon_sets = {
-        ["Aettir Physical"] = {
-            main="Aettir",
-            sub="Refined Grip +1",
+        ["Aettir"] = {
+            gear = {
+                main="Aettir",
+                sub="Refined Grip +1",
+            },
+            engaged_sets = {"Physical", "Parrying", "Magical", "TP"},
+            overrides = {
+                ["Magical"] = {
+                    main="Aettir",
+                    sub="Irenic Strap +1",
+                },
+                ["TP"] = {
+                    main="Aettir",
+                    sub="Utu Grip",
+                },
+            },
         },
-        ["Aettir Magical"] = {
-            main="Aettir",
-            sub="Irenic Strap +1",
+        ["Epeolatry"] = {
+            gear = {
+                main="Epeolatry",
+                sub="Refined Grip +1",
+            },
+            engaged_sets = {"Physical", "Parrying", "Magical", "TP"},
+            overrides = {
+                ["Magical"] = {
+                    main="Epeolatry",
+                    sub="Irenic Strap +1",
+                },
+                ["TP"] = {
+                    main="Epeolatry",
+                    sub="Utu Grip",
+                },
+            },
         },
-        ["Aettir TP"] = {
-            main="Epeolatry",
-            sub="Utu Grip",
-        },
-        ["Epeolatry Physical"] = {
-            main="Epeolatry",
-            sub="Refined Grip +1",
-        },
-        ["Epeolatry Magical"] = {
-            main="Epeolatry",
-            sub="Irenic Strap +1",
-        },
-        ["Epeolatry TP"] = {
-            main="Epeolatry",
-            sub="Utu Grip",
+        ["Naegling"] = {
+            gear = {
+                main="Naegling",
+                sub=empty,
+            },
+            engaged_sets = {"TP"},
+            overrides = {},
         },
     }
 
@@ -282,7 +329,7 @@ function get_sets()
         right_ring="",
         back="",
     }
-    sets.melee["Magic"] = {
+    sets.melee["Magical"] = {
         range="",
         ammo="",
         head="",

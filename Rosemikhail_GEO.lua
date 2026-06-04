@@ -440,7 +440,7 @@ function get_sets()
     -- ENHANCING MIDCAST
     ----------------------------------------------------------------
 
-    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +74% duration
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +75% duration
         main={ name="Gada", augments={'Enh. Mag. eff. dur. +6',}},                                                                  -- +6% duration
         sub="Ammurapi Shield",                                                                                                      -- +10% duration
         range=empty,
@@ -449,7 +449,7 @@ function get_sets()
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
         hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                    -- +10% duratiom.
         legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
-        feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
+        feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +10',}},                                                    -- +10% duration
         neck="Incanter's Torque",
         waist="Embla Sash",                                                                                                         -- +10% duration
         left_ear="Mendi. Earring",
@@ -465,6 +465,7 @@ function get_sets()
 
     sets.midcast["Stoneskin"] = set_combine(sets.midcast["Enhancing Magic"], {
         legs="Shedir Seraweels",                                                                                                    -- +35 Stoneskin
+        neck="Nodens Gorget",                                                                                                       -- +30 Stoneskin
     })
 
     sets.midcast["Aquaveil"] = set_combine(sets.midcast["Enhancing Magic"], {

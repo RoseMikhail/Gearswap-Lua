@@ -130,7 +130,7 @@ function get_sets()
         head="Spae. Petasos +1",
         body="Spae. Coat +4",
         hands="Spae. Gloves +4",
-        legs="Spae. Tonban +3",
+        legs="Spae. Tonban +4",
         feet="Spae. Sabots +2",
     }
 
@@ -238,7 +238,7 @@ function get_sets()
     sets.idle["Death"] = {
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head={ name="Kaabnax Hat", augments={'HP+30','MP+30','MP+30',}},
-        body={ name="Amalric Doublet +1", augments={'MP+80','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
+        body="Ros. Jaseran +1",
         hands=jse.AF.hands,
         legs=jse.AF.legs,
         feet={ name="Psycloth Boots", augments={'MP+50','INT+7','"Conserve MP"+6',}},
@@ -304,6 +304,7 @@ function get_sets()
 
     sets.precast["Death"] = set_combine(sets.precast.fast_cast, {
         hands="Agwu's Gages",
+        body="Ros. Jaseran +1",
         legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
         left_ring="Mephitas's Ring",
         right_ring="Mephitas's Ring +1",
@@ -328,7 +329,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck={ name="Src. Stole +1", augments={'Path: A',}}, --"Sibyl Scarf",=
+        neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring", -- Regal Earring
@@ -346,7 +347,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,                                                                                         -- 15% MB
         feet=jse.empyrean.feet,
-        neck={ name="Src. Stole +1", augments={'Path: A',}}, -- Now this is less MB again but apparently it does do a little more damage - i also cant cry about the extra INT/macc
+        neck={ name="Src. Stole +2", augments={'Path: A',}}, -- Now this is less MB again but apparently it does do a little more damage - i also cant cry about the extra INT/macc
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
@@ -374,6 +375,7 @@ function get_sets()
     sets.midcast.death_burst = set_combine(sets.midcast["Burst"], {
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Pixie Hairpin +1",
+        hands="Agwu's Gages",
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
         left_ring="Archon Ring",
         right_ring="Mephitas's Ring +1",
@@ -383,6 +385,7 @@ function get_sets()
     sets.midcast.death_free_nuke = set_combine(sets.midcast["Free Nuke"], {
         ammo={ name="Ghastly Tathlum +1", augments={'Path: A',}},
         head="Pixie Hairpin +1",
+        hands={ name="Amalric Gages +1", augments={'INT+12','Mag. Acc.+20','"Mag.Atk.Bns."+20',}},
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},
         left_ring="Archon Ring",
         right_ring="Mephitas's Ring +1",
@@ -457,7 +460,7 @@ function get_sets()
         hands=jse.AF.hands,
         legs=jse.AF.legs,
         feet=jse.relic.feet,
-        neck={ name="Src. Stole +1", augments={'Path: A',}},
+        neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Ilmr Earring", -- Replace with Regal Earring (and move Ilmr to Malignance's spot)
@@ -471,13 +474,13 @@ function get_sets()
     ----------------------------------------------------------------
     
     -- Could add Gada and Ammurapi if I felt special and cool and didn't mind losing TP
-    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +58% duration
+    sets.midcast["Enhancing Magic"] = set_combine(sets.midcast["Free Nuke"], {                                                      -- +59% duration
         ammo="Pemphredo Tathlum",
         head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +10',}},                                                         -- +10% duration
         body={ name="Telchine Chas.", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                      -- +10% duration
         hands={ name="Telchine Gloves", augments={'Pet: "Regen"+3','Enh. Mag. eff. dur. +10',}},                                    -- +10% duratiom.
         legs={ name="Telchine Braconi", augments={'Enh. Mag. eff. dur. +9',}},                                                      -- +9% duration
-        feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +9',}},                                                     -- +9% duration
+        feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +10',}},                                                    -- +10% duration
         neck="Incanter's Torque",
         waist="Embla Sash",                                                                                                         -- +10% duration
         left_ear="Mendi. Earring",
@@ -494,6 +497,7 @@ function get_sets()
 
     sets.midcast["Stoneskin"] = set_combine(sets.midcast["Enhancing Magic"], {
         legs="Shedir Seraweels",                                                                                                    -- +35 Stoneskin
+        neck="Nodens Gorget",                                                                                                       -- +30 Stoneskin
     })
 
     sets.midcast["Aquaveil"] = set_combine(sets.midcast["Enhancing Magic"], {
@@ -823,7 +827,7 @@ function precast(spell)
     end
 
     -- Death
-    if toggle_death == "On" then
+    if toggle_death == "On" and spell.name ~= "Myrkr" then -- I want to allow Myrkr, as that has more MP than my precast
         if spell.type == "JobAbility" then
             if equip_if_ja_match(spell.name) then
                 -- Stay in Death idle
@@ -1096,6 +1100,7 @@ function file_unload(file_name)
     send_command("unbind f7")
 
     send_command("unbind f9")
-
+    send_command("unbind f10")
+    send_command("unbind f11")
     send_command("unbind f12")
 end
