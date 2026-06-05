@@ -14,8 +14,11 @@ Potential enhancements:
 - Toggle for Mana Wall set
 - Doomed set
 - Notification in chat when I'm slept or doomed
+
 - Potentially build a straight up DT/meva set. Probably have Normal as a hybrid, a DT/meva set, and a refresh set.
+
 - Add a max accuracy+TP TP set for use for mercurial pole (funny)
+
 - If I want to use the occult acumen stick, I might need to have a variable that remembers my last weapon set
     - I assume the process would be to switch nuking mode to occ acumen, which would switch my weapon mode to the occac stick, then upon selecting a different mode, my weapon set would be restored
 - Maybe make it that switching to the Occult Acumen mode also switches to the Occult Staff weapon set, or have a check in equip_set_and_weapon that overrides whatever my current weapon mode is
@@ -28,7 +31,7 @@ Potential enhancements:
 -- Modes and toggles
 nuking_mode = M{"Free Nuke", "Burst", "Occult Acumen"}
 idle_mode = M{"Normal", "Refresh"}
-weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius", "Opashoro"}
+weapon_mode = M{"Marin Staff", "Wizard's Rod", "Maxentius", "Opashoro", "Khatvanga"}
 
 toggle_speed = "Off"
 toggle_af_body = "Off"
@@ -179,6 +182,10 @@ function get_sets()
         },
         ["Opashoro"] = {
             main="Opashoro",
+             sub="Enki Strap",
+        },
+        ["Khatvanga"] = { -- Apparently good for Earth Crusher and Cataclysm because of the TP bonus, also for Death strats
+            main="Khatvanga",
              sub="Enki Strap",
         },
         -- Soon Malevolence and Ammurapi Shield
