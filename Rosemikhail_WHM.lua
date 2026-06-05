@@ -8,23 +8,19 @@ include("Modes.lua")
 -- TODO:
 -- fast cast
 -- macros
--- update cure/curaga sets to accommodate upgraded JSE
--- likewise but for idle
--- overlays for swap in gear
 
 -- LONG TERM STUFF
 -- Think about Enfeebling when I have the AF set sorted.
 -- Apparently whm can also use impact, consider someday.
 -- Divine Magic skill - then Repose/Flash/Holy/Banish.
 -- Figure out melee stuff.
+-- Consider splitting raise/cleanse spells into separate sets for purposes of recast, etc...
+    -- Could easily do this via debuff_cleansers and match_list
 
 -- Consider setting stuff up for Afflatus Misery like Cura, macros, etc...
 
 -- No, I don't really care about helixes or elemental buttons
 -- Maybe I can set up some nuking sets for stuff like Banish and Holy? Lmao?
-
--- remember that WHM doesn't get Myrkr, so idles and precasts can contain weapons and stuff - malignance pole!
--- cath palug hammer!
 
 ----------------------------------------------------------------
 -- VARIABLES
@@ -115,7 +111,7 @@ end
 
 -- Lockstyle
 function update_lockstyle()
-    send_command("wait 5;input /lockstyleset 31") -- Spriggan
+    send_command("wait 5;input /lockstyleset 12") -- WHM Empy
 end
 
 function update_macro_book()
@@ -202,21 +198,25 @@ function get_sets()
     -- IDLE MODES
     ----------------------------------------------------------------
 
-    sets.idle["Normal"] = {                                                                                                                             -- OVERALL -55% DT, -0% PDT, -3% MDT (-55% DT+PDT, -58% DT+MDT), +3-4 Refresh
-        main ="Malignance Pole",                                                                                                                       
-        ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
-        head="Null Masque",                                                                                                                             -- -10% DT, +1 Refresh
-        body="Nyame Mail",                                                                                                                              -- -9% DT
-        hands="Nyame Gauntlets",                                                                                                                        -- -7% DT
-        legs="Assid. Pants +1",                                                                                                                         -- +1-2 Refresh
-        feet="Nyame Sollerets",                                                                                                                         -- -7% DT
+    -- Consider changing this when I get stikini rings for refresh.
+    -- I can use Malignance pole for an easy -20% DT
+    -- Re-evaluate when I have +3 empyrean
+    -- Probably want a max evasion and a max refresh set too
+
+    sets.idle["Normal"] = {                         -- OVERALL -49% DT, -2% PDT, -3% MDT (-51% DT+PDT, -52% DT+MDT), 7 Refresh, 4 Regen
+        ammo="Homiliary",                           -- 1 Refresh
+        head="Nyame Helm",                          -- -7% DT
+        body=jse.empyrean.body,                     -- 4 Regen, 3 Refresh
+        hands=jse.empyrean.hands,                   -- -10% DT
+        legs="Assid. Pants +1",                     -- 2 Refresh
+        feet="Nyame Sollerets",                     -- -7% DT
         neck="Warder's Charm +1",
-        waist="Fucho-no-Obi",                                                                                                                           -- +1 Refresh
-        left_ear="Nehalennia Earring",
-        right_ear="Etiolation Earring",                                                                                                                 -- -3% MDT
-        left_ring="Murky Ring",                                                                                                                         -- -10% DT
-        right_ring="Defending Ring",                                                                                                                    -- -10% DT
-        back="Null Shawl",                                                                                                                              -- Evasion and shit
+        waist="Fucho-no-Obi",                       -- 1 Refresh
+        left_ear="Genmei Earring",                  -- -2% PDT
+        right_ear="Etiolation Earring",             -- -3% MDT
+        left_ring="Murky Ring",                     -- -10% DT
+        right_ring="Defending Ring",                -- -10% DT
+        back=jse.capes.casting_idle,                -- -5% DT
     }
 
     ----------------------------------------------------------------
@@ -243,13 +243,15 @@ function get_sets()
     -- PRECAST
     ----------------------------------------------------------------
 
-    sets.precast.fast_cast = {                                                                                                          -- OVERALL 51% FC, 2% Occ
+    sets.precast.fast_cast = {                                                                                                          -- OVERALL 65% FC, 7 Cure FC, 14 Healing FC, 2% Occ (Effectively capped for healing/cures)
+        main="C. Palug Hammer",                                                                                                         -- 7 FC
+        --sub="Chanter's Shield",                                                                                                       -- 3 FC
         ammo="Impatiens",                                                                                                               -- 2% Occ
-        head="",
-        body="Inyanga Jubbah +2",                                                                                                       -- 14% FC
-        hands="",
-        legs="Ayanmo Cosciales",                                                                                                        -- 6% FC
-        feet="",
+        head=jse.empyrean.head,                                                                                                         -- 10 FC
+        body="Inyanga Jubbah +2",                                                                                                       -- 14 FC
+        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},        -- 7 Cure FC
+        legs=jse.empyrean.legs,                                                                                                         -- 14 Healing FC, -na FC, -na enmity
+        feet="Nyame Sollerets",                                                                                                         -- Yolo gear
         neck="Voltsurge Torque",                                                                                                        -- 4% FC
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- 5% FC
         left_ear="Malignance Earring",                                                                                                  -- 4% FC
@@ -343,61 +345,64 @@ function get_sets()
     -- re-math all of the DT and stuff here because I lost the plot
     -- consider the use of conserve pieces like fi follet 
 
-    -- Attempt at a Cure DT set.
-    sets.midcast["Cure"] = { -- -47% DT (-57 PDT, -47 MDT), 52% Cure Potency (50% cap), +28% Conserve MP, -16 Enmity, 23% SIRD 
-        main="Daybreak",                                                                                                            -- 30% Cure Potency
-        sub="Genmei Shield",                                                                                                        -- -10% PDT
-        ammo="Staunch Tathlum",                                                                                                     -- -2% DT, 10% SIRD 
-        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                             -- +17% Cure Potency, +6% Conserve MP, -6 Enmity
-        body=jse.empyrean.body,                                                                                                     -- Solace cureskin
-        hands="Nyame Gauntlets",                                                                                                    -- 7% DT
-        legs=jse.empyrean.legs,                                                                                                     -- MP return
-        feet="Nyame Sollerets",                                                                                                     -- 7% DT
-        neck="Loricate Torque +1",                                                                                                  -- -6% DT, 5% SIRD 
-        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                 -- +15% Conserve MP
-        left_ear="Mendi. Earring",                                                                                                  -- +2% Conserve MP, +5% Cure Potency
-        right_ear="Alabaster Earring",                                                                                              -- -5% DT
-        left_ring="Murky Ring",                                                                                                     -- -10% DT, 3% SIRD
-        right_ring="Defending Ring",                                                                                                -- -10% DT,
-        back=jse.capes.casting_idle,                                                                                                -- Solace cureskin, -10 enmity                                                                                        -- +5% Conserve MP, 5% SIRD
+    -- Consider a max cure/curaga set for when I feel safe enough to use one.
+    -- Is Naji's loop really worth a loss of enmity reduction and conserve MP offered by Mephitas?
+
+    -- Additional attempt at a cure DT set
+    sets.midcast["Cure"] = { -- -40% DT, -10% PDT (-50% PDT, -40% MDT), 60% Cure Potency (50% cap), 1% Cure Potency II, +27% Conserve MP, -41 Enmity, 18% SIRD
+        main="Daybreak",                                                                                                                -- 30% Cure Potency
+        sub="Genmei Shield",                                                                                                            -- -10% PDT
+        ammo="Staunch Tathlum",                                                                                                         -- -2% DT, 10% SIRD 
+        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                                 -- +17% Cure Potency, +6% Conserve MP, -6 Enmity
+        body=jse.empyrean.body,                                                                                                         -- Solace cureskin
+        hands=jse.empyrean.hands,                                                                                                       -- -10% DT, -11 Enmity
+        legs=jse.empyrean.legs,                                                                                                         -- MP return
+        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                                -- +12% Cure Potency, +6% Conserve MP, -6 Enmity
+        neck="Loricate Torque +1",                                                                                                      -- -6% DT, 5% SIRD 
+        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- +15% Conserve MP
+        left_ear="Alabaster Earring",                                                                                                   -- -5% DT
+        right_ear= { name="Ebers Earring +1", augments={'System: 1 ID: 1676 Val: 0','Accuracy+11','Mag. Acc.+11','Damage taken-3%',}},  -- -3% DT, -8 Enmity
+        left_ring="Murky Ring",                                                                                                         -- -10% DT, 3% SIRD
+        right_ring="Naji's Loop",                                                                                                       -- +1% Cure Potency II
+        back=jse.capes.casting_idle,                                                                                                    -- -5% DT, -10 enmity, Solace cureskin
     }
 
-    -- Attempt at a Curaga DT set.
-    sets.midcast["Curaga"] = { -- -47% DT (-57 PDT, -47 MDT), 59% Cure Potency (50% cap), +27% Conserve MP, -33-37 Enmity, 17% SIRD 
-        main="Daybreak",                                                                                                                  -- 30% Cure Potency
-        sub="Genmei Shield",                                                                                                              -- -10% PDT
-        ammo="Staunch Tathlum",                                                                                                           -- -2% DT, 10% SIRD 
-        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                                   -- +17% Cure Potency, +6% Conserve MP, -6 Enmity
-        body="Nyame Mail",                                                                                                                -- 9% DT
-        hands="Nyame Gauntlets",                                                                                                          -- 7% DT
-        legs=jse.empyrean.legs,                                                                                                           -- MP return
-        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                                  -- +12% Cure Potency, +6% Conserve MP, -6 Enmity
-        neck="Loricate Torque +1",                                                                                                        -- -6% DT, 5% SIRD 
-        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                       -- +15% Conserve MP
-        left_ear="Alabaster Earring",                                                                                                     -- -5% DT
-        right_ear= { name="Ebers Earring +1", augments={'System: 1 ID: 1676 Val: 0','Accuracy+11','Mag. Acc.+11','Damage taken-3%',}},    -- -3% DT, -8 Enmity
-        left_ring="Murky Ring",                                                                                                           -- -10% DT, 3% SIRD
-        right_ring="Mephitas's Ring +1",                                                                                                  -- -3-7 Enmity TODO: Needs augment for conserve MP
-        back=jse.capes.casting_idle,                                                                                                      -- -10 enmity  
+    -- Additional attempt at a curaga DT set
+    sets.midcast["Curaga"] = { -- -49% DT, -10% PDT (-59% PDT, -49% MDT), 60% Cure Potency (50% cap), 1% Cure Potency II, +27% Conserve MP, -41 Enmity, 18% SIRD
+        main="Daybreak",                                                                                                                -- 30% Cure Potency
+        sub="Genmei Shield",                                                                                                            -- -10% PDT
+        ammo="Staunch Tathlum",                                                                                                         -- -2% DT, 10% SIRD 
+        head={ name="Vanya Hood", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                                 -- +17% Cure Potency, +6% Conserve MP, -6 Enmity
+        body="Nyame Mail",                                                                                                              -- -9% DT
+        hands=jse.empyrean.hands,                                                                                                       -- -10% DT, -11 Enmity
+        legs=jse.empyrean.legs,                                                                                                         -- MP return
+        feet={ name="Vanya Clogs", augments={'MP+50','"Cure" potency +7%','Enmity-6',}},                                                -- +12% Cure Potency, +6% Conserve MP, -6 Enmity
+        neck="Loricate Torque +1",                                                                                                      -- -6% DT, 5% SIRD 
+        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                     -- +15% Conserve MP
+        left_ear="Alabaster Earring",                                                                                                   -- -5% DT
+        right_ear= { name="Ebers Earring +1", augments={'System: 1 ID: 1676 Val: 0','Accuracy+11','Mag. Acc.+11','Damage taken-3%',}},  -- -3% DT, -8 Enmity
+        left_ring="Murky Ring",                                                                                                         -- -10% DT, 3% SIRD
+        right_ring="Naji's Loop",                                                                                                       -- +1% Cure Potency II
+        back=jse.capes.casting_idle,                                                                                                    -- -5% DT, -10 enmity
     }
 
     -- This will apply to any non-cure healing magic, like debuff cleanses, unless they have their own set
-    sets.midcast["Healing Magic"] = { -- -59% DT, +34% Conserve MP, 33% SIRD, FC +8%
+    sets.midcast["Healing Magic"] = { -- -50% DT, +32% Conserve MP, 33% SIRD, FC +18%
         main="Daybreak",                                                                                                            -- Filler
         sub="Culminus",                                                                                                             -- 10% SIRD 
         ammo="Staunch Tathlum",                                                                                                     -- -2% DT, 10% SIRD 
-        head="Null Masque",                                                                                                         -- -10% DT, 10% Haste
+        head=jse.empyrean.head,                                                                                                     -- Chance to AOE debuff cleanse (Divine Veil)
         body="Nyame Mail",                                                                                                          -- -9% DT
-        hands="Nyame Gauntlets",                                                                                                    -- -7% DT
-        legs="Nyame Flanchard",                                                                                                     -- -8% DT
+        hands={ name="Vanya Cuffs", augments={'Healing magic skill +20','"Cure" spellcasting time -7%','Magic dmg. taken -3',}},    -- 7 Cure FC
+        legs=jse.empyrean.legs,                                                                                                     -- -12% DT, -na fc, -na enmity
         feet="Nyame Sollerets",                                                                                                     -- -7% DT
         neck="Loricate Torque +1",                                                                                                  -- -6% DT, 5% SIRD 
         waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                                                                 -- +15% Conserve MP
-        left_ear="Mendi. Earring",                                                                                                  -- +2% Conserve MP, +5% Cure Potency
+        left_ear="Alabaster Earring",                                                                                               -- -5% DT
         right_ear="Etiolation Earring",                                                                                             -- Resist silence
         left_ring="Murky Ring",                                                                                                     -- -10% DT, 3% SIRD
         right_ring="Mephitas's Ring +1",                                                                                            -- -3-7 Enmity TODO: Needs augment for conserve MP
-        back="Fi Follet Cape +1",                                                                                                   -- +5% Conserve MP, 5% SIRD
+        back="Fi Follet Cape +1",                                                                                                   -- +5% Conserve MP, 5% SIRD, 10 FC
     }
 
     -- Technically this is "enhancing magic", for some godforsaken reason, so we'll just copy Healing Magic for Erase
@@ -428,18 +433,20 @@ function get_sets()
     
     -- Someday
 
-    -----------------------------------------------------------
+    ----------------------------------------------------------------
     -- JOB ABILITIES 
     ----------------------------------------------------------------
-
-    -- Add more someday when I better fill out this job
+    
+    sets.ja["Devotion"] = {
+        head=jse.relic.head,
+    }
 
     sets.ja["Benediction"] = {
         body=jse.relic.body,
     }
 
-    sets.ja["Devotion"] = {
-        head=jse.relic.head,
+    sets.ja["Martyr"] = {
+        hands=jse.relic.hands,
     }
 
     ----------------------------------------------------------------
@@ -652,7 +659,7 @@ function midcast(spell)
 
     local valid_divine_caress_debuff = spell.name ~= "Esuna" and spell.name ~= "Erase" and spell.name ~= "Sacrifice"
     if buffactive["Divine Caress"] and debuff_cleansers:contains(spell.name) and valid_divine_caress_debuff then
-        equip({back="Mending Cape"})
+        equip({hands=jse.empyrean.hands, back="Mending Cape"})
     end
 end
 
@@ -707,6 +714,8 @@ function self_command(command)
 
     elseif main_command == "lockweapon" then
         weapon_lock = handle_toggle(weapon_lock, "Weapon Lock")
+
+        idle()
 
         if weapon_lock == "On" then
             equip_current_weapon()
