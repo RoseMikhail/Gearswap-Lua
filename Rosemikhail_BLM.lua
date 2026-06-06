@@ -253,7 +253,7 @@ function get_sets()
     -- IDLE MODES
     ----------------------------------------------------------------
 
-    sets.idle["Normal"] = {                                                                                                                                -- OVERALL -44% DT, -10% PDT, -3% MDT (-54% DT+PDT, -47% DT+MDT), +8-9 Refresh
+    sets.idle["Normal"] = {                                                                                                                             -- OVERALL -44% DT, -10% PDT, -3% MDT (-54% DT+PDT, -47% DT+MDT), +8-9 Refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
         body=jse.empyrean.body,                                                                                                                         -- +4 Refresh
@@ -269,7 +269,7 @@ function get_sets()
         back=jse.capes.idle_fc,                                                                                                                         -- -10% PDT
     }
 
-    sets.idle["Refresh"] = set_combine(sets.idle["Normal"], {                                                                                              -- OVERALL -33% DT, -10% PDT, -0% MDT (-43% DT+PDT, -33% DT+MDT), +9-10 refresh
+    sets.idle["Refresh"] = set_combine(sets.idle["Normal"], {                                                                                           -- OVERALL -33% DT, -10% PDT, -0% MDT (-43% DT+PDT, -33% DT+MDT), +9-10 refresh
         ammo="Staunch Tathlum",                                                                                                                         -- -2% DT
         head={ name="Merlinic Hood", augments={'DEX+11','Pet: "Store TP"+6','"Refresh"+2','Accuracy+16 Attack+16','Mag. Acc.+4 "Mag.Atk.Bns."+4',}},    -- +2 Refresh
         body=jse.empyrean.body,                                                                                                                         -- -0%      +4 Refresh
@@ -397,7 +397,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,                                                                                         -- 15% MB
         feet=jse.empyrean.feet,
-        neck={ name="Src. Stole +2", augments={'Path: A',}}, -- Now this is less MB again but apparently it does do a little more damage - i also cant cry about the extra INT/macc
+        neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
@@ -413,7 +413,7 @@ function get_sets()
         --hands=
         legs= "Perdition Slops",
         feet="Battlecast Gaiters",
-        --neck=,
+        neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist="Oneiros Rope",
         left_ear="Steelflash Earring",
         right_ear="Bladeborn Earring",
@@ -471,7 +471,7 @@ function get_sets()
         hands=jse.AF.hands,
         legs=jse.AF.legs,
         feet=jse.AF.feet,
-        neck="Incanter's Torque",
+        neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+10',}},
@@ -488,7 +488,7 @@ function get_sets()
         hands=jse.AF.hands,
         legs=jse.relic.legs,
         feet=jse.relic.feet,
-        neck="Incanter's Torque",
+        neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
         right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+10',}},
@@ -705,7 +705,7 @@ function get_sets()
         hands=jse.empyrean.hands,
         legs=jse.empyrean.legs,
         feet=jse.empyrean.feet,
-        neck="Loricate Torque +1",
+        neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist="Acuity Belt +1",
         left_ear="Malignance Earring",
         right_ear="Barkaro. Earring",
@@ -1111,18 +1111,16 @@ function self_command(command)
         if sub_command == "burst" then
             if nuking_mode.current == "Occult Acumen" then
                 weapon_mode:set(last_weapon_mode)
-                
             end
             nuking_mode:set("Burst")
-            idle()
+            --idle()
 
         elseif sub_command == "freenuke" then
             if nuking_mode.current == "Occult Acumen" then
                 weapon_mode:set(last_weapon_mode)
-                
             end
             nuking_mode:set("Free Nuke")
-            idle()
+            --idle()
 
         elseif sub_command == "occultacumen" then
             if nuking_mode.current ~= "Occult Acumen" then
@@ -1130,11 +1128,13 @@ function self_command(command)
             end
             weapon_mode:set("Khatvanga")
             nuking_mode:set("Occult Acumen")
-            idle()
+            --idle()
         else
             nuking_mode:cycle()
-            idle()
+            --idle()
         end
+
+        idle()
 
         add_to_chat(123, string.format("Nuking mode set to %s", nuking_mode.current))
 
