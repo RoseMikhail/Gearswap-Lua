@@ -22,10 +22,6 @@ Potential enhancements:
 - Casting overrides
 
 - Probably want to rework the death functionality to allow for occult acumen casting - it'll murder my mp, but the point is to get as much TP as possible to regain mp
-
-- If I want to use the occult acumen stick, I might need to have a variable that remembers my last weapon set
-    - I assume the process would be to switch nuking mode to occ acumen, which would switch my weapon mode to the occac stick, then upon selecting a different mode, my weapon set would be restored
-- Maybe make it that switching to the Occult Acumen mode also switches to the Occult Staff weapon set, or have a check in equip_set_and_weapon that overrides whatever my current weapon mode is
 ]]
 
 ----------------------------------------------------------------
