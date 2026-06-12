@@ -6,15 +6,6 @@ include("Modes.lua")
 ----------------------------------------------------------------
 
 --[[
-Maybe I need a toggle on whether TP mode also locks the weapon
-
-Tanking mode could be made generic as a melee mode for when I set up actual melee jobs
-- Note that this will also pave the way for low/high/etc main sets as well, not just weapon sets
-
-If I want to extend "melee mode" TP etc into my caster jobs, maybe I'd need a general "do I go into melee mode when engaged" toggle.
-This might then help me with setting up Mercurial pole funnies on BLM
-
-I may yet still want to be able to disable my weaponswapping even when I'm not specifically in my TP set
 
 SWIPE AND LUNGE DAMAGE JA Hachirin-no-obi check specific to RUN:
 There are 3 terms taken into account for the Obi.
@@ -32,17 +23,19 @@ DOOMED SET
 Need to check for enmity spells and apply an enmity set
 - do enmity JAs need this?
 
-I need to figure out a better way to handle weapon sets (these contain weapons and grips/shields) vs gear sets (these contain every other bit of body gear)
-- Sometimes you might want to use a weapon set that suits your engaged gear set (i.e. tanking)
-- Sometimes you might want to use a engaged gear set that suits your weapon set (i.e. accommodating for a specific weapon - accuracy, damage, etc.)
-- For runefencer tanking, I do the former. For a melee DPS, I might want the latter. For casters, I select weapon sets and gear sets independently, although there's the potential for bad combinations if I did that with a melee.
 
-I think the best way to handle this it to potentially have the weapon set drive a "preferred" set that is then equipped
-But how does that reflect on other jobs?
-I kinda want to choose a weapon and then select from a variety of engaged modes
-Could dynamically change which melee modes are available based on the weapon, but that feels like a sin
 
--- Maybe consider resist death set?
+-- Maybe consider resist death set / toggle overlay or whatever?
+
+-- Idle embolden overlay
+
+- Update barspell logic to care about the fact that elemental and status barspells have different resistance calculations
+    - i.e. status ones have a base potency, so I could just cast in conserve or idle
+    - Steal from WHM
+
+- See if hachirin no obi logic works with blu magic or if it even needs to
+
+-- Possibly have a "casting mode" for SIRD vs effect
 ]]
 
 ----------------------------------------------------------------
@@ -50,32 +43,34 @@ Could dynamically change which melee modes are available based on the weapon, bu
 ----------------------------------------------------------------
 
 -- Modes and toggles
-melee_mode = M{"Physical", "Parrying", "Magical", "TP"}
+weapon_mode = M{"Aettir"} -- Update these
+engaged_mode = M{"Physical", "Parrying", "Magical", "TP"}
 idle_mode = M{"Normal", "Phalanx"}
-weapon_mode = M{"Aettir", "Epeolatry", "Naegling"} -- Update these
 
 toggle_speed = "Off"
+weapon_lock = "Off"
 
 -- Midcast helpers
 match_list = S{"Cure", "Regen"}
+enmity_spells = S{"Biden Blast"}
 
 -- Bindings
-send_command("bind f1 gs c meleemode")
-
 send_command("bind f5 gs c weaponmode")
-send_command("bind f6 gs c idlemode")
+send_command("bind f6 gs c engagedmode")
+send_command("bind f7 gs c idlemode")
+send_command("bind f8 gs c lockweapon")
 
 send_command("bind f9 gs c togglespeed")
 send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
-add_to_chat(123, "F1: Cycle tanking mode")
-add_to_chat(123, "F5: Switch weapon set, F6: Cycle idle mode")
+add_to_chat(123, "F5: Cycle weapon mode, F6: Cycle engaged mode")
+add_to_chat(123, "F7: Cycle idle mode, F8: Lock weapon")
 add_to_chat(123, "F9: Toggle speed gear")
 add_to_chat(123, "F12: Hide information text box")
 
 ----------------------------------------------------------------
--- INFORMATION BOX
+-- INFORMATION BOX & OTHER FUNCTIONS
 ----------------------------------------------------------------
 
 default_settings = {
@@ -94,17 +89,35 @@ function build_info_box()
     end
 
     local output = string.format(
-        "Tanking: %s, Wep: %s | Idle: %s | Speed: %s",
-        melee_mode.current,
+        "[F5] Weapon: %s [F6] Engaged: %s [F7] Idle: %s [F8] Weapon Lock: %s [F9] Speed: %s",
         weapon_mode.current,
+        engaged_mode.current,
         idle_mode.current,
+        format_toggle(weapon_lock),
         format_toggle(toggle_speed)
     )
 
     text_box:text(output)
 end
 
-build_info_box()
+-- We wait until inside get_sets() to build the info box initially, as that is where some weapon set logic is being handled.
+
+function update_engaged_modes(weapon_sets)
+    -- Get the sets (i.e. Idle, TP, etc.) from the currently active weapon mode
+    local weapon = weapon_sets[weapon_mode.current]
+    local weapon_engaged_sets = {}
+    
+    -- If the weapon has engaged sets associated with it, then use those.
+    -- Otherwise, insert our own and assume that we want a non-engaged and a default TP toggle.
+    if #weapon.engaged_sets > 0 then
+        weapon_engaged_sets = weapon.engaged_sets
+    else
+        weapon_engaged_sets = {"Idle", "TP"}
+    end
+
+    add_to_chat(123, string.format("The current weapon has %s engaged sets associated with it.", #weapon.engaged_sets))
+    engaged_mode = M{table.unpack(weapon_engaged_sets)}
+end
 
 ----------------------------------------------------------------
 -- MISC INIT/COMMANDS
@@ -125,6 +138,33 @@ update_macro_book()
 -- Individual spells should be added in the following way: sets.precast["Impact"]. This goes for precast and midcast.
 function get_sets()
     ----------------------------------------------------------------
+    -- WEAPON SETS
+    ----------------------------------------------------------------
+
+    weapon_sets = {
+        ["Aettir"] = {
+            gear = {
+                main="Aettir",
+                sub="Refined Grip +1", -- -3% DT
+            },
+            engaged_sets = {"Physical", "Parrying", "Magical", "TP"},
+            overrides = {
+                -- ["Magical"] = {
+                --     main="Aettir",
+                --     sub="Irenic Strap +1",
+                -- },
+                -- ["TP"] = {
+                --     main="Aettir",
+                --     sub="Utu Grip",
+                -- },
+            },
+        },
+    }
+
+    update_engaged_modes(weapon_sets)
+    build_info_box()
+
+    ----------------------------------------------------------------
     -- GEAR PLACEHOLDERS
     ----------------------------------------------------------------
     
@@ -135,107 +175,32 @@ function get_sets()
     jse.capes = {}                 -- Leave this empty
 
     jse.AF = {
-        --head="",
-        --body="",
-        --hands="",
-        --legs="",
-        --feet="",
+        head="Runeist Bandeau +3", -- FC, Regen
+        body="Runeist Coat +3", -- Valliance/Vallation, "FC"?, Refresh swap? -- Not as good as Nyame for MEVA
+        hands="Runeist Mitons +3", -- Gambit, Enhancing Magic Skill
+        legs="Runeist Trousers +3", -- Vaguely useful in niche circumstances, yolo
+        feet="Runeist Bottes +3", -- I have these for lockstyle more than anything, thank you AF+3 voucher
     }
 
     jse.relic = {
-        --head="",
-        --body="",
+        head="Futhark Bandeau +3", -- Phalanx!!!, PDT
+        --body="", -- Get +1 via Deeds
         --hands="",
         --legs="",
         --feet="",
     }
 
+    -- Commission and upgrade
     jse.empyrean = {
         --head="",
         --body="",
         --hands="",
-        --legs="",
+        legs="Erilaz Leg Guards +3", -- Passive parry bonus, DT, Enmity
         --feet="",
     }
 
     jse.capes = {
         --idle="",
-    }
-
-    ----------------------------------------------------------------
-    -- WEAPON SETS
-    ----------------------------------------------------------------
-    
-    -- weapon_sets = {
-    --     ["Aettir Physical"] = {
-    --         main="Aettir",
-    --         sub="Refined Grip +1",
-    --     },
-    --     ["Aettir Magical"] = {
-    --         main="Aettir",
-    --         sub="Irenic Strap +1",
-    --     },
-    --     ["Aettir TP"] = {
-    --         main="Epeolatry",
-    --         sub="Utu Grip",
-    --     },
-    --     ["Epeolatry Physical"] = {
-    --         main="Epeolatry",
-    --         sub="Refined Grip +1",
-    --     },
-    --     ["Epeolatry Magical"] = {
-    --         main="Epeolatry",
-    --         sub="Irenic Strap +1",
-    --     },
-    --     ["Epeolatry TP"] = {
-    --         main="Epeolatry",
-    --         sub="Utu Grip",
-    --     },
-    -- }
-
-    weapon_sets = {
-        ["Aettir"] = {
-            gear = {
-                main="Aettir",
-                sub="Refined Grip +1",
-            },
-            engaged_sets = {"Physical", "Parrying", "Magical", "TP"},
-            overrides = {
-                ["Magical"] = {
-                    main="Aettir",
-                    sub="Irenic Strap +1",
-                },
-                ["TP"] = {
-                    main="Aettir",
-                    sub="Utu Grip",
-                },
-            },
-        },
-        ["Epeolatry"] = {
-            gear = {
-                main="Epeolatry",
-                sub="Refined Grip +1",
-            },
-            engaged_sets = {"Physical", "Parrying", "Magical", "TP"},
-            overrides = {
-                ["Magical"] = {
-                    main="Epeolatry",
-                    sub="Irenic Strap +1",
-                },
-                ["TP"] = {
-                    main="Epeolatry",
-                    sub="Utu Grip",
-                },
-            },
-        },
-        ["Naegling"] = {
-            gear = {
-                main="Naegling",
-                sub=empty,
-            },
-            engaged_sets = {"TP"},
-            overrides = {},
-        },
     }
 
     ----------------------------------------------------------------
@@ -248,7 +213,7 @@ function get_sets()
     sets.idle = {}                  -- Leave this empty
     sets.ja = {}                    -- Leave this empty
     sets.ws = {}                    -- Leave this empty
-    sets.melee = {}                 -- Leave this empty
+    sets.engaged = {}               -- Leave this empty
     sets.buff = {}                  -- Leave this empty
 
     ----------------------------------------------------------------
@@ -292,12 +257,12 @@ function get_sets()
     }
 
     ----------------------------------------------------------------
-    -- MELEE "IDLE"
+    -- ENGAGED
     ----------------------------------------------------------------
 
     -- May be worth keeping a RUN +1 earring for Regen received
 
-    sets.melee["Physical"] = {
+    sets.engaged["Physical"] = {
         range="",
         ammo="",
         head="",
@@ -313,7 +278,7 @@ function get_sets()
         right_ring="",
         back="",
     }
-    sets.melee["Parrying"] = {
+    sets.engaged["Parrying"] = {
         range="",
         ammo="",
         head="",
@@ -329,7 +294,7 @@ function get_sets()
         right_ring="",
         back="",
     }
-    sets.melee["Magical"] = {
+    sets.engaged["Magical"] = {
         range="",
         ammo="",
         head="",
@@ -347,7 +312,7 @@ function get_sets()
     }
 
     -- I don't expect that I'll be using this much
-    sets.melee["TP"] = {
+    sets.engaged["TP"] = {
         range="",
         ammo="",
         head="",
@@ -474,6 +439,8 @@ function get_sets()
     -- JOB ABILITIES 
     ----------------------------------------------------------------
 
+    -- It appears that you still want the enmity set combined with whatever JAs might be used for that
+
     sets.ja["Vallation"] = {
         -- I unno
     }
@@ -521,7 +488,6 @@ function get_sets()
     ----------------------------------------------------------------
 
     sets.ws.default = {
-        range="",
         ammo="",
         head="",
         body="",
@@ -538,7 +504,6 @@ function get_sets()
     }
 
     sets.ws["Dimidiation"] = {
-        range="",
         ammo="",
         head="",
         body="",
@@ -555,7 +520,6 @@ function get_sets()
     }
 
     sets.ws["Resolution"] = {
-        range="",
         ammo="",
         head="",
         body="",
@@ -572,7 +536,6 @@ function get_sets()
     }
 
     sets.ws["Fimbulvetre"] = {
-        range="",
         ammo="",
         head="",
         body="",
@@ -589,7 +552,6 @@ function get_sets()
     }
 
     sets.ws["Savage Blade"] = {
-        range="",
         ammo="",
         head="",
         body="",
@@ -610,20 +572,37 @@ end
 -- HELPER FUNCTIONS 
 ----------------------------------------------------------------
 
+function equip_current_weapon()
+    local current_weapon = weapon_sets[weapon_mode.current]
+    local engaged_override = current_weapon.overrides[engaged_mode.current]
+
+    -- First check if the weapon has any engaged_mode specific permutation
+    -- Otherwise, we'll just use the default gear
+    if engaged_override then
+        equip(engaged_override)
+    else
+        equip(current_weapon.gear)
+    end
+end
+
 function equip_set_and_weapon(set)
     equip(set)
 
     -- This will only add the current weapon set to sets that have neither a main weapon or a sub (like a shield)
     if not set.main and not set.sub then
-        equip(weapon_sets[weapon_mode.current])
-        return
+        equip_current_weapon()
     end
 end
 
 function idle()
-    -- Choose between melee mode and regular idle
+    -- I don't *think* I need to care about Sublimation on Runefencer?
+    -- Choose between engaged set and regular idle
     if player.status == "Engaged" then
-        equip_set_and_weapon(sets.melee[melee_mode.current])
+        if engaged_mode.current == "Idle" then
+            equip_set_and_weapon(sets.idle[idle_mode.current])
+        else
+            equip_set_and_weapon(sets.engaged[engaged_mode.current])
+        end
     else
         equip_set_and_weapon(sets.idle[idle_mode.current])
     end
@@ -635,7 +614,7 @@ function idle()
 
     -- Runefencer buffs
     if buffactive["Embolden"] then
-        equip({""}) -- Evasionist's cape
+        equip({""}) -- TODO: Evasionist's cape
     end
 end
 
@@ -735,7 +714,7 @@ function midcast(spell)
         matched = true
     end
 
-    -- If the spell is a barspell
+    -- TODO: Update this
     if not matched and spell.name:match("^Bar") then
         equip_set_and_weapon(sets.midcast.barspell)
         matched = true
@@ -751,11 +730,28 @@ function midcast(spell)
         matched = true
     end
 
+    -- Ez default?
     if not matched and spell.action_type == "Magic" then
         equip_set_and_weapon(sets.midcast.SIRD)
     end
 
-    -- Missing weather and day overlays (unsure if necessary)
+    -- Weather and day overlays
+    -- Technically I could also do Divine for Banish but also lmao
+    local valid_obi_skill = S{"Elemental Magic", "Dark Magic"}:contains(spell.skill)
+    local is_cure = spell.name:match("Cure") or spell.name:match("Curaga")
+    local element_matches_day_or_weather = S{world.weather_element, world.day_element}:contains(spell.element)
+    local element_matches_weather = world.weather_element == spell.element
+
+    if (valid_obi_skill or is_cure) and element_matches_day_or_weather and spell.element ~= "None" then
+        -- Helixes get weather bonuses 100% of the time.
+        if not helix_spells:contains(spell.name) then
+            equip({waist="Hachirin-no-Obi"})
+        end
+    end
+
+    if is_cure and element_matches_weather then
+        equip({main="Chatoyant Staff", sub="Khonsu",})
+    end
 end
 
 function aftercast(spell)
@@ -779,27 +775,33 @@ function self_command(command)
     local main_command = commandArgs[1]
     local sub_command = commandArgs[2]
 
-    if main_command == "meleemode" then
-        melee_mode:cycle()
-        add_to_chat(123, string.format("Melee mode set to %s", melee_mode.current))
-
-        if melee_mode == "TP" then
-            idle()
-            send_command("gs disable main;gs disable sub;gs disable range")
-        else
-            send_command("gs enable main;gs enable sub;gs enable range")
-            idle()
-        end
-
-    elseif main_command == "weaponmode" then
+    if main_command == "weaponmode" then
         weapon_mode:cycle()
         add_to_chat(123, string.format("Weapon mode set to %s", weapon_mode.current))
+        update_engaged_modes(weapon_sets)
+        idle()
+    
+    elseif main_command == "engagedmode" then
+        engaged_mode:cycle()
+        add_to_chat(123, string.format("Engaged mode set to %s", engaged_mode.current))
         idle()
 
     elseif main_command == "idlemode" then
         idle_mode:cycle()
         add_to_chat(123, string.format("Idle mode set to %s", idle_mode.current))
         idle()
+
+    elseif main_command == "lockweapon" then
+        weapon_lock = handle_toggle(weapon_lock, "Weapon Lock")
+
+        idle()
+
+        if weapon_lock == "On" then
+            equip_current_weapon()
+            send_command("gs disable main;gs disable sub;gs disable range")
+        else
+            send_command("gs enable main;gs enable sub;gs enable range")
+        end
 
     elseif main_command == "togglespeed" then
         toggle_speed = handle_toggle(toggle_speed, "Speed")
@@ -816,10 +818,10 @@ function self_command(command)
 end
 
 function file_unload(file_name)
-    send_command("unbind f1")
-
     send_command("unbind f5")
     send_command("unbind f6")
+    send_command("unbind f7")
+    send_command("unbind f8")
 
     send_command("unbind f9")
 
