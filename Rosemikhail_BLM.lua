@@ -22,6 +22,8 @@ Potential enhancements:
 - Casting overrides
 
 - Probably want to rework the death functionality to allow for occult acumen casting - it'll murder my mp, but the point is to get as much TP as possible to regain mp
+
+- Barspell stuff maybe?
 ]]
 
 ----------------------------------------------------------------
@@ -474,7 +476,7 @@ function get_sets()
         neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+10',}},
+        right_ear={ name="Wicce Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+13','Enmity-3',}},
         left_ring="Kishar Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -491,7 +493,7 @@ function get_sets()
         neck={ name="Src. Stole +2", augments={'Path: A',}},
         waist={ name="Acuity Belt +1", augments={'Path: A',}},
         left_ear="Malignance Earring",
-        right_ear={ name="Wicce Earring", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+10',}},
+        right_ear={ name="Wicce Earring +1", augments={'System: 1 ID: 1676 Val: 0','Mag. Acc.+13','Enmity-3',}},
         left_ring="Stikini Ring",
         right_ring="Stikini Ring",
         back={ name="Aurist's Cape +1", augments={'Path: A',}},
@@ -552,10 +554,6 @@ function get_sets()
 
     sets.midcast["Aquaveil"] = set_combine(sets.midcast["Enhancing Magic"], {
         legs="Shedir Seraweels",                                                                                                    -- +1 Aquaveil
-    })
-
-    sets.midcast.barspell = set_combine(sets.midcast["Enhancing Magic"], {
-        legs="Shedir Seraweels",
     })
 
     ----------------------------------------------------------------

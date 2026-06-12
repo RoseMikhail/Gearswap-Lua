@@ -634,24 +634,43 @@ function get_sets()
 
     sets.midcast["Drain"] = sets.midcast["Aspir"]
 
-    -- TODO: Subtle Blow and WSD variants
-    sets.midcast.immanence = { -- 10% PDT, 37% DT (47% PDT, 37% MDT), 36% Haste (26 Cap), 40 FC (20% FC haste)
-        main=empty,
-        sub="Genmei Shield",            -- 10% PDT
+    --TODO: Subtle Blow and WSD variants
+    -- sets.midcast.immanence = { -- 10% PDT, 37% DT (47% PDT, 37% MDT), 36% Haste (26 Cap), 40 FC (20% FC haste)
+    --     main=empty,
+    --     sub="Genmei Shield",            -- 10% PDT
+    --     range=empty,
+    --     ammo="Staunch Tathlum",         -- 2% DT
+    --     head="Null Masque",             -- 10% DT, 10% Haste
+    --     body="Shango Robe",             -- 3% FC, 3% Haste
+    --     hands=jse.AF.hands,             -- 9% FC, 3% Haste
+    --     legs=jse.AF.legs,               -- 5% Haste
+    --     feet=jse.AF.feet,               -- 12% Grimoire FC
+    --     neck="Voltsurge Torque",        -- 4% FC
+    --     waist="Cornelia's Belt",        -- 10% Haste
+    --     left_ear="Alabaster Earring",   -- 5% DT, 5% Haste
+    --     right_ear="Loquac. Earring",    -- 2% FC
+    --     left_ring="Murky Ring",         -- 10% DT
+    --     right_ring="Defending Ring",    -- 10% DT
+    --     back="Fi Follet Cape +1",       -- 10% FC
+    -- }
+
+    sets.midcast.immanence = {          -- 53% DT (53% PDT, 53% MDT), 30% Haste (25 Cap), 56 FC (28% FC haste)
+        main="Malignance Pole",                                                             -- 20% DT
+        sub="Khonsu",                                                                       -- 6% DT, 4% Haste
         range=empty,
-        ammo="Staunch Tathlum",         -- 2% DT
-        head="Null Masque",             -- 10% DT, 10% Haste
-        body="Shango Robe",             -- 3% FC, 3% Haste
-        hands=jse.AF.hands,             -- 9% FC, 3% Haste
-        legs=jse.AF.legs,               -- 5% Haste
-        feet=jse.AF.feet,               -- 12% Grimoire FC
-        neck="Voltsurge Torque",        -- 4% FC
-        waist="Cornelia's Belt",        -- 10% Haste
-        left_ear="Alabaster Earring",   -- 5% DT, 5% Haste
-        right_ear="Loquac. Earring",    -- 2% FC
-        left_ring="Murky Ring",         -- 10% DT
-        right_ring="Defending Ring",    -- 10% DT
-        back="Fi Follet Cape +1",       -- 10% FC
+        ammo="Staunch Tathlum",                                                             -- 2% DT
+        head="Null Masque",                                                                 -- 10% DT, 10% Haste
+        body="Shango Robe",                                                                 -- 3% FC, 3% Haste
+        hands=jse.AF.hands,                                                                 -- 9% FC, 3% Haste
+        legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}}, -- 5% Haste, 7% FC
+        feet=jse.AF.feet,                                                                   -- 12% Grimoire FC
+        neck="Voltsurge Torque",                                                            -- 4% FC
+        waist={ name="Shinjutsu-no-Obi +1", augments={'Path: A',}},                         -- 5% FC
+        left_ear="Alabaster Earring",                                                       -- 5% DT, 5% Haste
+        right_ear="Loquac. Earring",                                                        -- 2% FC
+        left_ring="Murky Ring",                                                             -- 10% DT
+        right_ring="Kishar Ring",                                                           -- 4% FC
+        back="Fi Follet Cape +1",                                                           -- 10% FC
     }
 
     -----------------------------------------------------------
@@ -806,6 +825,13 @@ function precast(spell)
         add_to_chat(123, "Consider disabling the speed toggle!")
     end
 
+    -- To avoid any delay in knowing that Immanence is up (I am going to STRANGLE FFXI - it won't immediately register that the buff is active, so I can't check that)
+    if spell.name == "Immanence" then
+        immanence = true
+        add_to_chat(200, "Casting Immanence.")
+        return
+    end
+
     -- Somewhat redundant, but leftover from BLM's other paths
     local function equip_if_ja_match(spell_name)
         if sets.ja[spell_name] then
@@ -870,7 +896,7 @@ function midcast(spell)
     local matched = false
 
     -- To avoid any delay in knowing that Immanence is up (I am going to STRANGLE FFXI - it won't immediately register that the buff is active, so I can't check that)
-    -- I could maybe move this to precast but it doesn't really matter.
+    -- Redunancy check just in case
     if spell.name == "Immanence" then
         immanence = true
         return
@@ -1027,6 +1053,10 @@ function buff_change(name, gain, buff_details)
 
     -- Part of the "why is ping like this" solution for minimal delays in checking for Immanence
     -- I'm happy to leave this in buff_change, as Immanence wearing is less time sensitive than it being gained + this accounts for any interrupted nukes/helixes
+    if name == "Immanence" and gain == true then
+        add_to_chat(200, "Immanence buff is active.")
+    end
+    
     if name == "Immanence" and gain == false then
         immanence = false
     end

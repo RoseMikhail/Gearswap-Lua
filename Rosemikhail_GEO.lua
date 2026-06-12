@@ -237,7 +237,7 @@ function get_sets()
         right_ring="Defending Ring",                                                                                                    -- -10% DT
         waist="Isa Belt",                                                                                                               -- -3% Pet DT, +1 Regen
         left_ear="Alabaster Earring",                                                                                                   -- -5% DT ETIOLATION EARRING WHEN DT ACHEIVED
-        right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT
+        right_ear={ name="Odnowa Earring +1", augments={'Path: A',}},                                                                   -- -3% DT actually probably this one
         back=jse.capes.luopan,                                                                                                          -- +15 regen
     }
 

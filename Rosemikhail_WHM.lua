@@ -51,7 +51,7 @@ send_command("bind f12 gs c toggletextbox")
 
 -- Help Text
 add_to_chat(123, "F5: Cycle weapon mode, F6: Cycle engaged mode")
-add_to_chat(123, "F7: Cycle idle mode")
+add_to_chat(123, "F7: Cycle idle mode, F8: Lock weapon")
 add_to_chat(123, "F9: Toggle speed gear")
 add_to_chat(123, "F12: Hide information text box")
 
@@ -203,7 +203,7 @@ function get_sets()
     -- Re-evaluate when I have +3 empyrean
     -- Probably want a max evasion and a max refresh set too
 
-    sets.idle["Normal"] = {                         -- OVERALL -49% DT, -2% PDT, -3% MDT (-51% DT+PDT, -52% DT+MDT), 7 Refresh, 4 Regen
+    sets.idle["Normal"] = {                         -- OVERALL -54% DT, -0% PDT, -3% MDT (-54% DT+PDT, -57% DT+MDT), 7 Refresh, 4 Regen
         ammo="Homiliary",                           -- 1 Refresh
         head="Nyame Helm",                          -- -7% DT
         body=jse.empyrean.body,                     -- 4 Regen, 3 Refresh
@@ -212,7 +212,7 @@ function get_sets()
         feet="Nyame Sollerets",                     -- -7% DT
         neck="Warder's Charm +1",
         waist="Fucho-no-Obi",                       -- 1 Refresh
-        left_ear="Genmei Earring",                  -- -2% PDT
+        left_ear="Alabaster Earring",               -- -5% DT
         right_ear="Etiolation Earring",             -- -3% MDT
         left_ring="Murky Ring",                     -- -10% DT
         right_ring="Defending Ring",                -- -10% DT
@@ -245,7 +245,7 @@ function get_sets()
 
     sets.precast.fast_cast = {                                                                                                          -- OVERALL 65% FC, 7 Cure FC, 14 Healing FC, 2% Occ (Effectively capped for healing/cures)
         main="C. Palug Hammer",                                                                                                         -- 7 FC
-        --sub="Chanter's Shield",                                                                                                       -- 3 FC
+        sub="Chanter's Shield",                                                                                                         -- 3 FC
         ammo="Impatiens",                                                                                                               -- 2% Occ
         head=jse.empyrean.head,                                                                                                         -- 10 FC
         body="Inyanga Jubbah +2",                                                                                                       -- 14 FC
@@ -508,6 +508,7 @@ function equip_set_and_weapon(set)
 end
 
 function idle()
+    -- Choose between engaged set and regular idle
     if player.status == "Engaged" then
         if engaged_mode.current == "Idle" then
             equip_set_and_weapon(sets.idle[idle_mode.current])
